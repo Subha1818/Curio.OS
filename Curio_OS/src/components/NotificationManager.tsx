@@ -14,152 +14,216 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
 }) => {
   const { windows, openApp } = useWindowManager();
   const [activeToast, setActiveToast] = useState<NotificationToastData | null>(null);
-  const [standaloneQueue, setStandaloneQueue] = useState<NotificationToastData[]>([]);
 
-  // Queue progression state
-  const [queueIndex, setQueueIndex] = useState<number>(0);
-  const [isWaitingForTimer, setIsWaitingForTimer] = useState<boolean>(false);
-  const shownIdsRef = useRef<Set<string>>(new Set());
+  // Queue of toasts waiting to be shown if one is already active
+  const toastQueueRef = useRef<NotificationToastData[]>([]);
+
+  // Stable references for timer operations
+  const windowsRef = useRef(windows);
+  windowsRef.current = windows;
+
+  const openAppRef = useRef(openApp);
+  openAppRef.current = openApp;
+
+  const queueIndexRef = useRef<number>(0);
+  const queueStartedRef = useRef<boolean>(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const shownIdsRef = useRef<Set<string>>(new Set());
 
-  // Helper to check live session activity state
-  const getSessionActivity = useCallback(() => {
-    const hasMusicWin = windows.some((w) => w.appId === 'music');
-    const hasFilesWin = windows.some((w) => w.appId === 'files');
-    const hasNotesWin = windows.some((w) => w.appId === 'notes');
-    const hasVoidWin = windows.some((w) => w.appId === 'void');
+  // Check live session activity state
+  const checkActivity = useCallback(() => {
+    const currentWindows = windowsRef.current;
+    const hasMusicWin = currentWindows.some((w) => w.appId === 'music');
+    const hasFilesWin = currentWindows.some((w) => w.appId === 'files');
+    const hasNotesWin = currentWindows.some((w) => w.appId === 'notes');
+    const hasVoidWin = currentWindows.some((w) => w.appId === 'void');
 
-    return {
+    const activity = {
       hasOpenedMusic: hasMusicWin || sessionStorage.getItem('curio_music_opened') === 'true',
       hasOpenedFiles: hasFilesWin || sessionStorage.getItem('curio_files_opened') === 'true',
       hasOpenedSecret: sessionStorage.getItem('curio_secret_folder_opened') === 'true',
       hasOpenedNotes: hasNotesWin || sessionStorage.getItem('curio_notes_opened') === 'true',
       hasOpenedVoid: hasVoidWin || sessionStorage.getItem('curio_void_opened') === 'true',
     };
-  }, [windows]);
 
-  // Handle Action Button click from notification
-  const handleAction = useCallback(
-    (item: NotificationConfigItem) => {
-      if (!item.actionButton) return;
-      const { appId, targetFolder } = item.actionButton;
+    return activity;
+  }, []);
 
-      if (appId === 'files' && targetFolder) {
-        sessionStorage.setItem('curio_files_target_folder', targetFolder);
-        sessionStorage.setItem('curio_secret_folder_opened', 'true');
-        window.dispatchEvent(new CustomEvent('curio_files_navigate', { detail: targetFolder }));
+  // Display a toast safely ensuring only 1 is on screen at a time
+  const showToast = useCallback((toast: NotificationToastData) => {
+    setActiveToast((current) => {
+      if (current) {
+        console.log(`[Curio Notification] Another notification (${current.id}) is active. Queuing:`, toast.id);
+        toastQueueRef.current.push(toast);
+        return current;
+      }
+      return toast;
+    });
+  }, []);
+
+  // Handle toast dismissal (auto or manual)
+  const handleToastDismissed = useCallback((toastId: string, isFromQueue: boolean) => {
+    console.log(`[Curio Notification] Toast dismissed: ${toastId}`);
+
+    // If there is another toast waiting in the queue, show it next
+    if (toastQueueRef.current.length > 0) {
+      const nextToast = toastQueueRef.current.shift()!;
+      setTimeout(() => setActiveToast(nextToast), 300);
+    } else {
+      setActiveToast(null);
+    }
+
+    // If this was a timed queue notification, start the next 30s timer
+    if (isFromQueue) {
+      scheduleStep(30000);
+    }
+  }, []);
+
+  // Action button click dispatcher
+  const handleAction = useCallback((item: NotificationConfigItem) => {
+    if (!item.actionButton) return;
+    const { appId, targetFolder } = item.actionButton;
+
+    if (appId === 'files' && targetFolder) {
+      sessionStorage.setItem('curio_files_target_folder', targetFolder);
+      sessionStorage.setItem('curio_secret_folder_opened', 'true');
+      window.dispatchEvent(new CustomEvent('curio_files_navigate', { detail: targetFolder }));
+    }
+
+    openAppRef.current(appId);
+  }, []);
+
+  // Schedule next step in the queue
+  const scheduleStep = useCallback(
+    (delayMs: number) => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
       }
 
-      openApp(appId);
+      console.log(
+        `%c[Curio Notification]%c Next queue check in ${delayMs / 1000}s (index: ${queueIndexRef.current})`,
+        'color: #ec4899; font-weight: bold;',
+        'color: #94a3b8;'
+      );
+
+      timerRef.current = setTimeout(() => {
+        timerRef.current = null;
+
+        while (queueIndexRef.current < QUEUED_NOTIFICATIONS.length) {
+          const item = QUEUED_NOTIFICATIONS[queueIndexRef.current];
+
+          if (shownIdsRef.current.has(item.id)) {
+            console.log(`[Curio Notification] ${item.id} already shown. Skipping.`);
+            queueIndexRef.current += 1;
+            continue;
+          }
+
+          const activity = checkActivity();
+          const shouldSkip = item.checkSkip(activity);
+
+          if (shouldSkip) {
+            console.log(
+              `%c[Curio Notification]%c Skip condition met for "${item.id}". Advancing to next step in 30s.`,
+              'color: #eab308; font-weight: bold;',
+              'color: #94a3b8;'
+            );
+            shownIdsRef.current.add(item.id);
+            queueIndexRef.current += 1;
+            scheduleStep(30000);
+            return;
+          }
+
+          // Found next eligible notification!
+          console.log(
+            `%c[Curio Notification]%c Displaying: "${item.message}"`,
+            'color: #10b981; font-weight: bold;',
+            'color: #f1f5f9;'
+          );
+          shownIdsRef.current.add(item.id);
+          queueIndexRef.current += 1;
+
+          const toastData: NotificationToastData = {
+            id: item.id,
+            emoji: item.emoji,
+            title: 'Curio.OS',
+            message: item.message,
+            autoDismissMs: 7500,
+            actionButton: item.actionButton
+              ? {
+                  label: item.actionButton.label,
+                  onClick: () => handleAction(item),
+                }
+              : undefined,
+            onDismiss: () => {
+              handleToastDismissed(item.id, true);
+            },
+          };
+
+          showToast(toastData);
+          return;
+        }
+
+        console.log('%c[Curio Notification]%c All notifications finished.', 'color: #8b5cf6; font-weight: bold;', 'color: #94a3b8;');
+      }, delayMs);
     },
-    [openApp]
+    [checkActivity, handleAction, handleToastDismissed, showToast]
   );
 
-  // Trigger Subbu is disappointed standalone reaction
+  // Standalone "Subbu is disappointed 😢" popup
   const triggerSubbuDisappointed = useCallback(() => {
     if (shownIdsRef.current.has('subbu-disappointed')) return;
     shownIdsRef.current.add('subbu-disappointed');
+
+    console.log(
+      '%c[Curio Notification]%c Fired standalone: "Subbu is disappointed 😢"',
+      'color: #ef4444; font-weight: bold;',
+      'color: #f87171;'
+    );
 
     const disappointedToast: NotificationToastData = {
       id: 'subbu-disappointed',
       emoji: '😢',
       title: 'Curio.OS',
       message: 'Subbu is disappointed 😢',
+      autoDismissMs: 6000,
       onDismiss: () => {
-        setActiveToast(null);
+        handleToastDismissed('subbu-disappointed', false);
       },
     };
 
-    setStandaloneQueue((prev) => [...prev, disappointedToast]);
-  }, []);
+    showToast(disappointedToast);
+  }, [handleToastDismissed, showToast]);
 
-  // Expose triggerSubbuDisappointed to parent
+  // Connect standalone trigger
   useEffect(() => {
     onRegisterTriggerSubbuDisappointed(triggerSubbuDisappointed);
   }, [onRegisterTriggerSubbuDisappointed, triggerSubbuDisappointed]);
 
-  // Check standalone queue whenever activeToast clears
+  // Start the queue as soon as login sequence is resolved
   useEffect(() => {
-    if (!activeToast && standaloneQueue.length > 0) {
-      const [next, ...rest] = standaloneQueue;
-      setActiveToast(next);
-      setStandaloneQueue(rest);
-    }
-  }, [activeToast, standaloneQueue]);
+    if (!isLoginSequenceResolved || queueStartedRef.current) return;
 
-  // Step resolution: called when current queued toast dismisses or is skipped
-  const advanceQueue = useCallback(() => {
-    setActiveToast(null);
-    setQueueIndex((prev) => prev + 1);
-    setIsWaitingForTimer(false);
-  }, []);
+    queueStartedRef.current = true;
+    console.log(
+      '%c[Curio Notification]%c Login resolved! Starting 10-second countdown for Music notification...',
+      'color: #38bdf8; font-weight: bold;',
+      'color: #94a3b8;'
+    );
 
-  // Main Sequential Queue Driver
+    // Initial 10 second delay
+    scheduleStep(10000);
+  }, [isLoginSequenceResolved, scheduleStep]);
+
+  // Cleanup on unmount only
   useEffect(() => {
-    // Only run if login popup sequence has completed
-    if (!isLoginSequenceResolved) return;
-    // Don't start a timer if queue is already finished or active toast is showing
-    if (queueIndex >= QUEUED_NOTIFICATIONS.length) return;
-    if (activeToast !== null || isWaitingForTimer) return;
-
-    const currentItem = QUEUED_NOTIFICATIONS[queueIndex];
-    if (!currentItem) return;
-
-    // If already shown once, advance immediately
-    if (shownIdsRef.current.has(currentItem.id)) {
-      setQueueIndex((prev) => prev + 1);
-      return;
-    }
-
-    setIsWaitingForTimer(true);
-
-    timerRef.current = setTimeout(() => {
-      setIsWaitingForTimer(false);
-
-      // Check skip condition when timer expires
-      const activity = getSessionActivity();
-      const shouldSkip = currentItem.checkSkip(activity);
-
-      if (shouldSkip) {
-        // Skip silently, advance to next item
-        shownIdsRef.current.add(currentItem.id);
-        setQueueIndex((prev) => prev + 1);
-        return;
-      }
-
-      // Show notification
-      shownIdsRef.current.add(currentItem.id);
-      const toastData: NotificationToastData = {
-        id: currentItem.id,
-        emoji: currentItem.emoji,
-        title: 'Curio.OS',
-        message: currentItem.message,
-        actionButton: currentItem.actionButton
-          ? {
-              label: currentItem.actionButton.label,
-              onClick: () => handleAction(currentItem),
-            }
-          : undefined,
-        onDismiss: () => {
-          advanceQueue();
-        },
-      };
-
-      setActiveToast(toastData);
-    }, currentItem.delayAfterPrevious);
-
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
     };
-  }, [
-    isLoginSequenceResolved,
-    queueIndex,
-    activeToast,
-    isWaitingForTimer,
-    getSessionActivity,
-    handleAction,
-    advanceQueue,
-  ]);
+  }, []);
 
   if (!activeToast) return null;
 
