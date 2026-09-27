@@ -1,0 +1,568 @@
+
+# 🖥️ DREAM.OS — Feature Plan
+
+### Core concept
+
+> **A whimsical desktop operating system running entirely inside the browser.**
+
+Users can explore the OS anonymously, but **logging in unlocks their own personalized desktop/data**.
+
+---
+
+# 1. 🖥️ Desktop
+
+### Default desktop
+
+* Animated wallpaper
+* Desktop icons
+* Taskbar / dock
+* System clock
+* Battery-style indicator
+* Wi-Fi/status indicator
+* Start/Menu button
+* Notifications
+* Open-window management
+
+### Desktop apps
+
+| App             | Status               |
+| --------------- | -------------------- |
+| 💻 Terminal     | ⭐ **Core**           |
+| 📁 File Manager | ⭐ **Core**           |
+| 🌐 Browser      | ⭐ **Core**           |
+| 🧠 Brain        | ⭐ **Core**           |
+| 🎵 Music Player | ⭐ **Core**           |
+| 🌌 Void         | ⭐ **Core**           |
+| ⚙️ Settings     | ⭐ **Core**           |
+| 📷 Camera       | ⭐ **Core**           |
+| 🕹️ Arcade      | 🔒 Later             |
+| 📸 Gallery      | Part of File Manager |
+
+---
+
+# 2. 💻 Terminal — MAIN FEATURE
+
+The terminal should feel like the **heart of DREAM.OS**.
+
+### Basic commands
+
+```bash
+help
+clear
+whoami
+about
+neofetch
+echo
+history
+```
+
+### User commands
+
+```bash
+register
+login
+logout
+user
+profile
+passwd
+```
+
+### Personal data
+
+```bash
+notes
+photos
+songs
+favorites
+files
+```
+
+### OS commands
+
+```bash
+wallpaper
+settings
+open
+close
+reboot
+shutdown
+```
+
+### Fun commands
+
+```bash
+fortune
+joke
+matrix
+sudo
+void
+secret
+```
+
+---
+
+## `help`
+
+Complete command manual:
+
+```text
+DREAM.OS TERMINAL
+────────────────────────
+
+USER
+  register       Create account
+  login          Login
+  logout         Logout
+  whoami         Current user
+
+SYSTEM
+  about          About DREAM.OS
+  neofetch       System information
+  reboot         Restart OS
+
+FILES
+  ls             List files
+  cd             Change directory
+  open           Open file
+
+PERSONAL
+  notes          View notes
+  photos         View photos
+  favorites      Favorite songs
+
+FUN
+  fortune
+  joke
+  matrix
+  void
+
+Type:
+help <command>
+for more information.
+```
+
+---
+
+# 3. 👤 User Authentication
+
+### Anonymous mode
+
+User can explore:
+
+* Desktop
+* Terminal
+* Browser
+*File Manager(Only  Subuu's secret folder will be there and  other folders will  be empty )
+* Music
+* Void
+* About
+
+
+
+### Registered mode
+
+User hav to register/login through terminal (for  that a pop-up/notification type  wil be shown to tell them to  login,  after login no  such pop-up ),  and user by clicking login from any where user will redirect  to terminal and it should be like 
+
+cutie@username:~$ login (this line would be automaticly entered)
+cutie@username:~$ Enter email: user_email
+cutie@username:~$ Enter Password: user_password
+cutie@username:~$ Enter username: user_namee
+cutie@username:~$ Hii user_name ! Now you are my cutipie
+
+
+
+Saved:
+
+* Username
+* Profile
+* Notes
+* Wallpapers
+* Favorite songs
+* Uploaded photos
+* Camera photos
+* Settings
+* Recently opened files
+* Personal preferences
+
+Use **Supabase Auth**.
+
+---
+
+# 4. 📁 File Manager
+
+Make it feel like a real OS.
+
+```text
+HOME
+│
+├── 📁 Documents
+├── 📁 Photos
+├── 📁 Music
+├── 📁 Downloads
+├── 📁 Camera
+├── 📁 Favorites
+└── 🔐 Admin's Secret Folder
+```
+
+Functions:
+
+* Create folder
+* Create text file
+* Rename
+* Delete
+* Open
+* Upload
+* Download
+* Search
+* Sort
+* Grid/List view
+
+---
+
+# 5. 📷 Camera
+
+Browser camera using:
+
+```text
+navigator.mediaDevices.getUserMedia()
+```
+
+User can:
+
+**Take Photo → Preview → Save**
+
+Saved under:
+
+```text
+📁 Camera
+   ├── IMG_001
+   ├── IMG_002
+   └── IMG_003
+```
+
+Store the actual images in **Supabase Storage**, not the database.
+
+Set a reasonable user limit.
+
+---
+
+# 6. 🖼️ Personal Photos
+
+Users can upload up to:
+
+> **10 photos**
+
+These appear in:
+
+```text
+📁 Photos
+```
+
+And can also be used as:
+
+> 🖼️ Wallpaper
+
+So:
+
+**Upload photo → Set as wallpaper**
+
+When they log in again, their photos/wallpaper come back.
+
+---
+
+# 7. 🎵 Music Player
+
+Definitely keep this.
+
+Features:
+
+* Play/pause
+* Previous/next
+* Progress bar
+* Volume
+* Playlist
+* Favorite ❤️
+* Recently played
+* Shuffle
+* Repeat
+
+### User personalization
+
+```text
+🎵 MY FAVORITES
+
+Song A ❤️
+Song C ❤️
+Song F ❤️
+```
+
+Favorites persist through Supabase.
+
+For the actual audio, use **your own uploaded/royalty-free tracks or external embeds**, rather than storing lots of large audio files.
+
+---
+
+# 8. 🧠 Brain.exe
+
+Personal thought/notes system.
+
+```text
+BRAIN.EXE
+
+┌────────────────────────────┐
+│ What's on your mind?       │
+│                            │
+│ [______________________]   │
+│                            │
+│          + SAVE            │
+└────────────────────────────┘
+```
+
+Features:
+
+* Create note
+* Edit
+* Delete
+* Search
+* Pin
+* Tags
+* Timestamp
+
+Example:
+
+```text
+🧠 Thoughts
+
+"Need to finish SIH project"
+"Learn WebSockets"
+"Build something stupid this weekend"
+```
+
+Saved per user.
+
+---
+
+# 9. 🌐 Browser
+
+Don't try to build a real browser initially.
+
+Make it a **fictional DREAM.OS browser**.
+
+### Phase 1
+
+A browser window containing:
+
+* Address/search bar
+* Back/forward
+* Reload
+* Home
+* Tabs
+
+But it opens **internal DREAM.OS websites**.
+
+Example:
+
+```text
+dream://home
+dream://about
+dream://music
+dream://terminal
+dream://subbu
+dream://void
+```
+
+Later you can add:
+
+* Fake search engine
+* Easter eggs
+* Internet API integration
+* Actual external browsing if technically appropriate
+
+For now, make it an **in-universe browser**.
+
+---
+
+# 10. 🌌 VOID.EXE
+
+Keep this mysterious.
+
+Initial screen:
+
+> **THERE IS NOTHING HERE.**
+
+Button:
+
+> `[ DO NOT CLICK ]`
+
+Every interaction gradually changes the experience.
+
+Possible progression:
+
+```text
+Click 1
+"Why?"
+
+Click 2
+"Seriously?"
+
+Click 3
+"Stop."
+
+Click 4
+"..."
+
+Click 5
+"Fine."
+```
+
+Then the desktop starts behaving strangely.
+
+Potential effects:
+
+* Windows move
+* Text changes
+* Desktop glitches
+* Cursor changes
+* Fake system messages
+* Hidden commands become available
+
+Eventually:
+
+> **VOID.EXE has noticed you.**
+
+---
+
+# 11. ⚙️ Settings
+
+### Personalization
+
+* Wallpaper
+* Theme
+* Accent color
+* UI scale
+* Clock format
+* Animations ON/OFF
+
+### Account
+
+* Username
+* Email
+* Profile picture
+* Logout
+* Delete account
+
+### System
+
+* Sound
+* Notifications
+* Reset desktop
+
+---
+
+# 12. 🔐 ADMIN'S SECRET FILE
+
+This should be one of the major Easter eggs.
+
+File Manager:
+
+```text
+📁 Home
+│
+├── 📁 Documents
+├── 📁 Photos
+├── 📁 Music
+├── 📁 Camera
+└── 🔐 Admin's Secret File
+|----Subbu's Project
+```
+
+Clicking it:
+
+```text
+╭────────────────────────────╮
+│ 🔐 CLASSIFIED              │
+│                            │
+│ This folder belongs to     │
+│ Subbu.                     │
+│                            │
+│ Prove that you appreciate  │
+│ the administrator.         │
+│                            │
+│ [ Type your message... ]   │
+│                            │
+│             [UNLOCK]       │
+╰────────────────────────────╯
+```
+
+### Compliment scoring
+
+Examples:
+
+> "Subbu is the best developer"
+
+> "I love you Subbu"
+
+> "Marry me Subbu"
+
+> "Subbu is the kindest developer"
+
+> "Subbu is awesome"
+
+The system calculates a **compliment score**.
+
+```text
+Compliment detected!
+
+❤️ 87%
+```
+
+Only:
+
+> **100% → UNLOCKED**
+
+---
+
+### Failed attempts
+
+After ~5–6 attempts:
+
+```text
+🔐 ACCESS DENIED
+
+You've tried very hard.
+
+Perhaps you should ask
+the administrator himself.
+
+────────────────────
+
+📧 [MAIL SUBBU]
+```
+
+The button can open a mailto link / contact method.
+
+---
+
+# 13. 📂 Secret Folder Contents
+
+I control the content locally.
+
+Potential structure:
+
+```text
+ADMIN'S SECRET FILE
+│
+├── 📸 embarrassing_photo.jpg
+├── 📄 about_subbu.txt
+├── 🎵 secret_song.mp3
+├── 📜 developer_lore.txt
+└── ❓ classified.txt
+```
+
+You can make the files themselves interactive Easter eggs.
+
+
+
+Keep the **10-photo limit** per user.
+
+The **terminal + file system + personalization + weird Easter eggs** should be the identity of the project. Everything else should feel like an app living inside that OS.

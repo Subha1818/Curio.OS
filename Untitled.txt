@@ -1,0 +1,153 @@
+
+
+1.$ subbu -about
+Shows a short profile:
+
+
+╭─ ADMIN PROFILE ─────────────────╮
+
+  NAME       Subhajit Patra
+  ALIAS      Subbu
+  ROLE       Full Stack Developer
+  LOCATION   Kolkata, India
+  STATUS     Building something...
+
+  "I turn ideas into interfaces."
+
+╰─────────────────────────────────╯
+
+
+2.$ Subbu -skill
+
+
+FRONTEND
+███████████████████ React
+███████████████████ JavaScript
+███████████████████ HTML / CSS
+██████████████████ Tailwind
+██████████████ GSAP
+
+BACKEND
+██████████████ Node.js
+██████████████ Supabase
+██████████████ MongoDB
+
+TOOLS
+████████████████ Git
+██████████████ Figma
+
+Languages
+██████████████ C
+██████████████ Python
+██████████████ Java
+██████████████ C++
+
+Shows everything Subbu works with, but in a more playful way than a skill grid.
+
+
+3.$ Subbu -projects
+
+Scanning administrator's creations...
+
+[01] KISAANSETU
+     Smart procurement queue management system for farmers
+
+[02] LOGIFLOW
+     Route optimization & logistics visualization
+
+
+[03] STUDENT SPHERE
+     Student resource platform
+
+[04] AYURTRACK
+     Panchakarma patient management system
+
+[05] DREAM.OS
+     You are currently inside it.
+
+
+work Shows your development timeline:
+
+
+4.$ subbu -work
+
+2026
+│
+├── SIH 2026
+├── Hackathon projects
+├── LogiFlow
+├── DREAM.OS
+└── ???
+
+2025
+│
+└── The origin story...
+
+
+
+
+
+5.$ Subbu -achievements
+
+🏆 Hack-Ur-Way — ENVISAGE 25
+   Runner-up
+
+🚀 SIH 2026
+   Internal Round — Top 45 / 300 teams
+
+📜 IBM Python
+📜 AWS Academy
+📜 ...
+
+Clicking an achievement could open a little certificate/card window.  (later implementation)
+
+🧪 More playful ones
+These are the ones I'd definitely include.
+
+currentmission
+
+6.$ Subbu -currentmission
+
+CURRENT MISSION
+────────────────────────────
+
+Build.
+Break.
+Fix.
+Deploy.
+Repeat.
+
+STATUS: ███████████░ 87%
+
+Next objective:
+Become dangerously good at building things.
+now
+
+7.$ Subbu -now
+
+SUBBU IS CURRENTLY:
+
+> coding
+> learning
+> overthinking UI
+> probably changing the navbar again
+
+Last detected:
+2 minutes ago.
+You can make this content manually configurable.
+
+interests
+
+8.$ Subbu -interests
+
+✦ Frontend
+✦ Creative UI
+✦ Movies
+✦ Video editing
+✦ Graphics
+✦ Photgraphy
+✦ Hackathons
+✦ Building weird things
+✦ Learning random technologies
+
+

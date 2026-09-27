@@ -1,0 +1,4 @@
+# Drop raw audio files here for the add-track script to pick up.
+# These are your personal files — do NOT commit them.
+*
+!.gitignore

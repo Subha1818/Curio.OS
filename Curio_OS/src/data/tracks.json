@@ -1,0 +1,53 @@
+[
+  {
+    "id": "1",
+    "title": "Midnight Whimsy",
+    "artist": "Subbu Soundscapes",
+    "duration": "0:24",
+    "bpm": 82,
+    "fileName": "midnight-whimsy.wav",
+    "tag": "Rhodes Chords",
+    "mood": "Late Night Lofi"
+  },
+  {
+    "id": "2",
+    "title": "Curio Reverie",
+    "artist": "Neon Clouds",
+    "duration": "0:24",
+    "bpm": 75,
+    "fileName": "curio-reverie.wav",
+    "tag": "Ambient Bells",
+    "mood": "Cosmic Dreamscape"
+  },
+  {
+    "id": "3",
+    "title": "Lavender Code",
+    "artist": "SIH Dreams",
+    "duration": "0:24",
+    "bpm": 88,
+    "fileName": "lavender-code.wav",
+    "tag": "Chillhop Groove",
+    "mood": "Focus & Hacking"
+  },
+  {
+    "id": "4",
+    "title": "Void Ambient Echoes",
+    "artist": "0xCurio",
+    "duration": "0:24",
+    "bpm": 60,
+    "fileName": "void-ambient-echoes.wav",
+    "tag": "Deep Drone",
+    "mood": "Mysterious Space"
+  },
+  {
+    "id": "yeh-raaten-yeh-mausam-b72f",
+    "title": "Yeh Raaten Yeh Mausam",
+    "artist": "Sanam ft. Simran Sehgal",
+    "duration": "3:40",
+    "bpm": 85,
+    "fileName": "yeh-raaten-yeh-mausam-b72f.mp3",
+    "tag": "Retro Romance",
+    "mood": "Nostalgic Vibe",
+    "coverArt": "yeh-raaten-yeh-mausam-b72f-cover.png"
+  }
+]
