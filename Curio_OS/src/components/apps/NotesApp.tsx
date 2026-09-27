@@ -58,6 +58,11 @@ const DEFAULT_GUEST_NOTES: LocalNote[] = [
 const PRESET_TAGS = ['Ideas', 'Priority', 'Whimsy', 'Code', 'Personal'];
 
 export const NotesApp: React.FC<{ windowId: string }> = () => {
+  useEffect(() => {
+    sessionStorage.setItem('curio_notes_opened', 'true');
+    window.dispatchEvent(new Event('curio_activity_updated'));
+  }, []);
+
   const { isLoggedIn, user } = useAuth();
 
   // State

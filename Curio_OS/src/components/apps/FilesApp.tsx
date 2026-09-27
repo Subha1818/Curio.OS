@@ -351,7 +351,14 @@ const FilePreviewModal: React.FC<{ file: FileItem; onClose: () => void }> = ({ f
 export const FilesApp: React.FC<{ windowId: string }> = () => {
   const { isLoggedIn, user } = useAuth();
 
-  const [currentFolder, setCurrentFolder] = useState<FolderId>('documents');
+  const [currentFolder, setCurrentFolder] = useState<FolderId>(() => {
+    const target = sessionStorage.getItem('curio_files_target_folder') as FolderId | null;
+    if (target) {
+      sessionStorage.removeItem('curio_files_target_folder');
+      return target;
+    }
+    return 'documents';
+  });
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -363,6 +370,30 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
 
   // Toast
   const [actionToast, setActionToast] = useState<{ message: string; type: 'mail' | 'donate' } | null>(null);
+
+  // Listen for navigation events from notifications & track activity
+  React.useEffect(() => {
+    sessionStorage.setItem('curio_files_opened', 'true');
+    window.dispatchEvent(new Event('curio_activity_updated'));
+
+    const handleNavigate = (e: Event) => {
+      const customEvent = e as CustomEvent<FolderId>;
+      if (customEvent.detail) {
+        setCurrentFolder(customEvent.detail);
+      }
+    };
+
+    window.addEventListener('curio_files_navigate', handleNavigate);
+    return () => window.removeEventListener('curio_files_navigate', handleNavigate);
+  }, []);
+
+  // Track secret folder opening
+  React.useEffect(() => {
+    if (currentFolder === 'secret') {
+      sessionStorage.setItem('curio_secret_folder_opened', 'true');
+      window.dispatchEvent(new Event('curio_activity_updated'));
+    }
+  }, [currentFolder]);
 
   // ── Folder content resolution ─────────────────────────────────────────────
   const folderDef = FOLDER_DEFINITIONS.find((f) => f.id === currentFolder)!;

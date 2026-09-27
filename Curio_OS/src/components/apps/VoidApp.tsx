@@ -120,6 +120,11 @@ const VoidParticles: React.FC = () => {
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export const VoidApp: React.FC<{ windowId: string }> = () => {
+  useEffect(() => {
+    sessionStorage.setItem('curio_void_opened', 'true');
+    window.dispatchEvent(new Event('curio_activity_updated'));
+  }, []);
+
   const { voidClickCount, escalateVoid, isVoidAwoken } = useVoid();
   const [showGlitch, setShowGlitch] = useState(false);
   const [jitter, setJitter] = useState(false);

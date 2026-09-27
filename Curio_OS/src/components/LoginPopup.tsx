@@ -5,11 +5,12 @@ import { sound } from '../utils/sound';
 
 interface LoginPopupProps {
   onDismissForSession: () => void;
+  onStillNo?: () => void;
 }
 
 type PopupStage = 'primary' | 'secondary' | 'dismissed';
 
-export const LoginPopup: React.FC<LoginPopupProps> = ({ onDismissForSession }) => {
+export const LoginPopup: React.FC<LoginPopupProps> = ({ onDismissForSession, onStillNo }) => {
   const [stage, setStage] = useState<PopupStage>('primary');
   const [visible, setVisible] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
@@ -50,6 +51,7 @@ export const LoginPopup: React.FC<LoginPopupProps> = ({ onDismissForSession }) =
   const handleStillNo = () => {
     sound.playClick();
     animateOut(() => {
+      if (onStillNo) onStillNo();
       onDismissForSession(); // Sets flag — no more popups this session
     });
   };
@@ -58,10 +60,10 @@ export const LoginPopup: React.FC<LoginPopupProps> = ({ onDismissForSession }) =
 
   return (
     <div
-      className={`fixed bottom-16 right-4 z-[200] transition-all duration-300 ${
+      className={`fixed top-6 left-1/2 -translate-x-1/2 z-[250] max-w-sm w-[92vw] sm:w-[350px] pointer-events-auto transition-all duration-300 ease-out select-none ${
         visible && !isExiting
-          ? 'translate-y-0 opacity-100'
-          : 'translate-y-6 opacity-0'
+          ? 'translate-y-0 opacity-100 scale-100'
+          : '-translate-y-8 opacity-0 scale-95'
       }`}
     >
       {stage === 'primary' ? (

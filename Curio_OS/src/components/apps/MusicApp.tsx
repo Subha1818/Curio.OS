@@ -17,6 +17,11 @@ import { sound } from '../../utils/sound';
 import { useMusic } from '../../context/MusicContext';
 
 export const MusicApp: React.FC<{ windowId: string }> = () => {
+  React.useEffect(() => {
+    sessionStorage.setItem('curio_music_opened', 'true');
+    window.dispatchEvent(new Event('curio_activity_updated'));
+  }, []);
+
   const {
     tracks,
     currentTrack,

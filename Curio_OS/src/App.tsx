@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { WindowManagerProvider } from './context/WindowManagerContext';
 import { MusicProvider } from './context/MusicContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -9,6 +9,7 @@ import { Taskbar } from './components/Taskbar';
 import { StartMenu } from './components/StartMenu';
 import { NotificationCenter } from './components/NotificationCenter';
 import { LoginPopup } from './components/LoginPopup';
+import { NotificationManager } from './components/NotificationManager';
 import type { WallpaperId, SystemNotification } from './types/os';
 import { sound } from './utils/sound';
 
@@ -171,6 +172,12 @@ function CurioShell() {
     !isLoggedIn &&
     !loginPopupDismissed;
 
+  const triggerSubbuDisappointedRef = useRef<(() => void) | null>(null);
+  const isLoginSequenceResolved =
+    hasBooted &&
+    !isRestoringSession &&
+    (isLoggedIn || loginPopupDismissed);
+
   const handleDesktopClick = () => {
     if (isStartOpen) setIsStartOpen(false);
     if (isNotificationsOpen) setIsNotificationsOpen(false);
@@ -265,7 +272,20 @@ function CurioShell() {
 
           {/* Two-stage login popup — only for anonymous guests */}
           {showLoginPopup && (
-            <LoginPopup onDismissForSession={handleDismissLoginPopup} />
+            <LoginPopup
+              onDismissForSession={handleDismissLoginPopup}
+              onStillNo={() => triggerSubbuDisappointedRef.current?.()}
+            />
+          )}
+
+          {/* Reusable top-center notification queue */}
+          {hasBooted && (
+            <NotificationManager
+              isLoginSequenceResolved={isLoginSequenceResolved}
+              onRegisterTriggerSubbuDisappointed={(trigger) => {
+                triggerSubbuDisappointedRef.current = trigger;
+              }}
+            />
           )}
 
           {/* VOID leak overlay — subtle red vignette when awoken */}
