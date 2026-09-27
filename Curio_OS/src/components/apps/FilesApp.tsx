@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Folder,
   FileText,
@@ -7,18 +7,15 @@ import {
   ChevronRight,
   Heart,
   Unlock,
-  AlertTriangle,
   Mail,
   FileCode,
   Sparkles,
   LayoutGrid,
   List,
   X,
-  IndianRupee,
   Home,
   CheckCircle2,
   FileQuestion,
-  HelpCircle,
   Code2,
   Trophy,
   Camera,
@@ -42,6 +39,7 @@ import {
   type FolderId,
   type FileItem,
 } from '../../data/fileSystemData';
+import { SecretFolderUnlocker } from './SecretFolderUnlocker';
 import {
   portfolioContent,
   type PortfolioProject,
@@ -52,31 +50,6 @@ import {
 
 // ── Portfolio union type ─────────────────────────────────────────────────────
 type PortfolioItem = PortfolioProject | PortfolioAchievement | PortfolioPhoto | PortfolioDrawing;
-
-// ── Sincerity Scorer ─────────────────────────────────────────────────────────
-function evaluateComplimentScore(text: string): { score: number; feedback: string } {
-  const clean = text.toLowerCase().trim();
-  if (!clean) return { score: 0, feedback: 'Type a message appreciating Administrator Subbu...' };
-
-  let score = 0;
-  if (clean.includes('subbu') || clean.includes('subhajit')) score += 25;
-  if (clean.includes('best') || clean.includes('great') || clean.includes('awesome')) score += 15;
-  if (clean.includes('love') || clean.includes('marry') || clean.includes('crush')) score += 20;
-  if (clean.includes('kind') || clean.includes('good') || clean.includes('sweet')) score += 15;
-  if (clean.includes('handsome') || clean.includes('cute') || clean.includes('cutie')) score += 15;
-  if (clean.includes('genius') || clean.includes('goat') || clean.includes('legend') || clean.includes('smart')) score += 15;
-  if (clean.includes('developer') || clean.includes('coder') || clean.includes('creator')) score += 10;
-  if (clean.length > 25) score += 5;
-  score = Math.min(100, score);
-
-  let feedback = 'Needs more sincerity... Subbu is waiting.';
-  if (score === 100) feedback = 'PERFECT HARMONY! 100% Sincerity achieved. Ready to unlock! 🎉';
-  else if (score >= 90) feedback = 'Almost there! Add a touch more adoration to hit exactly 100%.';
-  else if (score >= 60) feedback = 'Subbu is smiling, but the lock strictly requires 100% sincerity.';
-  else if (score >= 30) feedback = 'Good start, but is that all the love you have for the admin?';
-
-  return { score, feedback };
-}
 
 // ── Folder icon renderer ─────────────────────────────────────────────────────
 const FolderIcon: React.FC<{ iconName: string; isUnlocked?: boolean; className?: string }> = ({
@@ -382,13 +355,7 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Secret folder state
-  const [complimentInput, setComplimentInput] = useState('');
-  const [complimentScore, setComplimentScore] = useState(0);
-  const [scoreFeedback, setScoreFeedback] = useState('Type a message appreciating Administrator Subbu...');
   const [unlocked, setUnlocked] = useState(false);
-  const [failedAttempts, setFailedAttempts] = useState(0);
-  const [showHint, setShowHint] = useState(false);
 
   // Preview / detail modals
   const [previewFile, setPreviewFile] = useState<FileItem | null>(null);
@@ -396,29 +363,6 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
 
   // Toast
   const [actionToast, setActionToast] = useState<{ message: string; type: 'mail' | 'donate' } | null>(null);
-
-  // Live sincerity scoring
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const result = evaluateComplimentScore(complimentInput);
-      setComplimentScore(result.score);
-      setScoreFeedback(result.feedback);
-    }, 80);
-    return () => clearTimeout(timer);
-  }, [complimentInput]);
-
-  const handleUnlockSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    sound.playClick();
-    if (complimentScore === 100) {
-      setUnlocked(true);
-      sound.playNotification();
-      confetti({ particleCount: 65, spread: 70, origin: { y: 0.6 } });
-    } else {
-      setFailedAttempts((prev) => prev + 1);
-      sound.playAlert();
-    }
-  };
 
   // ── Folder content resolution ─────────────────────────────────────────────
   const folderDef = FOLDER_DEFINITIONS.find((f) => f.id === currentFolder)!;
@@ -620,132 +564,22 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
         {/* ── Body ──────────────────────────────────────────────────────────── */}
         <div className="flex-1 p-5 overflow-y-auto relative overscroll-contain [transform:translateZ(0)]">
 
-          {/* ── Secret Folder Lock Screen ───────────────────────────────────── */}
+          {/* ── Secret Folder Lock Protocol ───────────────────────────────────── */}
           {currentFolder === 'secret' && !unlocked ? (
-            <div className="h-full flex items-center justify-center p-2">
-              <div className="max-w-md w-full p-6 rounded-2xl bg-slate-900/90 border border-rose-500/30 shadow-2xl backdrop-blur-md space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 shadow-inner">
-                    <Lock className="w-6 h-6 animate-pulse" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-rose-300 text-sm tracking-widest font-mono">🔐 CLASSIFIED</h3>
-                    <p className="text-xs text-slate-300">This folder belongs to Subbu.</p>
-                  </div>
-                </div>
-
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Prove that you appreciate the administrator. Compliment Subbu with pure sincerity.
-                </p>
-
-                <form onSubmit={handleUnlockSubmit} className="space-y-3">
-                  <div className="space-y-1.5">
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={complimentInput}
-                        onChange={(e) => setComplimentInput(e.target.value)}
-                        placeholder="Type your message..."
-                        className="flex-1 bg-slate-950 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 font-sans"
-                        autoFocus
-                      />
-                      <button
-                        type="submit"
-                        disabled={complimentScore !== 100}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 uppercase font-mono ${
-                          complimentScore === 100
-                            ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/30 cursor-pointer'
-                            : 'bg-slate-800 text-slate-500 border border-slate-700/60 cursor-not-allowed opacity-70'
-                        }`}
-                      >
-                        <Unlock className="w-3.5 h-3.5" /> UNLOCK
-                      </button>
-                    </div>
-
-                    <div className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1.5">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-slate-300 flex items-center gap-1.5 text-[11px]">
-                          <Heart
-                            className={`w-3.5 h-3.5 ${complimentScore > 0 ? 'text-rose-500 fill-rose-500 animate-pulse' : 'text-slate-600'}`}
-                          />
-                          Compliment Sincerity:
-                        </span>
-                        <span className={`font-mono font-bold text-xs ${
-                          complimentScore === 100 ? 'text-emerald-400' : complimentScore >= 70 ? 'text-pink-400' : 'text-amber-400'
-                        }`}>
-                          ❤️ {complimentScore}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-slate-800/80 h-1.5 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full transition-all duration-300 rounded-full ${
-                            complimentScore === 100 ? 'bg-emerald-400 shadow-sm shadow-emerald-400' : 'bg-gradient-to-r from-pink-500 to-rose-500'
-                          }`}
-                          style={{ width: `${complimentScore}%` }}
-                        />
-                      </div>
-                      <p className="text-[10px] text-slate-400 italic font-mono pt-0.5">{scoreFeedback}</p>
-                    </div>
-                  </div>
-
-                  {failedAttempts >= 3 && complimentScore < 100 && (
-                    <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-800/50 space-y-2 text-xs">
-                      <div className="flex items-center gap-1.5 text-amber-400 font-bold font-mono">
-                        <AlertTriangle className="w-4 h-4" /> 🔐 ACCESS DENIED
-                      </div>
-                      <p className="text-slate-300 text-[11px] leading-relaxed">
-                        You&apos;ve tried very hard.<br />
-                        Perhaps you should ask the administrator himself.
-                      </p>
-                      <div className="flex flex-wrap gap-2 pt-1">
-                        <button
-                          type="button"
-                          onClick={() => { sound.playClick(); setActionToast({ message: 'Mail to Subhajit Patra initiated. Mail.js gateway ready!', type: 'mail' }); }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-lg text-xs font-semibold transition-colors"
-                        >
-                          <Mail className="w-3.5 h-3.5" /> MAIL SUBBU
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => { sound.playClick(); setActionToast({ message: 'Thank you for your ₹1 thought! UPI QR donation terminal active in v2.0 ❤️', type: 'donate' }); }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 rounded-lg text-xs font-semibold transition-colors"
-                        >
-                          <IndianRupee className="w-3.5 h-3.5" /> DONATE ₹1
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setShowHint(!showHint)}
-                      className="text-[11px] text-slate-400 hover:text-slate-200 flex items-center gap-1"
-                    >
-                      <HelpCircle className="w-3 h-3 text-pink-400" />
-                      {showHint ? 'Hide hints' : 'Need inspiration?'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setComplimentInput('Subbu is the best, most kind, handsome, awesome, and genius developer. I love your work and would marry your code!')}
-                      className="text-[11px] text-pink-400 hover:text-pink-300 font-medium underline"
-                    >
-                      Fill 100% Sincere Praise
-                    </button>
-                  </div>
-
-                  {showHint && (
-                    <div className="p-2.5 rounded-lg bg-indigo-950/40 border border-indigo-800/40 text-[11px] text-slate-300 space-y-1">
-                      <p className="text-indigo-300 font-semibold">Keywords Subbu Loves:</p>
-                      <p className="text-slate-400">
-                        Include: <span className="text-pink-300">Subbu</span>, <span className="text-amber-300">best</span>, <span className="text-pink-300">love</span>, <span className="text-emerald-300">kind</span>, <span className="text-cyan-300">handsome</span>, <span className="text-pink-300">marry</span>, <span className="text-amber-300">awesome</span>, <span className="text-indigo-300">genius</span>!
-                      </p>
-                    </div>
-                  )}
-                </form>
-              </div>
-            </div>
-
+            <SecretFolderUnlocker
+              onUnlock={() => {
+                setUnlocked(true);
+                sound.playNotification();
+                confetti({ particleCount: 65, spread: 70, origin: { y: 0.6 } });
+              }}
+              onMailSubbu={() => {
+                setActionToast({ message: 'Mail to Subhajit Patra initiated. Mail.js gateway ready!', type: 'mail' });
+                window.open('mailto:subhajitpatra1818@gmail.com?subject=Permission%20for%20Secret%20Folder%20Access', '_blank');
+              }}
+              onDonate={() => {
+                setActionToast({ message: 'Thank you for your ₹1 thought! UPI QR donation terminal active in v2.0 ❤️', type: 'donate' });
+              }}
+            />
           ) : isPortfolioFolder ? (
             /* ── Portfolio Grid View ──────────────────────────────────────── */
             filteredPortfolioItems.length === 0 ? (
@@ -798,7 +632,7 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
                     <Unlock className="w-4 h-4" /> ACCESS GRANTED — Administrator Subbu Archive Unlocked
                   </div>
                   <button
-                    onClick={() => { sound.playClick(); setUnlocked(false); setComplimentInput(''); setComplimentScore(0); }}
+                    onClick={() => { sound.playClick(); setUnlocked(false); }}
                     className="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors"
                   >
                     Lock Vault
