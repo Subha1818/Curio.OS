@@ -124,9 +124,13 @@ const PortfolioCard: React.FC<{
   onClick: () => void;
 }> = ({ item, index, folderId, onClick }) => {
   const imagePath =
-    'banner' in item ? item.banner
-    : 'image' in item ? item.image
-    : '';
+    'thumbnail' in item && item.thumbnail
+      ? item.thumbnail
+      : 'banner' in item
+      ? item.banner
+      : 'image' in item
+      ? item.image
+      : '';
 
   const title =
     'title' in item ? item.title
@@ -143,14 +147,17 @@ const PortfolioCard: React.FC<{
   return (
     <div
       onClick={onClick}
-      className="group cursor-pointer rounded-2xl bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800/80 hover:border-pink-500/40 transition-all overflow-hidden shadow-sm hover:shadow-lg hover:scale-[1.02]"
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '240px 180px' }}
+      className="group cursor-pointer rounded-2xl bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800/80 hover:border-pink-500/40 transition-all overflow-hidden shadow-sm hover:shadow-lg hover:scale-[1.02] will-change-transform"
     >
       {/* Thumbnail */}
-      <div className="w-full aspect-video bg-slate-950/80 overflow-hidden">
+      <div className="w-full aspect-video bg-slate-950/80 overflow-hidden relative">
         {imagePath ? (
           <img
             src={imagePath}
             alt={title}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             onError={(e) => {
               // Replace broken image with gradient placeholder
@@ -611,7 +618,7 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
         </div>
 
         {/* ── Body ──────────────────────────────────────────────────────────── */}
-        <div className="flex-1 p-5 overflow-y-auto relative">
+        <div className="flex-1 p-5 overflow-y-auto relative overscroll-contain [transform:translateZ(0)]">
 
           {/* ── Secret Folder Lock Screen ───────────────────────────────────── */}
           {currentFolder === 'secret' && !unlocked ? (
