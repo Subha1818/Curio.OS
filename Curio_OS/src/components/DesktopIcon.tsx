@@ -10,6 +10,7 @@ interface DesktopIconProps {
   badge?: string;
   isDisabled?: boolean;
   isSelected?: boolean;
+  isDragging?: boolean;
   onSelect: () => void;
   onOpen: () => void;
 }
@@ -20,6 +21,7 @@ export const DesktopIcon: React.FC<DesktopIconProps> = ({
   badge,
   isDisabled,
   isSelected,
+  isDragging,
   onSelect,
   onOpen,
 }) => {
@@ -68,16 +70,20 @@ export const DesktopIcon: React.FC<DesktopIconProps> = ({
     <div
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
-      className={`group w-24 p-2 rounded-2xl flex flex-col items-center text-center cursor-pointer select-none transition-all relative ${
-        isSelected
-          ? 'bg-white/15 backdrop-blur-md ring-1 ring-white/30 shadow-lg'
-          : 'hover:bg-white/10 hover:backdrop-blur-sm'
+      className={`group w-24 p-2 rounded-2xl flex flex-col items-center text-center select-none transition-all relative ${
+        isDragging
+          ? 'bg-white/20 backdrop-blur-md ring-2 ring-pink-400/60 shadow-2xl scale-105 cursor-grabbing z-50'
+          : isSelected
+          ? 'bg-white/15 backdrop-blur-md ring-1 ring-white/30 shadow-lg cursor-pointer'
+          : 'hover:bg-white/10 hover:backdrop-blur-sm cursor-pointer'
       } ${isDisabled ? 'opacity-40 cursor-not-allowed' : ''}`}
     >
       {/* Icon container */}
       <div
         className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg relative transition-all ${
-          isSelected
+          isDragging
+            ? 'bg-indigo-600/40 border border-pink-400/60 shadow-[0_0_20px_rgba(244,114,182,0.4)]'
+            : isSelected
             ? 'bg-indigo-600/30 border border-indigo-400/50 shadow-indigo-500/20'
             : 'bg-slate-900/60 border border-white/10 group-hover:border-white/20'
         }`}

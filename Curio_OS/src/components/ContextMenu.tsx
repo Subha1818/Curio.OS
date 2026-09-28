@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Terminal, Folder, Palette, Info, RotateCcw } from 'lucide-react';
+import { Terminal, Folder, Palette, Info, RotateCcw, LayoutGrid } from 'lucide-react';
 import { LetterBoxIcon } from './icons/LetterBoxIcon';
 import { sound } from '../utils/sound';
 import type { AppId } from '../types/os';
@@ -10,6 +10,7 @@ interface ContextMenuProps {
   onClose: () => void;
   onOpenApp: (appId: AppId) => void;
   onReboot: () => void;
+  onAutoArrange?: () => void;
 }
 
 export const ContextMenu: React.FC<ContextMenuProps> = ({
@@ -18,6 +19,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   onClose,
   onOpenApp,
   onReboot,
+  onAutoArrange,
 }) => {
   useEffect(() => {
     const handleGlobalClick = () => onClose();
@@ -26,12 +28,21 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   }, [onClose]);
 
   // Constrain coordinates within screen
-  const menuW = 190;
-  const menuH = 220;
+  const menuW = 200;
+  const menuH = 260;
   const adjustedX = Math.min(x, window.innerWidth - menuW - 10);
   const adjustedY = Math.min(y, window.innerHeight - menuH - 60);
 
   const items: { label: string; icon: React.ReactNode; action: () => void; danger?: boolean }[] = [
+    ...(onAutoArrange
+      ? [
+          {
+            label: 'Auto Arrange Icons',
+            icon: <LayoutGrid className="w-4 h-4 text-indigo-400" />,
+            action: onAutoArrange,
+          },
+        ]
+      : []),
     {
       label: 'Open Terminal',
       icon: <Terminal className="w-4 h-4 text-pink-400" />,
