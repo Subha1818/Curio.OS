@@ -9,11 +9,12 @@ export interface FileItem {
   id: string;
   name: string;
   extension: string;
-  type: 'text' | 'image' | 'audio' | 'code' | 'secret';
+  type: 'text' | 'image' | 'audio' | 'code' | 'secret' | 'pdf';
   size: string;
   modified: string;
   content: string;
   previewUrl?: string;
+  downloadUrl?: string;
   isSecret?: boolean;
 }
 
@@ -22,14 +23,15 @@ export type FolderId =
   | 'education'
   | 'projects'
   | 'achievements'
-  | 'photography'
+  | 'resume'
   | 'drawings'
+  | 'photography'
   | 'secret';
 
 export interface FolderDefinition {
   id: FolderId;
   name: string;
-  iconName: 'FileText' | 'GraduationCap' | 'Code' | 'Trophy' | 'Camera' | 'Pen' | 'Lock';
+  iconName: 'FileText' | 'GraduationCap' | 'Code' | 'Trophy' | 'Camera' | 'Pen' | 'Lock' | 'Briefcase';
   badge?: string;
   description: string;
   /** If true, content comes from portfolioContent.ts and is visible to all users */
@@ -66,17 +68,24 @@ export const FOLDER_DEFINITIONS: FolderDefinition[] = [
     isPortfolio: true,
   },
   {
-    id: 'photography',
-    name: 'Photography',
-    iconName: 'Camera',
-    description: "Subbu's photography collection",
-    isPortfolio: true,
+    id: 'resume',
+    name: 'Resume',
+    iconName: 'Briefcase',
+    badge: 'PDF',
+    description: "Subhajit's official resume & CV — view and download",
   },
   {
     id: 'drawings',
     name: 'Drawings',
     iconName: 'Pen',
     description: "Subbu's drawings and digital art",
+    isPortfolio: true,
+  },
+  {
+    id: 'photography',
+    name: 'Photography',
+    iconName: 'Camera',
+    description: "Subbu's photography collection",
     isPortfolio: true,
   },
   {
@@ -88,16 +97,47 @@ export const FOLDER_DEFINITIONS: FolderDefinition[] = [
   },
 ];
 
+// ── Resume Folder Content ───────────────────────────────────────────────────
+
+export const RESUME_FILES: FileItem[] = [
+  {
+    id: 'doc-resume-sept-2026',
+    name: 'Subha_Resume_September_2026.pdf',
+    extension: 'pdf',
+    type: 'pdf',
+    size: '308 KB',
+    modified: 'September 2026',
+    previewUrl: '/assets/resume/Subha_Resume_September_2026.pdf',
+    downloadUrl: '/assets/resume/Subha_Resume_September_2026.pdf',
+    content: `==================================================
+        SUBHAJIT PATRA (SUBBU) — RESUME (SEPT 2026)
+==================================================
+Role: Full-Stack Engineer & Creative Technologist
+Location: Kolkata, India • B.Tech CSE (2024–2028)
+GitHub: https://github.com/Subha1818
+LinkedIn: https://www.linkedin.com/in/subha1818/
+
+File: Subha_Resume_September_2026.pdf
+Status: Verified Official Resume
+Size: 308 KB • Format: Portable Document Format (PDF)
+
+Download this resume directly using the Download button or preview the document.`,
+  },
+];
+
 // ── Documents folder content (static admin-provided, visible to all visitors) ──
 
 export const STATIC_DOCUMENTS: FileItem[] = [
   {
     id: 'doc-resume',
-    name: 'Subhajit_Patra_Resume_2026.pdf',
+    name: 'Subha_Resume_September_2026.pdf',
     extension: 'pdf',
-    type: 'text',
-    size: '184 KB',
+    type: 'pdf',
+    size: '308 KB',
     modified: 'September 2026',
+    previewUrl: '/assets/resume/Subha_Resume_September_2026.pdf',
+    downloadUrl: '/assets/resume/Subha_Resume_September_2026.pdf',
+
     content: `==================================================
            SUBHAJIT PATRA (SUBBU) — RESUME 2026
 ==================================================

@@ -21,6 +21,8 @@ import {
   Camera,
   Pen,
   ExternalLink,
+  Download,
+  Briefcase,
   Image as ImageIcon,
   GraduationCap,
 } from 'lucide-react';
@@ -36,6 +38,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
   FOLDER_DEFINITIONS,
   STATIC_DOCUMENTS,
+  RESUME_FILES,
   SECRET_FOLDER_FILES,
   type FolderId,
   type FileItem,
@@ -64,6 +67,7 @@ const FolderIcon: React.FC<{ iconName: string; isUnlocked?: boolean; className?:
     case 'GraduationCap': return <GraduationCap className={`${className} text-emerald-400`} />;
     case 'Code': return <Code2 className={`${className} text-cyan-400`} />;
     case 'Trophy': return <Trophy className={`${className} text-yellow-400`} />;
+    case 'Briefcase': return <Briefcase className={`${className} text-rose-400`} />;
     case 'Camera': return <Camera className={`${className} text-pink-400`} />;
     case 'Pen': return <Pen className={`${className} text-purple-400`} />;
     case 'Lock':
@@ -300,11 +304,14 @@ const LightboxModal: React.FC<{
   </div>
 );
 
-// ── File Preview Modal (for Documents / Secret folders) ───────────────────────
+// ── File Preview Modal (for Documents / Secret / Resume folders) ───────────────
 const FilePreviewModal: React.FC<{ file: FileItem; onClose: () => void }> = ({ file, onClose }) => {
+  const isPdf = file.extension.toLowerCase() === 'pdf' || file.type === 'pdf';
+
   const renderFileIcon = (f: FileItem) => {
     switch (f.type) {
       case 'text': return <FileText className="w-4 h-4 text-amber-400" />;
+      case 'pdf': return <FileText className="w-4 h-4 text-rose-400" />;
       case 'image': return <ImageIcon className="w-4 h-4 text-pink-400" />;
       case 'code': return <FileCode className="w-4 h-4 text-cyan-400" />;
       case 'secret': return <Lock className="w-4 h-4 text-rose-400" />;
@@ -314,31 +321,76 @@ const FilePreviewModal: React.FC<{ file: FileItem; onClose: () => void }> = ({ f
 
   return (
     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="max-w-lg w-full rounded-2xl bg-slate-900 border border-slate-700/80 shadow-2xl overflow-hidden flex flex-col max-h-[85%]">
-        <div className="h-10 px-4 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between">
+      <div className={`w-full rounded-2xl bg-slate-900 border border-slate-700/80 shadow-2xl overflow-hidden flex flex-col max-h-[90%] ${
+        isPdf ? 'max-w-3xl h-[85vh]' : 'max-w-lg'
+      }`}>
+        <div className="h-11 px-4 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-200 truncate">
             {renderFileIcon(file)}
             <span className="truncate">{file.name}</span>
+            {isPdf && (
+              <span className="text-[10px] bg-rose-500/20 text-rose-300 border border-rose-500/30 px-1.5 py-0.5 rounded font-mono font-bold">
+                PDF
+              </span>
+            )}
           </div>
-          <button
-            onClick={onClose}
-            className="w-6 h-6 rounded-md hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-200 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-        <div className="p-4 flex-1 overflow-y-auto space-y-3 font-mono text-xs">
-          {file.type === 'image' && file.previewUrl && (
-            <div
-              className="w-full h-36 rounded-xl border border-slate-700/50 shadow-inner flex items-center justify-center text-white/80 font-sans text-xs p-3 text-center"
-              style={{ background: file.previewUrl }}
+          <div className="flex items-center gap-2">
+            {file.downloadUrl && (
+              <a
+                href={file.downloadUrl}
+                download={file.name}
+                onClick={() => sound.playSuccess()}
+                className="px-3 py-1 rounded-lg bg-gradient-to-r from-pink-500 to-indigo-600 hover:from-pink-600 hover:to-indigo-700 text-white font-medium flex items-center gap-1.5 text-xs shadow-sm transition-transform hover:scale-105 active:scale-95 cursor-pointer"
+                title="Download file"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download</span>
+              </a>
+            )}
+            <button
+              onClick={onClose}
+              className="w-7 h-7 rounded-md hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-200 transition-colors"
             >
-              <p className="bg-black/40 px-3 py-1.5 rounded-lg backdrop-blur-md">{file.content}</p>
-            </div>
-          )}
-          <div className="p-3 rounded-xl bg-slate-950/90 border border-slate-800/80 text-slate-300 whitespace-pre-wrap leading-relaxed select-text font-mono text-[11px]">
-            {file.content}
+              <X className="w-4 h-4" />
+            </button>
           </div>
+        </div>
+        <div className="p-4 flex-1 overflow-y-auto space-y-3 font-mono text-xs flex flex-col">
+          {isPdf && file.previewUrl ? (
+            <div className="flex-1 flex flex-col space-y-3 min-h-0">
+              <div className="flex-1 w-full min-h-[380px] rounded-xl border border-slate-800 overflow-hidden bg-slate-950 shadow-inner">
+                <iframe
+                  src={`${file.previewUrl}#toolbar=1`}
+                  title={file.name}
+                  className="w-full h-full min-h-[380px] border-0"
+                />
+              </div>
+              <div className="flex items-center justify-between p-2.5 px-3 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px] text-slate-400 font-sans">
+                <span>Direct PDF rendering active.</span>
+                <a
+                  href={file.downloadUrl || file.previewUrl}
+                  download={file.name}
+                  className="text-pink-400 hover:text-pink-300 font-semibold flex items-center gap-1.5 underline"
+                >
+                  <Download className="w-3.5 h-3.5" /> Save to Computer
+                </a>
+              </div>
+            </div>
+          ) : (
+            <>
+              {file.type === 'image' && file.previewUrl && (
+                <div
+                  className="w-full h-36 rounded-xl border border-slate-700/50 shadow-inner flex items-center justify-center text-white/80 font-sans text-xs p-3 text-center"
+                  style={{ background: file.previewUrl }}
+                >
+                  <p className="bg-black/40 px-3 py-1.5 rounded-lg backdrop-blur-md">{file.content}</p>
+                </div>
+              )}
+              <div className="p-3 rounded-xl bg-slate-950/90 border border-slate-800/80 text-slate-300 whitespace-pre-wrap leading-relaxed select-text font-mono text-[11px]">
+                {file.content}
+              </div>
+            </>
+          )}
           <div className="flex items-center justify-between text-[11px] text-slate-500 font-sans pt-1 border-t border-slate-800">
             <span>Size: {file.size}</span>
             <span>Modified: {file.modified}</span>
@@ -348,6 +400,84 @@ const FilePreviewModal: React.FC<{ file: FileItem; onClose: () => void }> = ({ f
     </div>
   );
 };
+
+// ── Resume Folder Dedicated View ──────────────────────────────────────────
+const ResumeFolderView: React.FC = () => {
+  return (
+    <div className="flex-1 flex flex-col h-full overflow-hidden p-4 space-y-3">
+      {/* Top Banner Card */}
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-slate-900/95 via-slate-900/80 to-indigo-950/50 border border-slate-800/90 shadow-xl backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-rose-500/20 to-pink-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400 shadow-inner shrink-0">
+            <FileText className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-xs sm:text-sm font-bold text-white tracking-wide">
+                Subha_Resume_September_2026.pdf
+              </h2>
+              <span className="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-mono font-semibold">
+                PDF • 308 KB
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-sans font-medium">
+                Verified Official
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              Subhajit Patra (Subbu) • Full-Stack Engineer &amp; Creative Technologist
+            </p>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <a
+            href="/assets/resume/Subha_Resume_September_2026.pdf"
+            download="Subha_Resume_September_2026.pdf"
+            onClick={() => sound.playSuccess()}
+            className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-indigo-600 hover:from-pink-600 hover:to-indigo-700 text-white text-xs font-semibold shadow-lg shadow-pink-500/25 flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            title="Download PDF resume to your computer"
+          >
+            <Download className="w-4 h-4" />
+            <span>Download Resume</span>
+          </a>
+          <a
+            href="/assets/resume/Subha_Resume_September_2026.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+            title="Open in new browser tab"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Fullscreen</span>
+          </a>
+        </div>
+      </div>
+
+      {/* Embedded Live PDF Frame */}
+      <div className="flex-1 w-full rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-950 shadow-2xl relative flex flex-col min-h-0">
+        <iframe
+          src="/assets/resume/Subha_Resume_September_2026.pdf#toolbar=1"
+          title="Subhajit Patra Resume"
+          className="w-full flex-1 border-0 rounded-2xl min-h-[460px]"
+        />
+        {/* Fallback & details bar */}
+        <div className="p-2.5 px-4 bg-slate-950/90 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
+          <span>Official Resume (September 2026 Edition)</span>
+          <a
+            href="/assets/resume/Subha_Resume_September_2026.pdf"
+            download="Subha_Resume_September_2026.pdf"
+            onClick={() => sound.playSuccess()}
+            className="text-pink-400 hover:text-pink-300 underline font-medium flex items-center gap-1 cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5" /> Direct Download PDF
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 // ── Main FilesApp ─────────────────────────────────────────────────────────────
 
@@ -407,6 +537,12 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
     return STATIC_DOCUMENTS;
   }, [currentFolder]);
 
+  // For resume folder
+  const resumeFiles: FileItem[] = useMemo(() => {
+    if (currentFolder !== 'resume') return [];
+    return RESUME_FILES;
+  }, [currentFolder]);
+
   // For secret folder
   const secretFiles: FileItem[] = useMemo(() => {
     if (currentFolder !== 'secret') return [];
@@ -439,15 +575,16 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
 
   // Search filter for document files
   const filteredDocFiles = useMemo(() => {
-    const files = currentFolder === 'documents' ? documentFiles : secretFiles;
+    const files = currentFolder === 'documents' ? documentFiles : currentFolder === 'resume' ? resumeFiles : secretFiles;
     if (!searchQuery.trim()) return files;
     return files.filter((f) => f.name.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [documentFiles, secretFiles, currentFolder, searchQuery]);
+  }, [documentFiles, resumeFiles, secretFiles, currentFolder, searchQuery]);
 
   // Count displayed in sidebar
   const getFolderCount = (fid: FolderId): string | number => {
     if (fid === 'secret') return unlocked ? SECRET_FOLDER_FILES.length : 'Locked';
     if (fid === 'education') return 3;
+    if (fid === 'resume') return RESUME_FILES.length;
     if (fid === 'documents') return STATIC_DOCUMENTS.length;
     if (fid === 'projects') return portfolioContent.projects.length;
     if (fid === 'achievements') return portfolioContent.achievements.length;
@@ -460,6 +597,7 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
   const renderFileIcon = (file: FileItem) => {
     switch (file.type) {
       case 'text': return <FileText className="w-6 h-6 text-amber-400" />;
+      case 'pdf': return <FileText className="w-6 h-6 text-rose-400" />;
       case 'image': return <ImageIcon className="w-6 h-6 text-pink-400" />;
       case 'code': return <FileCode className="w-6 h-6 text-cyan-400" />;
       case 'secret': return <Lock className="w-6 h-6 text-rose-400" />;
@@ -609,7 +747,9 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
         </div>
 
         {/* ── Body ──────────────────────────────────────────────────────────── */}
-        <div className="flex-1 p-5 overflow-y-auto relative overscroll-contain [transform:translateZ(0)]">
+        <div className={`flex-1 overflow-y-auto relative overscroll-contain [transform:translateZ(0)] ${
+          currentFolder === 'resume' ? 'p-3 flex flex-col' : 'p-5'
+        }`}>
 
           {/* ── Secret Folder Lock Protocol ───────────────────────────────────── */}
           {currentFolder === 'secret' && !unlocked ? (
@@ -630,6 +770,9 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
           ) : currentFolder === 'education' ? (
             /* ── Education Timeline ────────────────────────────────────────── */
             <EducationTimeline key="education-timeline" />
+          ) : currentFolder === 'resume' ? (
+            /* ── Resume Viewer & Downloader ────────────────────────────────── */
+            <ResumeFolderView key="resume-view" />
           ) : isPortfolioFolder ? (
             /* ── Portfolio Grid View ──────────────────────────────────────── */
             filteredPortfolioItems.length === 0 ? (
