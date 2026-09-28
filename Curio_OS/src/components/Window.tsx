@@ -34,7 +34,16 @@ export const Window: React.FC<WindowProps> = ({ windowState, children }) => {
   const currentSizeRef = useRef({ w: windowState.size.width, h: windowState.size.height, x: windowState.position.x, y: windowState.position.y });
 
   // Keep refs in sync when windowState changes from outside (e.g. tile/maximize)
+  const [isOpeningSpring, setIsOpeningSpring] = useState(true);
+
   useEffect(() => {
+    setIsOpeningSpring(true);
+    const timer = setTimeout(() => setIsOpeningSpring(false), 460);
+    return () => clearTimeout(timer);
+  }, [windowState.isMinimized]);
+
+  useEffect(() => {
+
     currentPosRef.current = { x: windowState.position.x, y: windowState.position.y };
     currentSizeRef.current = {
       w: windowState.size.width,
@@ -222,6 +231,8 @@ export const Window: React.FC<WindowProps> = ({ windowState, children }) => {
         style={style}
         onMouseDown={() => focusWindow(windowState.id)}
         className={`flex-col overflow-hidden transition-shadow select-none ${
+          isOpeningSpring && !isDragging && !isResizing ? 'animate-window-spring' : ''
+        } ${
           windowState.isMaximized ? '' : 'rounded-2xl'
         } ${
           isFocused

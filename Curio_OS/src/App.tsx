@@ -3,7 +3,7 @@ import { WindowManagerProvider } from './context/WindowManagerContext';
 import { MusicProvider } from './context/MusicContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { VoidProvider, useVoid } from './context/VoidContext';
-import { BootSequence } from './components/BootSequence';
+import { BootSequence, getTimeBasedGreeting } from './components/BootSequence';
 import { Desktop } from './components/Desktop';
 import { Taskbar } from './components/Taskbar';
 import { StartMenu } from './components/StartMenu';
@@ -121,32 +121,36 @@ function CurioShell() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [handleReboot, voidNotificationSent]);
 
-  const [notifications, setNotifications] = useState<SystemNotification[]>([
-    {
-      id: '1',
-      title: 'Welcome to Curio.OS!',
-      message: "Explore as guest or log in via Terminal for your personalized desktop!",
-      time: 'Just now',
-      read: false,
-      type: 'heart',
-    },
-    {
-      id: '2',
-      title: 'Secret Archive Detected',
-      message: "Can you pass Administrator Subbu's sincerity compliment filter? (Hint: >85%)",
-      time: '1m ago',
-      read: false,
-      type: 'alert',
-    },
-    {
-      id: '3',
-      title: 'Aesthetic Sound Synthesizer',
-      message: 'Web Audio API chimes are active. Click the speaker icon to toggle.',
-      time: '2m ago',
-      read: false,
-      type: 'info',
-    },
-  ]);
+  const [notifications, setNotifications] = useState<SystemNotification[]>(() => {
+    const greetingInfo = getTimeBasedGreeting();
+    return [
+      {
+        id: '1',
+        title: greetingInfo.greeting,
+        message: `${greetingInfo.subtitle} Welcome to Curio.OS!`,
+        time: 'Just now',
+        read: false,
+        type: 'heart',
+      },
+      {
+        id: '2',
+        title: 'Secret Archive Detected',
+        message: "Can you pass Administrator Subbu's sincerity compliment filter? (Hint: >85%)",
+        time: '1m ago',
+        read: false,
+        type: 'alert',
+      },
+      {
+        id: '3',
+        title: 'Aesthetic Sound Synthesizer',
+        message: 'Web Audio API chimes are active. Click the speaker icon to toggle.',
+        time: '2m ago',
+        read: false,
+        type: 'info',
+      },
+    ];
+  });
+
 
   // ── Sync wallpaper from user profile on login ─────────────────────────────
   useEffect(() => {

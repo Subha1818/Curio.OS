@@ -5,16 +5,59 @@ interface BootSequenceProps {
   onComplete: () => void;
 }
 
+export const getTimeBasedGreeting = () => {
+  const now = new Date();
+  const hour = now.getHours();
+  const timeFormatted = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  if (hour >= 5 && hour < 12) {
+    return {
+      greeting: "Good morning cutie 🌸",
+      subtitle: "Hope you have a magical and productive day ahead!",
+      tag: "MORNING",
+      timeFormatted,
+      icon: "🌸",
+    };
+  } else if (hour >= 12 && hour < 17) {
+    return {
+      greeting: "Good afternoon sunshine ☀️",
+      subtitle: "Cruising through the day! Welcome to Curio.OS playground.",
+      tag: "AFTERNOON",
+      timeFormatted,
+      icon: "☀️",
+    };
+  } else if (hour >= 17 && hour < 22) {
+    return {
+      greeting: "Good evening star gazer ✨",
+      subtitle: "Time to unwind, listen to lofi beats, and explore.",
+      tag: "EVENING",
+      timeFormatted,
+      icon: "✨",
+    };
+  } else {
+    // 22:00 to 04:59
+    return {
+      greeting: "Still up? 🌙",
+      subtitle: "Burning the midnight oil... nocturnal genius mode activated!",
+      tag: "MIDNIGHT",
+      timeFormatted,
+      icon: "🌙",
+    };
+  }
+};
+
 export const BootSequence: React.FC<BootSequenceProps> = ({ onComplete }) => {
   const [progress, setProgress] = useState(0);
   const [logs, setLogs] = useState<string[]>([]);
   const [isFadingOut, setIsFadingOut] = useState(false);
+  const timeGreeting = React.useMemo(() => getTimeBasedGreeting(), []);
 
   const bootDiagnostics = [
     'BIOS Date 09/26/26 20:36:00 Ver: 08.00.15',
     'CPU: Quantum Neural Hexacore @ 4.20 GHz (Whimsy Edition)',
     'Memory Frequency: 4200MHz Dual Channel DDR5 (100% OK)',
     'Initializing Curio Quantum Kernel v2.4.9...',
+    `Temporal chronometer synced: [${timeGreeting.timeFormatted}] → "${timeGreeting.greeting}"`,
     'Checking hardware whimsy thresholds... 100% NOMINAL',
     'Scanning for unauthorized seriousness... NONE DETECTED!',
     'Mounting virtual filesystem: /dev/curio-root mounted on /',
@@ -24,6 +67,7 @@ export const BootSequence: React.FC<BootSequenceProps> = ({ onComplete }) => {
     'Calibrating celestial wallpaper & window manager...',
     'All systems whimsical. Entering desktop shell...',
   ];
+
 
   useEffect(() => {
     // Play startup chime
@@ -107,6 +151,29 @@ export const BootSequence: React.FC<BootSequenceProps> = ({ onComplete }) => {
           <span>Architecture: WebAssembly/Browser</span>
           <span>•</span>
           <span className="text-amber-400">Subbu Dev Edition</span>
+        </div>
+
+        {/* Dynamic Time-of-Day Greeting Banner */}
+        <div className="bg-gradient-to-r from-pink-500/15 via-purple-500/15 to-indigo-500/15 border border-pink-500/30 rounded-xl px-4 py-3 flex items-center justify-between shadow-[0_0_25px_rgba(236,72,153,0.18)] animate-pulse backdrop-blur-md">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl filter drop-shadow-[0_0_8px_rgba(244,114,182,0.8)]">
+              {timeGreeting.icon}
+            </span>
+            <div>
+              <div className="text-pink-300 font-bold text-sm tracking-wide flex items-center gap-2">
+                <span>{timeGreeting.greeting}</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/30 uppercase font-mono tracking-wider">
+                  {timeGreeting.tag}
+                </span>
+              </div>
+              <div className="text-xs text-slate-300/80 mt-0.5">
+                {timeGreeting.subtitle}
+              </div>
+            </div>
+          </div>
+          <div className="text-[11px] font-mono text-indigo-300 border border-indigo-500/30 bg-indigo-950/40 px-2.5 py-1 rounded-lg">
+            {timeGreeting.timeFormatted}
+          </div>
         </div>
 
         {/* Diagnostics Log Output */}

@@ -168,6 +168,63 @@
   animation: wallpaperGlitch 0.5s ease-in-out;
 }
 
+/* ── Elastic Wobbly Window Open Animation ── */
+@keyframes windowSpringOpen {
+  0% {
+    opacity: 0;
+    transform: scale(0.7) translateY(24px) rotate(-1deg);
+  }
+  48% {
+    opacity: 1;
+    transform: scale(1.045) translateY(-5px) rotate(0.6deg);
+  }
+  72% {
+    transform: scale(0.985) translateY(2px) rotate(-0.3deg);
+  }
+  88% {
+    transform: scale(1.01) translateY(-1px) rotate(0.1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0) rotate(0deg);
+  }
+}
+
+.animate-window-spring {
+  animation: windowSpringOpen 0.44s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  transform-origin: center center;
+}
+
+/* ── Cozy Lofi Rain Droplets ── */
+@keyframes raindropFall {
+  0% {
+    transform: translateY(-80px) skewX(-10deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.65;
+  }
+  85% {
+    opacity: 0.65;
+  }
+  100% {
+    transform: translateY(105vh) skewX(-10deg);
+    opacity: 0.1;
+  }
+}
+
+@keyframes rainSplash {
+  0% {
+    transform: scale(0.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+
 /* ── Custom Cursor Styles ── */
 body.cursor-style-default,
 body.cursor-style-default button,
