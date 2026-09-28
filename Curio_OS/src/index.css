@@ -123,3 +123,85 @@
   background: rgba(147, 51, 234, 0.5);
   color: #fff;
 }
+
+/* Wallpaper Layer Animations */
+@keyframes slowParallax {
+  0%, 100% { transform: translate(0, 0) scale(1.01); }
+  50% { transform: translate(-10px, -4px) scale(1.03); }
+}
+
+@keyframes cloudDrift {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(-25px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes neonFlicker {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px rgba(236, 72, 153, 0.75)); }
+  19% { opacity: 0.88; filter: drop-shadow(0 0 5px rgba(236, 72, 153, 0.4)); }
+  21% { opacity: 1; }
+  53% { opacity: 0.92; }
+  55% { opacity: 0.45; }
+  57% { opacity: 1; filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.8)); }
+}
+
+@keyframes voidPulse {
+  0%, 100% { transform: scale(1.02) rotate(0deg); opacity: 0.9; }
+  50% { transform: scale(1.06) rotate(1.2deg); opacity: 1; }
+}
+
+@keyframes eyeWatcherGlow {
+  0%, 100% { opacity: 0.35; transform: scale(0.9); }
+  50% { opacity: 0.9; transform: scale(1.15); filter: drop-shadow(0 0 14px rgba(244, 63, 94, 0.9)); }
+}
+
+@keyframes wallpaperGlitch {
+  0% { transform: translate(0); filter: none; }
+  20% { transform: translate(-5px, 2px); filter: drop-shadow(-4px 0 rgba(239, 68, 68, 0.9)) drop-shadow(4px 0 rgba(34, 211, 238, 0.9)); }
+  40% { transform: translate(4px, -3px); }
+  60% { transform: translate(-3px, 3px); filter: drop-shadow(4px 0 rgba(239, 68, 68, 0.9)) drop-shadow(-4px 0 rgba(34, 211, 238, 0.9)); }
+  80% { transform: translate(3px, 1px); }
+  100% { transform: translate(0); filter: none; }
+}
+
+.animate-wallpaper-glitch {
+  animation: wallpaperGlitch 0.5s ease-in-out;
+}
+
+/* ── Custom Cursor Styles ── */
+body.cursor-style-default,
+body.cursor-style-default button,
+body.cursor-style-default a,
+body.cursor-style-default [role="button"] {
+  cursor: url('/assets/cursors/default.svg') 2 2, auto !important;
+}
+
+body.cursor-style-pixel,
+body.cursor-style-pixel button,
+body.cursor-style-pixel a,
+body.cursor-style-pixel [role="button"] {
+  cursor: url('/assets/cursors/pixel.svg') 0 0, auto !important;
+}
+
+body.cursor-style-fairy,
+body.cursor-style-fairy button,
+body.cursor-style-fairy a,
+body.cursor-style-fairy [role="button"] {
+  cursor: url('/assets/cursors/fairy.svg') 6 6, auto !important;
+}
+
+body.cursor-style-heart,
+body.cursor-style-heart button,
+body.cursor-style-heart a,
+body.cursor-style-heart [role="button"] {
+  cursor: url('/assets/cursors/heart.svg') 3 3, auto !important;
+}
+
+/* Ensure inputs keep text cursor */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+textarea {
+  cursor: text !important;
+}
+

@@ -42,7 +42,17 @@ export interface WindowState {
   zIndex: number;
 }
 
-export type WallpaperId = 'cosmic-aurora' | 'cyber-noir' | 'dream-lavender' | 'synth-sunset' | 'matrix-green';
+export type WallpaperId =
+  | 'twilight-peaks'
+  | 'sakura-spring'
+  | 'neon-rain'
+  | 'dream-void'
+  | 'classic-dark'
+  | 'cosmic-aurora'
+  | 'cyber-noir'
+  | 'dream-lavender'
+  | 'synth-sunset'
+  | 'matrix-green';
 
 export interface WallpaperOption {
   id: WallpaperId;

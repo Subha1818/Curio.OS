@@ -2,19 +2,18 @@ import React, { useState, useEffect } from 'react';
 import {
   Palette,
   Volume2,
-  RotateCcw,
   Sparkles,
-  User,
+  MousePointer,
   LogOut,
-  Trash2,
   Check,
-  AlertTriangle,
   CheckCircle2,
 } from 'lucide-react';
 import { sound } from '../../utils/sound';
 import { useAuth } from '../../context/AuthContext';
 import { apiSaveUserSettings } from '../../api/authApi';
 import type { WallpaperId } from '../../types/os';
+import { WALLPAPERS, getWallpaperConfig } from '../../data/wallpapers';
+import { useCursorStyle, CURSOR_OPTIONS, type CursorStyleId } from '../../utils/useCursorStyle';
 
 interface SettingsAppProps {
   windowId: string;
@@ -26,47 +25,6 @@ interface SettingsAppProps {
 }
 
 type AccentColor = 'pink' | 'indigo' | 'emerald' | 'amber' | 'cyan';
-type ClockFormat = '12h' | '24h';
-
-interface WallpaperPreset {
-  id: WallpaperId;
-  name: string;
-  preview: string;
-  description: string;
-}
-
-const WALLPAPER_PRESETS: WallpaperPreset[] = [
-  {
-    id: 'cosmic-aurora',
-    name: 'Cosmic Aurora',
-    preview: 'from-indigo-950 via-purple-900 to-slate-950',
-    description: 'Deep celestial nebulae and glowing starlight',
-  },
-  {
-    id: 'cyber-noir',
-    name: 'Cyber Noir',
-    preview: 'from-slate-950 via-slate-900 to-cyan-950',
-    description: 'Sleek dark mode with cybernetic cyan reflections',
-  },
-  {
-    id: 'dream-lavender',
-    name: 'Dreamy Lavender',
-    preview: 'from-purple-900 via-pink-900 to-indigo-950',
-    description: 'Pastel dreamscape with warm ethereal glows',
-  },
-  {
-    id: 'synth-sunset',
-    name: 'Synthwave Sunset',
-    preview: 'from-rose-950 via-purple-950 to-amber-950',
-    description: 'Neon dusk horizon inspired by 80s chillwave',
-  },
-  {
-    id: 'matrix-green',
-    name: 'Matrix Minimal',
-    preview: 'from-slate-950 via-emerald-950 to-slate-950',
-    description: 'Subtle cyberpunk emerald grid aesthetic',
-  },
-];
 
 const ACCENT_COLORS: { id: AccentColor; name: string; bgClass: string; borderClass: string }[] = [
   { id: 'pink', name: 'Cosmic Pink', bgClass: 'bg-pink-500', borderClass: 'border-pink-500' },
@@ -81,9 +39,9 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
   onSelectWallpaper,
   soundEnabled,
   onToggleSound,
-  onReboot,
 }) => {
-  const { user, isLoggedIn, logout, updateUserSettings, deleteAccount } = useAuth();
+  const { user, isLoggedIn, logout, updateUserSettings } = useAuth();
+  const [cursorStyle, setCursorStyle] = useCursorStyle();
 
   // Settings State
   const getInitialSettings = () => {
@@ -91,7 +49,7 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
       return user.themeSettings as {
         accentColor?: AccentColor;
         animations?: boolean;
-        clockFormat?: ClockFormat;
+        cursorStyle?: CursorStyleId;
       };
     }
     try {
@@ -105,14 +63,9 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
 
   const [accentColor, setAccentColor] = useState<AccentColor>(initialTheme.accentColor || 'pink');
   const [animations, setAnimations] = useState<boolean>(initialTheme.animations !== false);
-  const [clockFormat, setClockFormat] = useState<ClockFormat>(initialTheme.clockFormat || '12h');
 
   const [saving, setSaving] = useState<boolean>(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
-
-  // Delete Account Confirmation modal state
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
   // Sync state if user's theme settings change
   useEffect(() => {
@@ -120,30 +73,34 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
       const theme = user.themeSettings as {
         accentColor?: AccentColor;
         animations?: boolean;
-        clockFormat?: ClockFormat;
+        cursorStyle?: CursorStyleId;
       };
       if (theme.accentColor) setAccentColor(theme.accentColor);
       if (theme.animations !== undefined) setAnimations(theme.animations);
-      if (theme.clockFormat) setClockFormat(theme.clockFormat);
+      if (theme.cursorStyle) setCursorStyle(theme.cursorStyle);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.themeSettings]);
 
   // Handle saving settings to backend and local storage
   const handleSaveSettings = async (
     newAccent?: AccentColor,
     newAnims?: boolean,
-    newClock?: ClockFormat,
-    newWp?: WallpaperId
+    newWp?: WallpaperId,
+    newCursor?: CursorStyleId
   ) => {
     const updatedTheme = {
       accentColor: newAccent ?? accentColor,
       animations: newAnims ?? animations,
-      clockFormat: newClock ?? clockFormat,
+      cursorStyle: newCursor ?? cursorStyle,
     };
     const targetWp = newWp ?? currentWallpaper;
+    const validatedWp = getWallpaperConfig(targetWp).id;
 
     try {
       localStorage.setItem('curio_theme_settings', JSON.stringify(updatedTheme));
+      localStorage.setItem('curio_wallpaper', validatedWp);
+      localStorage.setItem('curio_cursor_style', newCursor ?? cursorStyle);
     } catch {}
 
     window.dispatchEvent(
@@ -152,9 +109,9 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
 
     if (isLoggedIn) {
       setSaving(true);
-      await apiSaveUserSettings(updatedTheme, targetWp);
+      await apiSaveUserSettings(updatedTheme, validatedWp);
       await updateUserSettings({
-        wallpaperId: targetWp,
+        wallpaperId: validatedWp,
         themeSettings: updatedTheme,
       });
       setSaving(false);
@@ -163,20 +120,12 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
     }
   };
 
-  const handleDeleteAccountConfirm = async () => {
-    sound.playAlert();
-    setDeleting(true);
-    await deleteAccount();
-    setDeleting(false);
-    setShowDeleteConfirm(false);
-  };
-
   return (
-    <div className="h-full w-full bg-slate-950/95 text-slate-200 flex flex-col p-4 select-none overflow-y-auto text-sm space-y-5 font-sans relative">
-      {/* ── User Account Status Card ────────────────────────────────────────── */}
-      <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-900/90 border border-slate-800 flex items-center justify-between shadow-lg">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-500 to-indigo-600 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-pink-500/20">
+    <div className="h-full w-full bg-slate-950/95 text-slate-200 flex flex-col p-4 select-none overflow-y-auto text-sm space-y-6 font-sans relative">
+      {/* ── User Session Status Header ────────────────────────────────────────── */}
+      <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-900/90 border border-slate-800 flex items-center justify-between shadow-lg">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-500 to-indigo-600 flex items-center justify-center text-white text-lg font-bold shadow-md shadow-pink-500/20">
             {isLoggedIn ? (user?.username.charAt(0).toUpperCase() ?? 'U') : '✨'}
           </div>
           <div>
@@ -185,83 +134,212 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
                 {isLoggedIn ? `cutie@${user?.username}` : 'cutie@guest'}
               </span>
               <span
-                className={`text-[10px] px-2 py-0.5 rounded-full font-mono border ${
+                className={`text-[9px] px-2 py-0.5 rounded-full font-mono border ${
                   isLoggedIn
                     ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-semibold'
                     : 'bg-pink-500/20 text-pink-300 border-pink-500/30'
                 }`}
               >
-                {isLoggedIn ? 'Authenticated VIP' : 'Anonymous Explorer'}
+                {isLoggedIn ? 'VIP Cloud Sync' : 'Anonymous Explorer'}
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-[11px] text-slate-400 mt-0.5">
               {isLoggedIn
-                ? `Account: ${user?.email} • Sync active with Neon Postgres.`
-                : 'Log in via Terminal to sync wallpaper, notes, and theme across sessions.'}
+                ? `Synced account: ${user?.email}`
+                : 'Preferences are saved locally on this machine.'}
             </p>
           </div>
         </div>
 
-        {saving ? (
-          <span className="text-xs text-pink-400 font-mono animate-pulse">Syncing...</span>
-        ) : saveSuccess ? (
-          <span className="text-xs text-emerald-400 font-mono flex items-center gap-1 animate-fadeIn">
-            <CheckCircle2 className="w-4 h-4" /> Saved!
-          </span>
-        ) : null}
+        <div className="flex items-center gap-2">
+          {saving ? (
+            <span className="text-xs text-pink-400 font-mono animate-pulse">Syncing...</span>
+          ) : saveSuccess ? (
+            <span className="text-xs text-emerald-400 font-mono flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Saved!
+            </span>
+          ) : null}
+
+          {isLoggedIn && (
+            <button
+              onClick={() => {
+                sound.playClick();
+                logout();
+              }}
+              className="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer border border-white/5"
+            >
+              <LogOut className="w-3.5 h-3.5 text-pink-400" />
+              Sign Out
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ── Personalization: Wallpapers ─────────────────────────────────────── */}
       <div className="space-y-3">
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-          <Palette className="w-4 h-4 text-pink-400" />
-          <span>Desktop Wallpapers</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
+            <Palette className="w-4 h-4 text-pink-400" />
+            <span>Desktop Wallpapers</span>
+          </div>
+          <span className="text-[10px] font-mono text-slate-500">
+            {WALLPAPERS.length} Animated Themes
+          </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-          {WALLPAPER_PRESETS.map((wp) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {WALLPAPERS.map((wp) => {
             const isSelected = currentWallpaper === wp.id;
+            const effectLabel =
+              wp.effect === 'fireflies'
+                ? '✨ Fireflies'
+                : wp.effect === 'petals'
+                ? '🌸 Drifting Petals'
+                : wp.effect === 'rain'
+                ? '🌧 Rain Streaks'
+                : wp.effect === 'stars'
+                ? '⭐ Starfield'
+                : '🖤 Low Power';
+
             return (
               <div
                 key={wp.id}
                 onClick={() => {
                   sound.playClick();
                   onSelectWallpaper(wp.id);
-                  handleSaveSettings(undefined, undefined, undefined, wp.id);
+                  window.dispatchEvent(new CustomEvent('curio:wallpaper', { detail: wp.id }));
+                  handleSaveSettings(undefined, undefined, wp.id);
                 }}
-                className={`p-2.5 rounded-xl border cursor-pointer transition-all ${
+                className={`group relative p-3 rounded-2xl border cursor-pointer transition-all duration-300 ${
                   isSelected
-                    ? 'bg-pink-500/15 border-pink-500 ring-2 ring-pink-500/40 shadow-md scale-[1.02]'
-                    : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
+                    ? 'bg-slate-900/90 border-pink-500 ring-2 ring-pink-500/40 shadow-xl shadow-pink-500/10 scale-[1.01]'
+                    : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900/80 hover:scale-[1.01]'
                 }`}
               >
+                {/* Thumbnail Preview Box with live/animated hover layers */}
                 <div
-                  className={`w-full h-16 rounded-lg bg-gradient-to-br ${wp.preview} mb-2 shadow-inner border border-white/10 flex items-center justify-center`}
+                  className={`relative w-full h-24 rounded-xl overflow-hidden mb-2.5 border border-white/10 bg-gradient-to-br ${wp.previewGradient} flex items-center justify-center shadow-inner group-hover:shadow-lg transition-all duration-300`}
                 >
-                  {isSelected && (
-                    <span className="text-[10px] font-bold text-white bg-black/50 px-2 py-0.5 rounded-full backdrop-blur-sm border border-white/20">
-                      Active
-                    </span>
+                  {/* Layer previews on hover */}
+                  {wp.layers.length > 0 && (
+                    <div className="absolute inset-0 overflow-hidden">
+                      {wp.layers.map((layerUrl, idx) => (
+                        <img
+                          key={idx}
+                          src={layerUrl}
+                          alt=""
+                          className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${
+                            idx === 1 ? 'group-hover:translate-x-1' : ''
+                          }`}
+                        />
+                      ))}
+                    </div>
                   )}
+
+                  {/* Dark subtle vignette over thumbnail */}
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+
+                  {/* Effect Badge */}
+                  <div className="absolute top-2 left-2 flex items-center gap-1.5 z-10">
+                    <span className="text-[10px] font-medium text-white/95 bg-black/60 px-2 py-0.5 rounded-full backdrop-blur-md border border-white/15">
+                      {effectLabel}
+                    </span>
+                  </div>
+
+                  {/* Active Indicator */}
+                  {isSelected && (
+                    <div className="absolute top-2 right-2 z-10">
+                      <span className="text-[10px] font-bold text-white bg-pink-500/95 px-2.5 py-0.5 rounded-full shadow-lg shadow-pink-500/30 backdrop-blur-sm border border-pink-300/30 flex items-center gap-1">
+                        <Check className="w-2.5 h-2.5" />
+                        Active
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Bottom Accent line */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-1"
+                    style={{ backgroundColor: wp.accent }}
+                  />
                 </div>
-                <p className="text-xs font-medium text-slate-200">{wp.name}</p>
-                <p className="text-[10px] text-slate-400 truncate">{wp.description}</p>
+
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-slate-100 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: wp.accent }} />
+                    {wp.name}
+                  </p>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                  {wp.description}
+                </p>
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* ── Personalization: Accent Color, Animations, Clock ────────────────── */}
+      {/* ── Personalization: Cursor Style (New!) ────────────────────────────── */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
+            <MousePointer className="w-4 h-4 text-cyan-400" />
+            <span>Pointer &amp; Cursor Style</span>
+          </div>
+          <span className="text-[10px] font-mono text-slate-500">Live Custom Cursors</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          {CURSOR_OPTIONS.map((c) => {
+            const isSelected = cursorStyle === c.id;
+            return (
+              <div
+                key={c.id}
+                onClick={() => {
+                  sound.playClick();
+                  setCursorStyle(c.id);
+                  handleSaveSettings(undefined, undefined, undefined, c.id);
+                }}
+                className={`p-3 rounded-2xl border cursor-pointer transition-all duration-200 flex flex-col items-center text-center relative group ${
+                  isSelected
+                    ? 'bg-slate-900/90 border-cyan-400 ring-2 ring-cyan-400/40 shadow-lg shadow-cyan-500/10 scale-[1.02]'
+                    : 'bg-slate-900/50 border-slate-800 hover:border-slate-700 hover:bg-slate-900/80 hover:scale-[1.02]'
+                }`}
+              >
+                {/* Active check pill */}
+                {isSelected && (
+                  <span className="absolute top-2 right-2 text-[9px] font-bold text-cyan-300 bg-cyan-950/70 border border-cyan-400/30 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                    <Check className="w-2.5 h-2.5" />
+                  </span>
+                )}
+
+                {/* Cursor Icon Preview Container */}
+                <div className="w-12 h-12 rounded-xl bg-slate-950/80 border border-white/10 flex items-center justify-center mb-2 shadow-inner group-hover:scale-110 transition-transform">
+                  <img src={c.iconUrl} alt={c.name} className="w-7 h-7 drop-shadow-md" />
+                </div>
+
+                <div className="flex items-center gap-1 text-xs font-semibold text-slate-100">
+                  <span>{c.emoji}</span>
+                  <span className="truncate">{c.name}</span>
+                </div>
+                <p className="text-[10px] text-slate-400 mt-0.5 leading-snug line-clamp-1">
+                  {c.description}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── UI Accents & Motion Controls ───────────────────────────────────── */}
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
           <Sparkles className="w-4 h-4 text-indigo-400" />
-          <span>UI Personalization</span>
+          <span>Theme Accents &amp; Audio</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Accent Color picker */}
-          <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
+          <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2">
             <p className="text-xs font-medium text-slate-200">Accent Color</p>
             <div className="flex items-center gap-2 pt-1">
               {ACCENT_COLORS.map((color) => (
@@ -274,7 +352,9 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
                   }}
                   title={color.name}
                   className={`w-6 h-6 rounded-full ${color.bgClass} flex items-center justify-center transition-transform hover:scale-110 cursor-pointer ${
-                    accentColor === color.id ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-950 scale-110' : 'opacity-80'
+                    accentColor === color.id
+                      ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-950 scale-110'
+                      : 'opacity-80'
                   }`}
                 >
                   {accentColor === color.id && <Check className="w-3.5 h-3.5 text-white" />}
@@ -284,9 +364,9 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
           </div>
 
           {/* Animations Toggle */}
-          <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
+          <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-slate-200">Animations</p>
+              <p className="text-xs font-medium text-slate-200">Motion Effects</p>
               <p className="text-[10px] text-slate-400">Glassmorphic motion</p>
             </div>
             <button
@@ -308,179 +388,33 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
             </button>
           </div>
 
-          {/* Clock Format (12h vs 24h) */}
-          <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-medium text-slate-200">Clock Format</p>
-              <p className="text-[10px] text-slate-400">Taskbar timestamp</p>
+          {/* Sound / Chimes Toggle */}
+          <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Volume2 className="w-4 h-4 text-indigo-400 shrink-0" />
+              <div>
+                <p className="text-xs font-medium text-slate-200">Audio Chimes</p>
+                <p className="text-[10px] text-slate-400">Web Audio synthesis</p>
+              </div>
             </div>
-            <div className="flex bg-slate-950 border border-slate-800 rounded-lg p-0.5">
-              <button
-                onClick={() => {
-                  sound.playClick();
-                  setClockFormat('12h');
-                  handleSaveSettings(undefined, undefined, '12h');
-                }}
-                className={`px-2 py-1 text-[11px] rounded font-mono ${
-                  clockFormat === '12h'
-                    ? 'bg-pink-500/25 text-pink-300 font-bold'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                12h
-              </button>
-              <button
-                onClick={() => {
-                  sound.playClick();
-                  setClockFormat('24h');
-                  handleSaveSettings(undefined, undefined, '24h');
-                }}
-                className={`px-2 py-1 text-[11px] rounded font-mono ${
-                  clockFormat === '24h'
-                    ? 'bg-pink-500/25 text-pink-300 font-bold'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                24h
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Sound & Audio ───────────────────────────────────────────────────── */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-          <Volume2 className="w-4 h-4 text-indigo-400" />
-          <span>Audio Synthesizer</span>
-        </div>
-
-        <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium text-slate-200">Web Audio API Synthesis</p>
-            <p className="text-[11px] text-slate-400">Harmonic chimes on boot, clicks, window events, and notifications</p>
-          </div>
-
-          <button
-            onClick={() => {
-              onToggleSound();
-              sound.playClick();
-            }}
-            className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
-              soundEnabled ? 'bg-indigo-600' : 'bg-slate-700'
-            }`}
-          >
-            <div
-              className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${
-                soundEnabled ? 'left-6' : 'left-1'
+            <button
+              onClick={() => {
+                onToggleSound();
+                sound.playClick();
+              }}
+              className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
+                soundEnabled ? 'bg-indigo-600' : 'bg-slate-700'
               }`}
-            />
-          </button>
+            >
+              <div
+                className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${
+                  soundEnabled ? 'left-6' : 'left-1'
+                }`}
+              />
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* ── Account Management (Logged-in Only) ─────────────────────────────── */}
-      {isLoggedIn && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-            <User className="w-4 h-4 text-emerald-400" />
-            <span>Account Details &amp; Danger Zone</span>
-          </div>
-
-          <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="text-[11px] text-slate-400 font-medium">Username (Read-only)</label>
-                <div className="mt-1 px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono text-slate-200">
-                  {user?.username}
-                </div>
-              </div>
-              <div>
-                <label className="text-[11px] text-slate-400 font-medium">Email Address (Read-only)</label>
-                <div className="mt-1 px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono text-slate-200">
-                  {user?.email}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-2 border-t border-slate-800">
-              <button
-                onClick={() => {
-                  sound.playClick();
-                  logout();
-                }}
-                className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <LogOut className="w-3.5 h-3.5 text-amber-400" /> Logout Session
-              </button>
-
-              <button
-                onClick={() => {
-                  sound.playAlert();
-                  setShowDeleteConfirm(true);
-                }}
-                className="px-3.5 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/50 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <Trash2 className="w-3.5 h-3.5 text-rose-400" /> Delete Account
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── System Actions (Reboot) ─────────────────────────────────────────── */}
-      <div className="space-y-3 pt-1">
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-          <RotateCcw className="w-4 h-4 text-amber-400" />
-          <span>System Operation</span>
-        </div>
-
-        <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium text-slate-200">Reboot Curio.OS</p>
-            <p className="text-[11px] text-slate-400">Replays full BIOS and desktop boot sequence</p>
-          </div>
-          <button
-            onClick={() => {
-              sound.playClick();
-              onReboot();
-            }}
-            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
-          >
-            <RotateCcw className="w-3.5 h-3.5" /> Reboot OS
-          </button>
-        </div>
-      </div>
-
-      {/* ── Delete Account Confirmation Modal ───────────────────────────────── */}
-      {showDeleteConfirm && (
-        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="max-w-sm w-full p-5 rounded-2xl bg-slate-900 border border-rose-500/40 shadow-2xl space-y-3.5">
-            <div className="flex items-center gap-2.5 text-rose-400 font-bold text-sm">
-              <AlertTriangle className="w-5 h-5 text-rose-500" />
-              <span>Permanently Delete Account?</span>
-            </div>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              This will permanently delete your user profile (<span className="text-pink-400 font-semibold">{user?.username}</span>) and cascade-delete all your saved notes from Neon Postgres.
-            </p>
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteAccountConfirm}
-                disabled={deleting}
-                className="px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-md transition-colors cursor-pointer flex items-center gap-1"
-              >
-                {deleting ? 'Deleting...' : 'Yes, Delete Everything'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

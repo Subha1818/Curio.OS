@@ -11,10 +11,13 @@ import { NotificationCenter } from './components/NotificationCenter';
 import { LoginPopup } from './components/LoginPopup';
 import { NotificationManager } from './components/NotificationManager';
 import type { WallpaperId, SystemNotification } from './types/os';
+import { DEFAULT_WALLPAPER_ID, getWallpaperConfig } from './data/wallpapers';
+import { useCursorStyle } from './utils/useCursorStyle';
 import { sound } from './utils/sound';
 
 // ── Inner OS shell (has access to AuthContext + VoidContext) ────────────────
 function CurioShell() {
+  useCursorStyle();
   const { isLoggedIn, isRestoringSession, user } = useAuth();
   const { isVoidAwoken } = useVoid();
 
@@ -22,7 +25,24 @@ function CurioShell() {
     return sessionStorage.getItem('curio_boot_completed') === 'true';
   });
 
-  const [currentWallpaper, setCurrentWallpaper] = useState<WallpaperId>('cosmic-aurora');
+  const [currentWallpaper, setCurrentWallpaper] = useState<WallpaperId>(() => {
+    try {
+      const saved = localStorage.getItem('curio_wallpaper');
+      if (saved) {
+        return getWallpaperConfig(saved).id;
+      }
+    } catch { /* ignore */ }
+    return DEFAULT_WALLPAPER_ID;
+  });
+
+  const handleSelectWallpaper = useCallback((id: WallpaperId) => {
+    const validId = getWallpaperConfig(id).id;
+    setCurrentWallpaper(validId);
+    try {
+      localStorage.setItem('curio_wallpaper', validId);
+    } catch { /* ignore */ }
+  }, []);
+
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isStartOpen, setIsStartOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -51,7 +71,9 @@ function CurioShell() {
     };
     const handleWallpaperEvent = (e: Event) => {
       const customEvent = e as CustomEvent<WallpaperId>;
-      if (customEvent.detail) setCurrentWallpaper(customEvent.detail);
+      if (customEvent.detail) {
+        handleSelectWallpaper(customEvent.detail);
+      }
     };
 
     // VOID.EXE awaken — push notification + mark
@@ -128,10 +150,11 @@ function CurioShell() {
 
   // ── Sync wallpaper from user profile on login ─────────────────────────────
   useEffect(() => {
-    if (user?.wallpaperId) {
-      setCurrentWallpaper(user.wallpaperId as WallpaperId);
+    const wpId = user?.wallpaperId || (user?.themeSettings as Record<string, unknown> | undefined)?.wallpaperId;
+    if (wpId && typeof wpId === 'string') {
+      handleSelectWallpaper(wpId as WallpaperId);
     }
-  }, [user?.wallpaperId]);
+  }, [user?.wallpaperId, user?.themeSettings, handleSelectWallpaper]);
 
   // ── Push a welcome notification on login ──────────────────────────────────
   useEffect(() => {
@@ -231,7 +254,7 @@ function CurioShell() {
         <>
           <Desktop
             currentWallpaper={currentWallpaper}
-            onSelectWallpaper={setCurrentWallpaper}
+            onSelectWallpaper={handleSelectWallpaper}
             soundEnabled={soundEnabled}
             onToggleSound={toggleSound}
             onReboot={handleReboot}

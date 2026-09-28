@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+  <defs>
+    <filter id="heartGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#f43f5e" flood-opacity="0.5" />
+    </filter>
+  </defs>
+  <!-- Main Heart Shape pointer tilted 45deg -->
+  <g transform="translate(14, 14) rotate(-30) translate(-14, -14)" filter="url(#heartGlow)">
+    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#f43f5e" stroke="#881337" stroke-width="1.2"/>
+    <!-- Cute specular highlight -->
+    <ellipse cx="7.5" cy="7" rx="2.5" ry="1.2" transform="rotate(-30 7.5 7)" fill="#ffffff" opacity="0.8"/>
+  </g>
+  <!-- Pointer stem tip -->
+  <polygon points="3,3 8,15 11,11 16,10" fill="#fda4af" stroke="#be123c" stroke-width="1"/>
+</svg>

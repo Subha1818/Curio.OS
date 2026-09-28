@@ -8,6 +8,7 @@ import { socialsData } from '../../data/socialsData';
 import { educationData } from '../../data/educationData';
 import { apiGetStats, type UserStats } from '../../api/authApi';
 import type { AppId, WallpaperId } from '../../types/os';
+import { WALLPAPERS } from '../../data/wallpapers';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -1099,50 +1100,97 @@ ${subbuData.now.lastDetected}`}
 
         // ── OS Commands ─────────────────────────────────────────────────────
         case 'wallpaper': {
-          const validWallpapers: WallpaperId[] = [
-            'cosmic-aurora',
-            'cyber-noir',
-            'dream-lavender',
-            'synth-sunset',
-            'matrix-green',
-          ];
+          const sub = (args[0] ?? '').toLowerCase();
+          const isList = !sub || sub === 'list' || sub === 'help' || sub === '--help';
 
-          const targetWallpaper = args[0]?.toLowerCase() as WallpaperId | undefined;
-
-          if (!targetWallpaper) {
+          if (isList) {
+            const currentSavedWp = localStorage.getItem('curio_wallpaper') || 'twilight-peaks';
             response = (
-              <div className="text-xs font-mono space-y-1 text-slate-300">
-                <p className="text-indigo-400 font-bold">AVAILABLE WALLPAPERS:</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-slate-300">
-                  <div>✦ <span className="text-amber-300 font-semibold">cosmic-aurora</span> — Deep space aurora mesh</div>
-                  <div>✦ <span className="text-amber-300 font-semibold">cyber-noir</span> — Neon rain cityscape</div>
-                  <div>✦ <span className="text-amber-300 font-semibold">dream-lavender</span> — Pastel lavender glow</div>
-                  <div>✦ <span className="text-amber-300 font-semibold">synth-sunset</span> — Retro 80s synth horizon</div>
-                  <div>✦ <span className="text-amber-300 font-semibold">matrix-green</span> — Cyber digital stream</div>
+              <div className="text-xs font-mono space-y-2 text-slate-300">
+                <div className="text-indigo-400 font-bold border-b border-indigo-500/30 pb-1 flex items-center justify-between">
+                  <span>CURIO.OS ANIMATED WALLPAPERS</span>
+                  <span className="text-pink-400 text-[10px]">3 Animated + 1 Minimal</span>
                 </div>
-                <p className="text-slate-400 text-[11px] pt-1">
-                  Usage: <span className="text-pink-400 font-semibold">wallpaper &lt;id&gt;</span> (e.g. <span className="text-amber-300">wallpaper synth-sunset</span>)
-                </p>
-              </div>
-            );
-          } else if (validWallpapers.includes(targetWallpaper)) {
-            window.dispatchEvent(
-              new CustomEvent<WallpaperId>('curio:wallpaper', { detail: targetWallpaper })
-            );
-            if (isLoggedIn) {
-              updateUserSettings({ wallpaperId: targetWallpaper });
-            }
-            response = (
-              <div className="text-xs text-emerald-400 font-mono">
-                ✓ Wallpaper changed to <span className="text-pink-400 font-semibold">'{targetWallpaper}'</span>. Looking sleek! ✨
+                <div className="space-y-1.5 text-slate-300">
+                  {WALLPAPERS.map((wp) => {
+                    const isCur = currentSavedWp === wp.id;
+                    const effectBadge =
+                      wp.effect === 'fireflies' ? '✨ Fireflies' :
+                      wp.effect === 'petals' ? '🌸 Drifting Petals' :
+                      wp.effect === 'rain' ? '🌧 Rain' :
+                      wp.effect === 'stars' ? '⭐ Starfield' : '🖤 Low Power';
+
+                    return (
+                      <div key={wp.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 p-1.5 rounded bg-slate-900/50 border border-slate-800">
+                        <div>
+                          <span className="text-amber-300 font-semibold">{wp.id}</span>
+                          <span className="text-slate-400"> — {wp.name}</span>
+                          <span className="text-pink-400 text-[10px] ml-2 font-mono">[{effectBadge}]</span>
+                          <p className="text-[11px] text-slate-400 mt-0.5">{wp.description}</p>
+                        </div>
+                        {isCur && (
+                          <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30 shrink-0 self-start sm:self-auto">
+                            CURRENT
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="text-slate-400 text-[11px] pt-1 border-t border-slate-800">
+                  Usage: <span className="text-pink-400 font-semibold">wallpaper set &lt;id&gt;</span> or <span className="text-pink-400 font-semibold">wallpaper &lt;id&gt;</span>
+                  <p className="text-slate-500 mt-0.5">Example: <span className="text-amber-300">wallpaper set sakura-spring</span> or <span className="text-amber-300">wallpaper neon-rain</span></p>
+                </div>
               </div>
             );
           } else {
-            response = (
-              <div className="text-xs text-rose-400 font-mono">
-                Invalid wallpaper id '{targetWallpaper}'. Choose from: {validWallpapers.join(', ')}
-              </div>
+            const targetInput = (sub === 'set' ? args[1] : args[0])?.toLowerCase();
+            if (!targetInput) {
+              response = (
+                <div className="text-xs text-rose-400 font-mono">
+                  Missing wallpaper id. Usage: <span className="text-amber-300">wallpaper set &lt;id&gt;</span>
+                </div>
+              );
+              break;
+            }
+
+            const targetConfig = WALLPAPERS.find(
+              (w) =>
+                w.id === targetInput ||
+                w.id.includes(targetInput) ||
+                (targetInput === 'spring' && w.id === 'sakura-spring')
             );
+
+            if (targetConfig) {
+              window.dispatchEvent(
+                new CustomEvent<WallpaperId>('curio:wallpaper', { detail: targetConfig.id })
+              );
+              try {
+                localStorage.setItem('curio_wallpaper', targetConfig.id);
+              } catch { /* ignore */ }
+
+              if (isLoggedIn) {
+                updateUserSettings({ wallpaperId: targetConfig.id });
+              }
+
+              response = (
+                <div className="text-xs text-emerald-400 font-mono space-y-0.5">
+                  <p>
+                    ✓ Wallpaper changed to <span className="text-pink-400 font-semibold">'{targetConfig.name}'</span> ({targetConfig.id})! ✨
+                  </p>
+                  <p className="text-slate-400 text-[11px]">
+                    Effect: <span className="text-amber-300">{targetConfig.effect}</span> • Accent: <span style={{ color: targetConfig.accent }}>{targetConfig.accent}</span>
+                  </p>
+                </div>
+              );
+            } else {
+              const validIds = WALLPAPERS.map((w) => w.id).join(', ');
+              response = (
+                <div className="text-xs text-rose-400 font-mono">
+                  Invalid wallpaper id '{targetInput}'. Choose from: <span className="text-amber-300">{validIds}</span>. Run <span className="text-slate-300 underline">wallpaper list</span> to see all options.
+                </div>
+              );
+            }
           }
           break;
         }
