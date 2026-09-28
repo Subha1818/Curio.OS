@@ -9,6 +9,7 @@ import { MusicApp } from './apps/MusicApp';
 import { NotesApp } from './apps/NotesApp';
 import { SettingsApp } from './apps/SettingsApp';
 import { VoidApp } from './apps/VoidApp';
+import { SocialsApp } from './apps/SocialsApp';
 import { MiniMusicPlayer } from './MiniMusicPlayer';
 import type { AppId, WallpaperId } from '../types/os';
 import { useWindowManager } from '../context/WindowManagerContext';
@@ -53,6 +54,7 @@ export const Desktop: React.FC<DesktopProps> = ({
   }[] = [
     { id: 'terminal', title: 'Terminal', iconName: 'Terminal' },
     { id: 'files', title: 'File Explorer', iconName: 'Folder' },
+    { id: 'socials', title: 'Socials', iconName: 'Share2' },
     { id: 'music', title: 'Music Player', iconName: 'Music' },
     { id: 'notes', title: 'Brain.exe', iconName: 'FileText' },
     { id: 'settings', title: 'Settings', iconName: 'Settings' },
@@ -122,6 +124,8 @@ export const Desktop: React.FC<DesktopProps> = ({
         );
       case 'void':
         return <VoidApp windowId={windowId} />;
+      case 'socials':
+        return <SocialsApp windowId={windowId} />;
       default:
         return <div className="p-4 text-slate-300">App under construction</div>;
     }

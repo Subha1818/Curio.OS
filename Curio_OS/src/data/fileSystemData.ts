@@ -19,6 +19,7 @@ export interface FileItem {
 
 export type FolderId =
   | 'documents'
+  | 'education'
   | 'projects'
   | 'achievements'
   | 'photography'
@@ -28,7 +29,7 @@ export type FolderId =
 export interface FolderDefinition {
   id: FolderId;
   name: string;
-  iconName: 'FileText' | 'Code' | 'Trophy' | 'Camera' | 'Pen' | 'Lock';
+  iconName: 'FileText' | 'GraduationCap' | 'Code' | 'Trophy' | 'Camera' | 'Pen' | 'Lock';
   badge?: string;
   description: string;
   /** If true, content comes from portfolioContent.ts and is visible to all users */
@@ -44,6 +45,12 @@ export const FOLDER_DEFINITIONS: FolderDefinition[] = [
     iconName: 'FileText',
     description: 'Personal documents and notes (login required to view your files)',
     requiresAuth: true,
+  },
+  {
+    id: 'education',
+    name: 'Education',
+    iconName: 'GraduationCap',
+    description: 'Academic milestones, high school records & engineering journey',
   },
   {
     id: 'projects',

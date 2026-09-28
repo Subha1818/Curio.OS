@@ -86,11 +86,22 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
   const { user, isLoggedIn, logout, updateUserSettings, deleteAccount } = useAuth();
 
   // Settings State
-  const initialTheme = (user?.themeSettings as {
-    accentColor?: AccentColor;
-    animations?: boolean;
-    clockFormat?: ClockFormat;
-  }) || {};
+  const getInitialSettings = () => {
+    if (user?.themeSettings) {
+      return user.themeSettings as {
+        accentColor?: AccentColor;
+        animations?: boolean;
+        clockFormat?: ClockFormat;
+      };
+    }
+    try {
+      const saved = localStorage.getItem('curio_theme_settings');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {};
+  };
+
+  const initialTheme = getInitialSettings();
 
   const [accentColor, setAccentColor] = useState<AccentColor>(initialTheme.accentColor || 'pink');
   const [animations, setAnimations] = useState<boolean>(initialTheme.animations !== false);
@@ -117,7 +128,7 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
     }
   }, [user?.themeSettings]);
 
-  // Handle saving settings to backend
+  // Handle saving settings to backend and local storage
   const handleSaveSettings = async (
     newAccent?: AccentColor,
     newAnims?: boolean,
@@ -130,6 +141,14 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
       clockFormat: newClock ?? clockFormat,
     };
     const targetWp = newWp ?? currentWallpaper;
+
+    try {
+      localStorage.setItem('curio_theme_settings', JSON.stringify(updatedTheme));
+    } catch {}
+
+    window.dispatchEvent(
+      new CustomEvent('curio_theme_changed', { detail: updatedTheme })
+    );
 
     if (isLoggedIn) {
       setSaving(true);

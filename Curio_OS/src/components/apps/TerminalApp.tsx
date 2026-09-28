@@ -4,6 +4,8 @@ import { useWindowManager } from '../../context/WindowManagerContext';
 import { useVoid } from '../../context/VoidContext';
 import { sound } from '../../utils/sound';
 import { subbuData } from '../../data/subbuData';
+import { socialsData } from '../../data/socialsData';
+import { educationData } from '../../data/educationData';
 import { apiGetStats, type UserStats } from '../../api/authApi';
 import type { AppId, WallpaperId } from '../../types/os';
 
@@ -513,6 +515,8 @@ export const TerminalApp: React.FC<{ windowId: string }> = () => {
               <div><span className="text-amber-300">subbu -currentmission</span> — Current mission &amp; goal</div>
               <div><span className="text-amber-300">subbu -now</span> — What Subbu is doing right now</div>
               <div><span className="text-amber-300">subbu -interests</span> — Passions &amp; random curiosities</div>
+              <div><span className="text-amber-300">subbu -socials</span> — Online profiles &amp; links</div>
+              <div><span className="text-amber-300">subbu -education</span> — Schooling &amp; B.Tech timeline</div>
             </div>
           </div>
         );
@@ -662,6 +666,82 @@ ${subbuData.now.lastDetected}`}
           );
           break;
 
+        case '-socials': {
+          const activeSocials = socialsData.filter((s) => s.url && s.url.trim() !== '');
+          pushOutput(
+            <div className="text-xs font-mono my-2 space-y-2 select-text">
+              <div className="text-pink-400 font-bold border-b border-pink-500/30 pb-1 flex items-center justify-between">
+                <span>🌐 SUBBU'S ACTIVE SOCIAL CHANNELS</span>
+                <span className="text-[10px] text-slate-400 font-normal">{activeSocials.length} connected</span>
+              </div>
+              <div className="space-y-1.5 pt-1">
+                {activeSocials.map((s) => (
+                  <div
+                    key={s.id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 p-2 rounded-lg bg-slate-900/60 border border-slate-800"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-amber-300 font-semibold">{s.name}</span>
+                      <span className="text-slate-500">({s.handle})</span>
+                    </div>
+                    <a
+                      href={s.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-cyan-400 hover:text-cyan-300 underline truncate max-w-xs sm:max-w-sm"
+                    >
+                      {s.url}
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+          break;
+        }
+
+        case '-education':
+          pushOutput(
+            <div className="text-xs font-mono my-2 space-y-2 select-text">
+              <div className="text-pink-400 font-bold border-b border-pink-500/30 pb-1 flex items-center justify-between">
+                <span>🎓 SUBBU'S ACADEMIC TIMELINE &amp; EDUCATION</span>
+                <span className="text-[10px] text-slate-400 font-normal">3 stages verified</span>
+              </div>
+              <div className="space-y-2.5 pt-1">
+                {educationData.map((item) => (
+                  <div key={item.id} className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-indigo-400 font-bold">
+                        [{item.step}] {item.stage}
+                      </span>
+                      {item.status ? (
+                        <span className="text-amber-400 text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 font-bold">
+                          {item.status}
+                        </span>
+                      ) : (
+                        <span className="text-emerald-400 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                          COMPLETED
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-white font-semibold">{item.institution}</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 text-slate-300 pt-1">
+                      {Object.entries(item)
+                        .filter(([k]) => !['id', 'step', 'stage', 'institution'].includes(k))
+                        .map(([k, v]) => (
+                          <div key={k}>
+                            <span className="text-slate-500 uppercase">{k}:</span>{' '}
+                            <span className="text-pink-300 font-semibold">{v}</span>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+          break;
+
         default:
           pushOutput(
             <div className="text-xs text-rose-400 font-mono">
@@ -760,6 +840,7 @@ ${subbuData.now.lastDetected}`}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 text-slate-300">
                   <div><span className="text-amber-300">wallpaper [id]</span> — Switch wallpaper</div>
                   <div><span className="text-amber-300">settings</span> — Open Settings app</div>
+                  <div><span className="text-amber-300">socials</span> — Open Social Profiles app</div>
                   <div><span className="text-amber-300">open &lt;app&gt;</span> — Launch app window</div>
                   <div><span className="text-amber-300">close &lt;app&gt;</span> — Close active window</div>
                   <div><span className="text-amber-300">reboot</span> — Replay boot sequence</div>
@@ -782,7 +863,12 @@ ${subbuData.now.lastDetected}`}
               <div>
                 <div className="text-indigo-400 font-bold mb-0.5">ADMIN PORTFOLIO</div>
                 <div className="text-slate-300">
-                  <span className="text-amber-300">subbu</span> or <span className="text-amber-300">subbu -&lt;flag&gt;</span> (e.g. <span className="text-pink-400">subbu -about</span>, <span className="text-pink-400">subbu -projects</span>, <span className="text-pink-400">subbu -skill</span>)
+                  <span className="text-amber-300">subbu</span> or <span className="text-amber-300">subbu -&lt;flag&gt;</span> (e.g.{' '}
+                  <span className="text-pink-400">subbu -socials</span>,{' '}
+                  <span className="text-pink-400">subbu -education</span>,{' '}
+                  <span className="text-pink-400">subbu -about</span>,{' '}
+                  <span className="text-pink-400">subbu -projects</span>,{' '}
+                  <span className="text-pink-400">subbu -skill</span>)
                 </div>
               </div>
             </div>
@@ -962,6 +1048,25 @@ ${subbuData.now.lastDetected}`}
           response = <div className="text-xs text-emerald-400 font-mono">Opening Portfolio &amp; File Manager... 📂</div>;
           break;
 
+        case 'socials':
+        case 'social':
+          openApp('socials');
+          response = (
+            <div className="text-xs text-emerald-400 font-mono">
+              Opening Subbu's Socials App... 🌐
+            </div>
+          );
+          break;
+
+        case 'education':
+          openApp('files');
+          response = (
+            <div className="text-xs text-emerald-400 font-mono">
+              Opening Academic Timeline in File Manager... 🎓
+            </div>
+          );
+          break;
+
         // ── OS Commands ─────────────────────────────────────────────────────
         case 'wallpaper': {
           const validWallpapers: WallpaperId[] = [
@@ -1024,6 +1129,9 @@ ${subbuData.now.lastDetected}`}
             files: 'files',
             file: 'files',
             explorer: 'files',
+            socials: 'socials',
+            social: 'socials',
+            links: 'socials',
             music: 'music',
             songs: 'music',
             player: 'music',
@@ -1048,7 +1156,7 @@ ${subbuData.now.lastDetected}`}
           } else {
             response = (
               <div className="text-xs text-rose-400 font-mono">
-                Unknown app '{appName}'. Available apps: <span className="text-amber-300">terminal, files, music, notes, settings, void</span>.
+                Unknown app '{appName}'. Available apps: <span className="text-amber-300">terminal, files, socials, music, notes, settings, void</span>.
               </div>
             );
           }
@@ -1062,6 +1170,9 @@ ${subbuData.now.lastDetected}`}
             files: 'files',
             file: 'files',
             explorer: 'files',
+            socials: 'socials',
+            social: 'socials',
+            links: 'socials',
             music: 'music',
             songs: 'music',
             player: 'music',

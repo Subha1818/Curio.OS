@@ -11,6 +11,7 @@ import {
   Maximize,
   ArrowRight,
   LogOut,
+  Share2,
 } from 'lucide-react';
 import type { AppId } from '../types/os';
 import { useWindowManager } from '../context/WindowManagerContext';
@@ -50,6 +51,13 @@ export const StartMenu: React.FC<StartMenuProps> = ({ isOpen, onClose, onReboot 
       desc: "Browse directories & Subbu's Classified Vault",
       icon: <Folder className="w-5 h-5 text-amber-400" />,
       badge: 'SECRET',
+    },
+    {
+      id: 'socials',
+      name: 'Socials',
+      desc: "Subbu's social transceivers & external uplinks",
+      icon: <Share2 className="w-5 h-5 text-cyan-400" />,
+      badge: 'NEW',
     },
     {
       id: 'music',

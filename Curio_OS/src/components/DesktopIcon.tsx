@@ -1,5 +1,5 @@
 import React from 'react';
-import { Terminal, Folder, Music, FileText, Settings, Skull, Compass, Gamepad2, MessageSquare } from 'lucide-react';
+import { Terminal, Folder, Music, FileText, Settings, Skull, Compass, Gamepad2, MessageSquare, Share2 } from 'lucide-react';
 import { sound } from '../utils/sound';
 
 interface DesktopIconProps {
@@ -36,6 +36,8 @@ export const DesktopIcon: React.FC<DesktopIconProps> = ({
         return <Settings className="w-8 h-8 text-sky-400 group-hover:rotate-45 transition-transform" />;
       case 'Skull':
         return <Skull className="w-8 h-8 text-rose-500 group-hover:animate-pulse transition-transform" />;
+      case 'Share2':
+        return <Share2 className="w-8 h-8 text-cyan-400 group-hover:scale-110 transition-transform" />;
       case 'Compass':
         return <Compass className="w-8 h-8 text-slate-500" />;
       case 'MessageSquare':

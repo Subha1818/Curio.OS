@@ -151,9 +151,9 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
             autoDismissMs: 7500,
             actionButton: item.actionButton
               ? {
-                  label: item.actionButton.label,
-                  onClick: () => handleAction(item),
-                }
+                label: item.actionButton.label,
+                onClick: () => handleAction(item),
+              }
               : undefined,
             onDismiss: () => {
               handleToastDismissed(item.id, true);

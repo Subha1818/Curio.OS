@@ -22,6 +22,7 @@ import {
   Pen,
   ExternalLink,
   Image as ImageIcon,
+  GraduationCap,
 } from 'lucide-react';
 
 const GithubIcon: React.FC<{ className?: string }> = ({ className = 'w-3.5 h-3.5' }) => (
@@ -40,6 +41,7 @@ import {
   type FileItem,
 } from '../../data/fileSystemData';
 import { SecretFolderUnlocker } from './SecretFolderUnlocker';
+import { EducationTimeline } from './EducationTimeline';
 import {
   portfolioContent,
   type PortfolioProject,
@@ -59,6 +61,7 @@ const FolderIcon: React.FC<{ iconName: string; isUnlocked?: boolean; className?:
 }) => {
   switch (iconName) {
     case 'FileText': return <FileText className={`${className} text-amber-400`} />;
+    case 'GraduationCap': return <GraduationCap className={`${className} text-emerald-400`} />;
     case 'Code': return <Code2 className={`${className} text-cyan-400`} />;
     case 'Trophy': return <Trophy className={`${className} text-yellow-400`} />;
     case 'Camera': return <Camera className={`${className} text-pink-400`} />;
@@ -444,6 +447,7 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
   // Count displayed in sidebar
   const getFolderCount = (fid: FolderId): string | number => {
     if (fid === 'secret') return unlocked ? SECRET_FOLDER_FILES.length : 'Locked';
+    if (fid === 'education') return 3;
     if (fid === 'documents') return isLoggedIn ? AUTH_USER_DOCUMENTS.length : 0;
     if (fid === 'projects') return portfolioContent.projects.length;
     if (fid === 'achievements') return portfolioContent.achievements.length;
@@ -553,43 +557,55 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
                 Public Portfolio
               </span>
             )}
+            {currentFolder === 'education' && (
+              <span className="ml-1 text-[10px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded-full font-sans">
+                Academic Journey
+              </span>
+            )}
           </div>
 
           {/* Right toolbar */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg text-slate-300 text-xs focus-within:border-pink-500/50">
-              <Search className="w-3.5 h-3.5 text-slate-500" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={`Search ${folderDef.name.toLowerCase()}...`}
-                className="bg-transparent border-none outline-none text-xs text-slate-200 placeholder-slate-500 w-28 sm:w-40"
-              />
-              {searchQuery && (
-                <button onClick={() => setSearchQuery('')} className="text-slate-500 hover:text-slate-300">
-                  <X className="w-3 h-3" />
-                </button>
-              )}
-            </div>
+          {currentFolder !== 'education' ? (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg text-slate-300 text-xs focus-within:border-pink-500/50">
+                <Search className="w-3.5 h-3.5 text-slate-500" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={`Search ${folderDef.name.toLowerCase()}...`}
+                  className="bg-transparent border-none outline-none text-xs text-slate-200 placeholder-slate-500 w-28 sm:w-40"
+                />
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery('')} className="text-slate-500 hover:text-slate-300">
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
 
-            <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5">
-              <button
-                onClick={() => { sound.playClick(); setViewMode('grid'); }}
-                title="Grid View"
-                className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-pink-500/20 text-pink-300' : 'text-slate-400 hover:text-slate-200'}`}
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={() => { sound.playClick(); setViewMode('list'); }}
-                title="List View"
-                className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-pink-500/20 text-pink-300' : 'text-slate-400 hover:text-slate-200'}`}
-              >
-                <List className="w-3.5 h-3.5" />
-              </button>
+              <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5">
+                <button
+                  onClick={() => { sound.playClick(); setViewMode('grid'); }}
+                  title="Grid View"
+                  className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-pink-500/20 text-pink-300' : 'text-slate-400 hover:text-slate-200'}`}
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => { sound.playClick(); setViewMode('list'); }}
+                  title="List View"
+                  className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-pink-500/20 text-pink-300' : 'text-slate-400 hover:text-slate-200'}`}
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
+              <GraduationCap className="w-3.5 h-3.5" />
+              <span>3 Milestones Recorded</span>
+            </div>
+          )}
         </div>
 
         {/* ── Body ──────────────────────────────────────────────────────────── */}
@@ -611,6 +627,9 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
                 setActionToast({ message: 'Thank you for your ₹1 thought! UPI QR donation terminal active in v2.0 ❤️', type: 'donate' });
               }}
             />
+          ) : currentFolder === 'education' ? (
+            /* ── Education Timeline ────────────────────────────────────────── */
+            <EducationTimeline key="education-timeline" />
           ) : isPortfolioFolder ? (
             /* ── Portfolio Grid View ──────────────────────────────────────── */
             filteredPortfolioItems.length === 0 ? (

@@ -26,6 +26,7 @@ const APP_CONFIGS: Record<
   notes: { title: 'Brain.exe — Notes', iconName: 'FileText', defaultWidth: 520, defaultHeight: 500 },
   settings: { title: 'System Settings', iconName: 'Settings', defaultWidth: 580, defaultHeight: 520 },
   void: { title: 'VOID.EXE', iconName: 'Skull', defaultWidth: 460, defaultHeight: 380 },
+  socials: { title: "Subbu's Socials", iconName: 'Share2', defaultWidth: 640, defaultHeight: 480 },
 };
 
 export const WindowManagerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

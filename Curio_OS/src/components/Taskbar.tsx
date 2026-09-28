@@ -13,6 +13,7 @@ import {
   Settings,
   Skull,
   Eye,
+  Share2,
 } from 'lucide-react';
 import type { AppId } from '../types/os';
 import { useWindowManager } from '../context/WindowManagerContext';
@@ -71,6 +72,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
   const pinnedApps: { id: AppId; name: string; icon: React.ReactNode }[] = [
     { id: 'terminal', name: 'Terminal', icon: <Terminal className="w-4 h-4 text-pink-400" /> },
     { id: 'files', name: 'Files', icon: <Folder className="w-4 h-4 text-amber-400" /> },
+    { id: 'socials', name: 'Socials', icon: <Share2 className="w-4 h-4 text-cyan-400" /> },
     { id: 'music', name: 'Music', icon: <Music className="w-4 h-4 text-purple-400" /> },
     { id: 'notes', name: 'Notes', icon: <FileText className="w-4 h-4 text-indigo-400" /> },
     { id: 'settings', name: 'Settings', icon: <Settings className="w-4 h-4 text-sky-400" /> },
