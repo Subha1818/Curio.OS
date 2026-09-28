@@ -269,9 +269,6 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
                     {wp.name}
                   </p>
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">
-                  {wp.description}
-                </p>
               </div>
             );
           })}
@@ -321,9 +318,6 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
                   <span>{c.emoji}</span>
                   <span className="truncate">{c.name}</span>
                 </div>
-                <p className="text-[10px] text-slate-400 mt-0.5 leading-snug line-clamp-1">
-                  {c.description}
-                </p>
               </div>
             );
           })}

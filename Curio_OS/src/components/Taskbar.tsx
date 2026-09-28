@@ -70,13 +70,13 @@ export const Taskbar: React.FC<TaskbarProps> = ({
   }, []);
 
   const pinnedApps: { id: AppId; name: string; icon: React.ReactNode }[] = [
-    { id: 'terminal', name: 'Terminal', icon: <Terminal className="w-4 h-4 text-pink-400" /> },
-    { id: 'files', name: 'Files', icon: <Folder className="w-4 h-4 text-amber-400" /> },
-    { id: 'socials', name: 'Socials', icon: <Share2 className="w-4 h-4 text-cyan-400" /> },
-    { id: 'music', name: 'Music', icon: <Music className="w-4 h-4 text-purple-400" /> },
-    { id: 'letterbox', name: 'LetterBox', icon: <LetterBoxIcon className="w-4 h-4" animated={false} /> },
-    { id: 'settings', name: 'Settings', icon: <Settings className="w-4 h-4 text-sky-400" /> },
-    { id: 'void', name: 'Void', icon: <Skull className="w-4 h-4 text-rose-500" /> },
+    { id: 'terminal', name: 'Terminal', icon: <Terminal className="w-6 h-6 text-pink-400" /> },
+    { id: 'files', name: 'Files', icon: <Folder className="w-6 h-6 text-amber-400" /> },
+    { id: 'socials', name: 'Socials', icon: <Share2 className="w-6 h-6 text-cyan-400" /> },
+    { id: 'music', name: 'Music', icon: <Music className="w-6 h-6 text-purple-400" /> },
+    { id: 'letterbox', name: 'LetterBox', icon: <LetterBoxIcon className="w-6 h-6" animated={false} /> },
+    { id: 'settings', name: 'Settings', icon: <Settings className="w-6 h-6 text-sky-400" /> },
+    { id: 'void', name: 'Void', icon: <Skull className="w-6 h-6 text-rose-500" /> },
   ];
 
   const handleAppClick = (appId: AppId) => {
@@ -97,7 +97,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
   };
 
   return (
-    <div className="h-12 w-full fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between px-3 bg-slate-950/85 backdrop-blur-2xl border-t border-white/10 select-none shadow-[0_-5px_25px_rgba(0,0,0,0.5)]">
+    <div className="h-[52px] w-full fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between px-3 bg-slate-950/85 backdrop-blur-2xl border-t border-white/10 select-none shadow-[0_-5px_25px_rgba(0,0,0,0.5)]">
       {/* Left: Start / Curio Menu Button */}
       <div className="flex items-center gap-2">
         <button
@@ -122,7 +122,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
       </div>
 
       {/* Center: Dock of Pinned & Running Apps */}
-      <div className="flex items-center gap-1.5 px-2 py-1 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-md">
+      <div className="flex items-center gap-1.5 px-3 py-1 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-md shadow-lg">
         {pinnedApps.map((app) => {
           const win = windows.find((w) => w.appId === app.id);
           const isOpen = Boolean(win);
@@ -139,14 +139,14 @@ export const Taskbar: React.FC<TaskbarProps> = ({
                   : 'hover:bg-white/10'
               }`}
             >
-              <div className="group-hover:scale-110 transition-transform">{app.icon}</div>
+              <div className="group-hover:scale-115 transition-transform">{app.icon}</div>
 
               {/* Status pill dot */}
               {isOpen && (
                 <span
                   className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 rounded-full transition-all ${
                     isActive
-                      ? 'w-3 h-0.5 bg-pink-400 shadow-[0_0_6px_rgba(244,114,182,0.9)]'
+                      ? 'w-3.5 h-0.5 bg-pink-400 shadow-[0_0_8px_rgba(244,114,182,0.9)]'
                       : 'w-1 h-1 bg-slate-400'
                   }`}
                 />

@@ -409,14 +409,12 @@ export const Wallpaper: React.FC<WallpaperProps> = ({ id }) => {
     if (config.id === 'sakura-spring') {
       return (
         <div className="absolute inset-0 overflow-hidden select-none">
-          {/* Layer 0: Pastel Pink Spring Sky & Dawn Clouds */}
+          {/* Layer 0: Pastel Pink Spring Sky Gradient */}
           {config.layers[0] && (
             <img
               src={config.layers[0]}
               alt="Spring Dawn Sky"
-              className={`absolute inset-0 w-full h-full object-cover select-none ${
-                isAnimated ? 'animate-[cloudDrift_80s_ease-in-out_infinite]' : ''
-              }`}
+              className="absolute inset-0 w-full h-full object-cover select-none"
             />
           )}
 

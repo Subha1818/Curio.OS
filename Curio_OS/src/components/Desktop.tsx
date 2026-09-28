@@ -137,7 +137,7 @@ export const Desktop: React.FC<DesktopProps> = ({
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      className="relative w-full h-[calc(100vh-48px)] overflow-hidden select-none"
+      className="relative w-full h-[calc(100vh-52px)] overflow-hidden select-none"
     >
       {/* Dynamic Animated Wallpaper */}
       <Wallpaper id={currentWallpaper} />
