@@ -35,7 +35,7 @@ import { sound } from '../../utils/sound';
 import { useAuth } from '../../context/AuthContext';
 import {
   FOLDER_DEFINITIONS,
-  AUTH_USER_DOCUMENTS,
+  STATIC_DOCUMENTS,
   SECRET_FOLDER_FILES,
   type FolderId,
   type FileItem,
@@ -401,11 +401,11 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
   // ── Folder content resolution ─────────────────────────────────────────────
   const folderDef = FOLDER_DEFINITIONS.find((f) => f.id === currentFolder)!;
 
-  // For documents folder (auth-gated)
+  // For documents folder (static admin provided)
   const documentFiles: FileItem[] = useMemo(() => {
     if (currentFolder !== 'documents') return [];
-    return isLoggedIn ? AUTH_USER_DOCUMENTS : [];
-  }, [currentFolder, isLoggedIn]);
+    return STATIC_DOCUMENTS;
+  }, [currentFolder]);
 
   // For secret folder
   const secretFiles: FileItem[] = useMemo(() => {
@@ -448,7 +448,7 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
   const getFolderCount = (fid: FolderId): string | number => {
     if (fid === 'secret') return unlocked ? SECRET_FOLDER_FILES.length : 'Locked';
     if (fid === 'education') return 3;
-    if (fid === 'documents') return isLoggedIn ? AUTH_USER_DOCUMENTS.length : 0;
+    if (fid === 'documents') return STATIC_DOCUMENTS.length;
     if (fid === 'projects') return portfolioContent.projects.length;
     if (fid === 'achievements') return portfolioContent.achievements.length;
     if (fid === 'photography') return portfolioContent.photography.length;

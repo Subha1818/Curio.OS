@@ -4,7 +4,7 @@ export interface NotificationConfigItem {
   message: string;
   actionButton?: {
     label: string;
-    appId: 'music' | 'files' | 'notes' | 'void';
+    appId: 'music' | 'files' | 'letterbox' | 'void' | 'socials' | 'terminal';
     targetFolder?: string;
   };
   delayAfterPrevious: number; // in ms: 10000 for first after login, 30000 for subsequent
@@ -12,7 +12,7 @@ export interface NotificationConfigItem {
     hasOpenedMusic: boolean;
     hasOpenedFiles: boolean;
     hasOpenedSecret: boolean;
-    hasOpenedNotes: boolean;
+    hasOpenedLetterbox: boolean;
     hasOpenedVoid: boolean;
   }) => boolean;
 }
@@ -53,15 +53,15 @@ export const QUEUED_NOTIFICATIONS: NotificationConfigItem[] = [
     checkSkip: (s) => s.hasOpenedSecret,
   },
   {
-    id: 'brain-promo',
-    emoji: '🧠',
-    message: 'Thoughts scattered? Brain.exe is ready for your notes and observations.',
+    id: 'letterbox-promo',
+    emoji: '💌',
+    message: 'Leave a letter. 💌 Thoughts, questions, compliments, feedback... say anything.',
     actionButton: {
-      label: 'Open Brain',
-      appId: 'notes',
+      label: 'Open LetterBox',
+      appId: 'letterbox',
     },
     delayAfterPrevious: 30000, // 30 seconds after secret resolves
-    checkSkip: (s) => s.hasOpenedNotes,
+    checkSkip: (s) => s.hasOpenedLetterbox,
   },
   {
     id: 'void-promo',

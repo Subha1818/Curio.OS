@@ -448,7 +448,9 @@ export const TerminalApp: React.FC<{ windowId: string }> = () => {
             <div><span className="text-indigo-400">Kernel:</span> {stats.kernel}</div>
             <div><span className="text-indigo-400">Uptime:</span> {stats.uptime}</div>
             <div><span className="text-indigo-400">Days Active:</span> <span className="text-emerald-400 font-semibold">{stats.daysSinceJoined} days</span></div>
-            <div><span className="text-indigo-400">Notes Stored:</span> <span className="text-amber-300 font-semibold">{stats.notesCount} items</span></div>
+            <div><span className="text-indigo-400">Mind Rank:</span> <span className="text-amber-300 font-semibold">{stats.rank?.badge ?? '🫧 Thought Drifter'}</span></div>
+            <div><span className="text-indigo-400">Letters Posted:</span> <span className="text-pink-300 font-semibold">{stats.lettersPosted ?? 0}</span></div>
+            <div><span className="text-indigo-400">Likes Received:</span> <span className="text-rose-400 font-semibold">{stats.likesReceived ?? 0} ♡</span></div>
             <div><span className="text-indigo-400">Login Streak:</span> <span className="text-pink-400 font-semibold">{stats.loginStreak} days 🔥</span></div>
             <div><span className="text-indigo-400">Shell:</span> {stats.shell}</div>
             <div><span className="text-indigo-400">Wallpaper:</span> {stats.wallpaper}</div>
@@ -827,9 +829,9 @@ ${subbuData.now.lastDetected}`}
               </div>
 
               <div>
-                <div className="text-indigo-400 font-bold mb-0.5">PERSONAL (Requires Login)</div>
+                <div className="text-indigo-400 font-bold mb-0.5">COMMUNITY &amp; EXPLORATION</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 text-slate-300">
-                  <div><span className="text-amber-300">notes</span> — Open Brain.exe notes app</div>
+                  <div><span className="text-amber-300">letterbox</span> — Open public guestbook &amp; thoughts</div>
                   <div><span className="text-amber-300">files</span> — Open Portfolio &amp; File Manager</div>
                   <div><span className="text-amber-300">music</span> — Open Curio Music Player</div>
                 </div>
@@ -879,11 +881,19 @@ ${subbuData.now.lastDetected}`}
           setHistory([]);
           return;
 
-        case 'whoami':
+        case 'whoami': {
+          let userRankBadge = '🫧 Thought Drifter';
+          if (isLoggedIn) {
+            const statsRes = await apiGetStats();
+            if (statsRes.stats?.rank?.badge) {
+              userRankBadge = statsRes.stats.rank.badge;
+            }
+          }
           response = isLoggedIn ? (
             <div className="text-xs text-slate-300 font-mono space-y-0.5">
               <p><span className="text-pink-400">user:</span> cutie@{currentUsername}</p>
               <p><span className="text-pink-400">status:</span> <span className="text-emerald-400">Authenticated ✓</span></p>
+              <p><span className="text-pink-400">rank:</span> <span className="text-amber-300 font-semibold">{userRankBadge}</span></p>
               <p><span className="text-pink-400">email:</span> {user?.email}</p>
               <p><span className="text-pink-400">role:</span> Cutiepie Administrator</p>
             </div>
@@ -895,6 +905,7 @@ ${subbuData.now.lastDetected}`}
             </div>
           );
           break;
+        }
 
         case 'about':
           response = (
@@ -985,12 +996,19 @@ ${subbuData.now.lastDetected}`}
               </div>
             );
           } else {
+            setIsExecutingAsync(true);
+            const statsRes = await apiGetStats();
+            setIsExecutingAsync(false);
+            const stats = statsRes.stats;
             response = (
               <div className="text-xs font-mono text-slate-300 space-y-1 bg-slate-900/40 p-2.5 rounded border border-pink-500/20">
                 <div className="text-pink-400 font-bold border-b border-pink-500/30 pb-0.5">
                   USER PROFILE: cutie@{user?.username}
                 </div>
                 <div><span className="text-indigo-400">Email:</span> {user?.email}</div>
+                <div><span className="text-indigo-400">Mind Rank:</span> <span className="text-amber-300 font-semibold">{stats?.rank?.badge ?? '🫧 Thought Drifter'}</span></div>
+                <div><span className="text-indigo-400">Letters Posted:</span> <span className="text-pink-300 font-semibold">{stats?.lettersPosted ?? 0}</span></div>
+                <div><span className="text-indigo-400">Likes Received:</span> <span className="text-rose-400 font-semibold">{stats?.likesReceived ?? 0} ♡</span></div>
                 <div><span className="text-indigo-400">Wallpaper:</span> {user?.wallpaperId || 'cosmic-aurora'}</div>
                 <div><span className="text-indigo-400">Member Since:</span> {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Today'}</div>
                 <div><span className="text-indigo-400">Role:</span> Cutiepie VIP Administrator</div>
@@ -1014,14 +1032,26 @@ ${subbuData.now.lastDetected}`}
           }
           break;
 
-        // ── Personal Commands (Auth Gated) ──────────────────────────────────
+        // ── Community / Guestbook Commands ──────────────────────────────────
+        case 'letterbox':
+        case 'guestbook':
+        case 'letter':
+        case 'letters':
+          openApp('letterbox');
+          response = (
+            <div className="text-xs text-pink-400 font-mono">
+              Opening LetterBox (Brain Guestbook)... 💌
+            </div>
+          );
+          break;
+
         case 'notes':
-          if (!isLoggedIn) {
-            response = <div className="text-xs text-pink-400 font-mono">login first, cutie 🥺</div>;
-          } else {
-            openApp('notes');
-            response = <div className="text-xs text-emerald-400 font-mono">Opening Brain.exe (Notes)... 📝</div>;
-          }
+          openApp('letterbox');
+          response = (
+            <div className="text-xs text-amber-300 font-mono">
+              ✦ Brain.exe has evolved into LetterBox! Opening public guestbook... 💌
+            </div>
+          );
           break;
 
         case 'photos':
@@ -1135,9 +1165,13 @@ ${subbuData.now.lastDetected}`}
             music: 'music',
             songs: 'music',
             player: 'music',
-            notes: 'notes',
-            note: 'notes',
-            brain: 'notes',
+            letterbox: 'letterbox',
+            guestbook: 'letterbox',
+            letter: 'letterbox',
+            letters: 'letterbox',
+            notes: 'letterbox',
+            note: 'letterbox',
+            brain: 'letterbox',
             settings: 'settings',
             setting: 'settings',
             config: 'settings',
@@ -1156,7 +1190,7 @@ ${subbuData.now.lastDetected}`}
           } else {
             response = (
               <div className="text-xs text-rose-400 font-mono">
-                Unknown app '{appName}'. Available apps: <span className="text-amber-300">terminal, files, socials, music, notes, settings, void</span>.
+                Unknown app '{appName}'. Available apps: <span className="text-amber-300">terminal, files, socials, music, letterbox, settings, void</span>.
               </div>
             );
           }
@@ -1176,9 +1210,13 @@ ${subbuData.now.lastDetected}`}
             music: 'music',
             songs: 'music',
             player: 'music',
-            notes: 'notes',
-            note: 'notes',
-            brain: 'notes',
+            letterbox: 'letterbox',
+            guestbook: 'letterbox',
+            letter: 'letterbox',
+            letters: 'letterbox',
+            notes: 'letterbox',
+            note: 'letterbox',
+            brain: 'letterbox',
             settings: 'settings',
             setting: 'settings',
             config: 'settings',
@@ -1190,7 +1228,7 @@ ${subbuData.now.lastDetected}`}
           if (!targetApp) {
             response = (
               <div className="text-xs text-rose-400 font-mono">
-                Unknown app '{appName}'. Available apps: <span className="text-amber-300">terminal, files, music, notes, settings, void</span>.
+                Unknown app '{appName}'. Available apps: <span className="text-amber-300">terminal, files, socials, music, letterbox, settings, void</span>.
               </div>
             );
           } else {

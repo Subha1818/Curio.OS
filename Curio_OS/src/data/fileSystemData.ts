@@ -43,8 +43,7 @@ export const FOLDER_DEFINITIONS: FolderDefinition[] = [
     id: 'documents',
     name: 'Documents',
     iconName: 'FileText',
-    description: 'Personal documents and notes (login required to view your files)',
-    requiresAuth: true,
+    description: "Official documents, resume & portfolio records",
   },
   {
     id: 'education',
@@ -89,61 +88,44 @@ export const FOLDER_DEFINITIONS: FolderDefinition[] = [
   },
 ];
 
-// ── Documents folder content (auth-gated, shown to logged-in users) ──────────
+// ── Documents folder content (static admin-provided, visible to all visitors) ──
 
-export const AUTH_USER_DOCUMENTS: FileItem[] = [
+export const STATIC_DOCUMENTS: FileItem[] = [
   {
-    id: 'doc-1',
-    name: 'welcome_guide.txt',
-    extension: 'txt',
+    id: 'doc-resume',
+    name: 'Subhajit_Patra_Resume_2026.pdf',
+    extension: 'pdf',
     type: 'text',
-    size: '1.2 KB',
-    modified: 'Today, 10:14 AM',
+    size: '184 KB',
+    modified: 'September 2026',
     content: `==================================================
-           WELCOME TO CURIO.OS FILE SYSTEM
+           SUBHAJIT PATRA (SUBBU) — RESUME 2026
 ==================================================
+Role: Full-Stack Engineer & Creative Technologist
+Location: Kolkata, India • B.Tech CSE (2024–2028)
+GitHub: https://github.com/Subha1818
+LinkedIn: https://www.linkedin.com/in/subha1818/
 
-Hello cutie! Your personal workspace is now initialized.
+SUMMARY:
+Passionate software engineer building high-craft web operating systems, 
+full-stack cloud applications, and interactive user experiences. Creator of Curio.OS.
 
-Any notes you create in Brain.exe while logged in
-are preserved across browser sessions via Neon Postgres.
+CORE SKILLS:
+- Languages: TypeScript, JavaScript, Python, C++, SQL
+- Frontend: React 19, Vite, Tailwind CSS, Web Audio API, Canvas, Glassmorphism
+- Backend: Node.js, Express, Neon Postgres, REST APIs, JWT Security
+- Tools: Git, Docker, Linux, Postman, Vercel
 
-Tips:
-- Use Terminal commands ('notes', 'files') for quick navigation.
-- Double-click or click any file to preview its content.
-- Check out Admin's Secret Folder on the left!
-- Projects, Achievements, Photography, Drawings are always visible — no login needed.`,
-  },
-  {
-    id: 'doc-2',
-    name: 'brain_notes_sync.md',
-    extension: 'md',
-    type: 'text',
-    size: '2.4 KB',
-    modified: 'Yesterday',
-    content: `# Brain.exe Notes Synchronizer
+FEATURED PROJECTS:
+- Curio.OS: Glassmorphic browser operating system with custom window manager, terminal CLI, sound engine, and social transceivers.
+- LetterBox: Public brain guestbook with live feed, community upvoting, and dynamic synapse rank hierarchy.
 
-- [x] Connected to Neon Postgres backend
-- [x] httpOnly JWT token validated
-- [x] Auto-save session active
-- [ ] Voice memo transcription (Backlog)
-
-"Curiosity killed the cat, but satisfaction brought it back to Curio.OS."`,
-  },
-  {
-    id: 'doc-3',
-    name: 'system_architecture.txt',
-    extension: 'txt',
-    type: 'code',
-    size: '3.1 KB',
-    modified: '3 days ago',
-    content: `CURIO.OS / DREAM.OS ARCHITECTURE OVERVIEW:
-----------------------------------------
-Frontend:  React 19 + TypeScript + Vite + Tailwind CSS
-Audio:     Web Audio API Custom Chimes Synthesizer
-State:     React Window Manager + Auth Context + Void Context
-Backend:   Node.js + Express + Neon Serverless Postgres
-Security:  12 rounds bcrypt salt + JWT httpOnly cookies`,
+EDUCATION:
+- B.Tech in Computer Science & Engineering (2024 — 2028)
+  Techno Main Salt Lake, CGPA: 8.0 / 10.0
+- Higher Secondary (WBCHSE, 2023) — 80%
+- Secondary (WBBSE, 2021) — 91%
+==================================================`,
   },
 ];
 

@@ -1,6 +1,6 @@
 import type React from 'react';
 
-export type AppId = 'terminal' | 'files' | 'music' | 'notes' | 'settings' | 'void' | 'socials';
+export type AppId = 'terminal' | 'files' | 'music' | 'letterbox' | 'settings' | 'void' | 'socials';
 
 export interface AppDefinition {
   id: AppId;

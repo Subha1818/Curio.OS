@@ -9,12 +9,12 @@ import {
   Terminal,
   Folder,
   Music,
-  FileText,
   Settings,
   Skull,
   Eye,
   Share2,
 } from 'lucide-react';
+import { LetterBoxIcon } from './icons/LetterBoxIcon';
 import type { AppId } from '../types/os';
 import { useWindowManager } from '../context/WindowManagerContext';
 import { sound } from '../utils/sound';
@@ -74,7 +74,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
     { id: 'files', name: 'Files', icon: <Folder className="w-4 h-4 text-amber-400" /> },
     { id: 'socials', name: 'Socials', icon: <Share2 className="w-4 h-4 text-cyan-400" /> },
     { id: 'music', name: 'Music', icon: <Music className="w-4 h-4 text-purple-400" /> },
-    { id: 'notes', name: 'Notes', icon: <FileText className="w-4 h-4 text-indigo-400" /> },
+    { id: 'letterbox', name: 'LetterBox', icon: <LetterBoxIcon className="w-4 h-4" animated={false} /> },
     { id: 'settings', name: 'Settings', icon: <Settings className="w-4 h-4 text-sky-400" /> },
     { id: 'void', name: 'Void', icon: <Skull className="w-4 h-4 text-rose-500" /> },
   ];

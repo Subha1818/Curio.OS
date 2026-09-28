@@ -35,14 +35,14 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
     const currentWindows = windowsRef.current;
     const hasMusicWin = currentWindows.some((w) => w.appId === 'music');
     const hasFilesWin = currentWindows.some((w) => w.appId === 'files');
-    const hasNotesWin = currentWindows.some((w) => w.appId === 'notes');
+    const hasLetterboxWin = currentWindows.some((w) => w.appId === 'letterbox');
     const hasVoidWin = currentWindows.some((w) => w.appId === 'void');
 
     const activity = {
       hasOpenedMusic: hasMusicWin || sessionStorage.getItem('curio_music_opened') === 'true',
       hasOpenedFiles: hasFilesWin || sessionStorage.getItem('curio_files_opened') === 'true',
       hasOpenedSecret: sessionStorage.getItem('curio_secret_folder_opened') === 'true',
-      hasOpenedNotes: hasNotesWin || sessionStorage.getItem('curio_notes_opened') === 'true',
+      hasOpenedLetterbox: hasLetterboxWin || sessionStorage.getItem('curio_letterbox_opened') === 'true',
       hasOpenedVoid: hasVoidWin || sessionStorage.getItem('curio_void_opened') === 'true',
     };
 

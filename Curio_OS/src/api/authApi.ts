@@ -118,7 +118,13 @@ export interface UserStats {
   wallpaper: string;
   createdAt: string;
   daysSinceJoined: number;
-  notesCount: number;
+  lettersPosted: number;
+  likesReceived: number;
+  rank?: {
+    title: string;
+    badge: string;
+    likesReceived: number;
+  };
   loginStreak: number;
   shell: string;
   kernel: string;
@@ -132,57 +138,6 @@ export async function apiGetStats(): Promise<{ stats?: UserStats; error?: string
   const res = await request<UserStats>('/api/stats/me');
   if (res.error) return { error: res.error };
   return { stats: res.data };
-}
-
-// ── Notes API ────────────────────────────────────────────
-
-export interface BackendNote {
-  id: string;
-  user_id: string;
-  content: string;
-  pinned: boolean;
-  tags: string[];
-  created_at: string;
-  updated_at: string;
-}
-
-export async function apiGetNotes(): Promise<{ notes?: BackendNote[]; error?: string }> {
-  const res = await request<{ notes: BackendNote[] }>('/api/notes');
-  if (res.error) return { error: res.error };
-  return { notes: res.data?.notes };
-}
-
-export async function apiCreateNote(
-  content: string,
-  pinned = false,
-  tags: string[] = []
-): Promise<{ note?: BackendNote; error?: string }> {
-  const res = await request<{ note: BackendNote }>('/api/notes', {
-    method: 'POST',
-    body: JSON.stringify({ content, pinned, tags }),
-  });
-  if (res.error) return { error: res.error };
-  return { note: res.data?.note };
-}
-
-export async function apiUpdateNote(
-  id: string,
-  updates: { content?: string; pinned?: boolean; tags?: string[] }
-): Promise<{ note?: BackendNote; error?: string }> {
-  const res = await request<{ note: BackendNote }>(`/api/notes/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(updates),
-  });
-  if (res.error) return { error: res.error };
-  return { note: res.data?.note };
-}
-
-export async function apiDeleteNote(id: string): Promise<{ success: boolean; error?: string }> {
-  const res = await request<{ message: string; id: string }>(`/api/notes/${id}`, {
-    method: 'DELETE',
-  });
-  if (res.error) return { success: false, error: res.error };
-  return { success: true };
 }
 
 // ── User Settings & Account Management ────────────────────

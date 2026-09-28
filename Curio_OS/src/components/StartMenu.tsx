@@ -4,7 +4,6 @@ import {
   Terminal,
   Folder,
   Music,
-  FileText,
   Settings,
   Skull,
   RotateCcw,
@@ -13,6 +12,7 @@ import {
   LogOut,
   Share2,
 } from 'lucide-react';
+import { LetterBoxIcon } from './icons/LetterBoxIcon';
 import type { AppId } from '../types/os';
 import { useWindowManager } from '../context/WindowManagerContext';
 import { useAuth } from '../context/AuthContext';
@@ -66,10 +66,11 @@ export const StartMenu: React.FC<StartMenuProps> = ({ isOpen, onClose, onReboot 
       icon: <Music className="w-5 h-5 text-purple-400" />,
     },
     {
-      id: 'notes',
-      name: 'Brain.exe',
-      desc: 'Personal thoughts and spontaneous revelations',
-      icon: <FileText className="w-5 h-5 text-indigo-400" />,
+      id: 'letterbox',
+      name: 'LetterBox',
+      desc: "Subbu's cerebral guestbook • Drop a thought into the stream",
+      icon: <LetterBoxIcon className="w-5 h-5" animated={false} />,
+      badge: 'COMMUNITY',
     },
     {
       id: 'settings',

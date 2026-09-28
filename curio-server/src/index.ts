@@ -10,7 +10,7 @@ import path from 'path';
 import authRoutes from './routes/auth';
 import statsRoutes from './routes/stats';
 import secretRoutes from './routes/secret';
-import notesRoutes from './routes/notes';
+import lettersRoutes from './routes/letters';
 import usersRoutes from './routes/users';
 
 const app = express();
@@ -58,7 +58,7 @@ app.get('/health', (_req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/secret', secretRoutes);
-app.use('/api/notes', notesRoutes);
+app.use('/api/letters', lettersRoutes);
 app.use('/api/users', usersRoutes);
 
 // ── 404 Fallthrough ────────────────────────────────────

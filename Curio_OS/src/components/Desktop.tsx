@@ -6,7 +6,7 @@ import { ContextMenu } from './ContextMenu';
 import { TerminalApp } from './apps/TerminalApp';
 import { FilesApp } from './apps/FilesApp';
 import { MusicApp } from './apps/MusicApp';
-import { NotesApp } from './apps/NotesApp';
+import { LetterBoxApp } from './apps/LetterBoxApp';
 import { SettingsApp } from './apps/SettingsApp';
 import { VoidApp } from './apps/VoidApp';
 import { SocialsApp } from './apps/SocialsApp';
@@ -56,7 +56,7 @@ export const Desktop: React.FC<DesktopProps> = ({
     { id: 'files', title: 'File Explorer', iconName: 'Folder' },
     { id: 'socials', title: 'Socials', iconName: 'Share2' },
     { id: 'music', title: 'Music Player', iconName: 'Music' },
-    { id: 'notes', title: 'Brain.exe', iconName: 'FileText' },
+    { id: 'letterbox', title: 'LetterBox', iconName: 'LetterBox' },
     { id: 'settings', title: 'Settings', iconName: 'Settings' },
     { id: 'void', title: 'VOID.EXE', iconName: 'Skull', badge: 'DANGER' },
   ];
@@ -109,8 +109,8 @@ export const Desktop: React.FC<DesktopProps> = ({
         return <FilesApp windowId={windowId} />;
       case 'music':
         return <MusicApp windowId={windowId} />;
-      case 'notes':
-        return <NotesApp windowId={windowId} />;
+      case 'letterbox':
+        return <LetterBoxApp windowId={windowId} />;
       case 'settings':
         return (
           <SettingsApp

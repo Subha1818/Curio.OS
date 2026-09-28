@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { Terminal, Folder, FileText, Palette, Info, RotateCcw } from 'lucide-react';
+import { Terminal, Folder, Palette, Info, RotateCcw } from 'lucide-react';
+import { LetterBoxIcon } from './icons/LetterBoxIcon';
 import { sound } from '../utils/sound';
 import type { AppId } from '../types/os';
 
@@ -42,9 +43,9 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
       action: () => onOpenApp('files'),
     },
     {
-      label: 'New Thought (Brain.exe)',
-      icon: <FileText className="w-4 h-4 text-indigo-400" />,
-      action: () => onOpenApp('notes'),
+      label: 'Open LetterBox',
+      icon: <LetterBoxIcon className="w-4 h-4" animated={false} />,
+      action: () => onOpenApp('letterbox'),
     },
     {
       label: 'Change Wallpaper',
