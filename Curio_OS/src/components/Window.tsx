@@ -295,7 +295,7 @@ export const Window: React.FC<WindowProps> = ({ windowState, children }) => {
           </div>
 
           {/* Center: Title + Drag Cue */}
-          <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wide pointer-events-none text-slate-200">
+          <div className="flex items-center gap-1.5 font-display font-medium text-xs sm:text-sm tracking-normal pointer-events-none text-slate-200">
             <GripHorizontal className="w-3.5 h-3.5 text-slate-500" />
             <span className="truncate max-w-[200px] sm:max-w-xs">{windowState.title}</span>
           </div>

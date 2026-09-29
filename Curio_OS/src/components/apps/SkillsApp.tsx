@@ -7,10 +7,6 @@ interface SkillCategory {
   id: string;
   title: string;
   icon: React.ComponentType<{ className?: string }>;
-  iconColor: string;
-  accent: string;
-  pillClass: string;
-  dotClass: string;
   skills: string[];
 }
 
@@ -19,40 +15,24 @@ const CATEGORIES: SkillCategory[] = [
     id: 'languages',
     title: 'Languages',
     icon: Code2,
-    iconColor: 'text-pink-400',
-    accent: '#ec4899',
-    pillClass: 'bg-pink-500/10 text-pink-300 border-pink-500/30 hover:border-pink-400/60 hover:bg-pink-500/20 hover:shadow-[0_0_12px_rgba(236,72,153,0.3)]',
-    dotClass: 'bg-pink-400',
     skills: skillsData.languages,
   },
   {
     id: 'frameworksAndLibraries',
     title: 'Frameworks & Libraries',
     icon: Layers,
-    iconColor: 'text-cyan-400',
-    accent: '#06b6d4',
-    pillClass: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30 hover:border-cyan-400/60 hover:bg-cyan-500/20 hover:shadow-[0_0_12px_rgba(6,182,212,0.3)]',
-    dotClass: 'bg-cyan-400',
     skills: skillsData.frameworksAndLibraries,
   },
   {
     id: 'backendAndDatabases',
     title: 'Backend & Databases',
     icon: Database,
-    iconColor: 'text-emerald-400',
-    accent: '#10b981',
-    pillClass: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:border-emerald-400/60 hover:bg-emerald-500/20 hover:shadow-[0_0_12px_rgba(16,185,129,0.3)]',
-    dotClass: 'bg-emerald-400',
     skills: skillsData.backendAndDatabases,
   },
   {
     id: 'toolsAndPlatforms',
     title: 'Tools & Platforms',
     icon: Wrench,
-    iconColor: 'text-amber-400',
-    accent: '#f59e0b',
-    pillClass: 'bg-amber-500/10 text-amber-300 border-amber-500/30 hover:border-amber-400/60 hover:bg-amber-500/20 hover:shadow-[0_0_12px_rgba(245,158,11,0.3)]',
-    dotClass: 'bg-amber-400',
     skills: skillsData.toolsAndPlatforms,
   },
 ];
@@ -101,7 +81,7 @@ const SkillSectionCard: React.FC<SkillSectionCardProps> = ({
       : 'transform 0.4s ease-out, box-shadow 0.3s ease',
     boxShadow:
       isHovered && animationsEnabled
-        ? `0 12px 30px -5px ${category.accent}25, 0 0 20px 2px ${category.accent}15`
+        ? '0 12px 30px -5px rgba(192, 132, 252, 0.2), 0 0 20px 2px rgba(192, 132, 252, 0.1)'
         : '0 4px 15px -2px rgba(0, 0, 0, 0.4)',
     animationDelay: animationsEnabled ? `${index * 90}ms` : '0ms',
   };
@@ -114,25 +94,26 @@ const SkillSectionCard: React.FC<SkillSectionCardProps> = ({
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`group relative rounded-2xl p-5 border flex flex-col justify-between select-none bg-slate-900/80 hover:bg-slate-900/95 border-slate-800 hover:border-slate-700/80 backdrop-blur-md transition-all ${animationsEnabled ? 'animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both' : ''
-        }`}
+      className={`group relative rounded-2xl p-5 border flex flex-col justify-between select-none bg-slate-900/80 hover:bg-slate-900/95 border-slate-800 hover:border-purple-500/40 backdrop-blur-md transition-all ${
+        animationsEnabled ? 'animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both' : ''
+      }`}
     >
       {/* Ambient corner glow */}
       <div
         className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none duration-500"
         style={{
-          background: `radial-gradient(circle at 85% 15%, ${category.accent}18 0%, transparent 70%)`,
+          background: 'radial-gradient(circle at 85% 15%, rgba(192, 132, 252, 0.12) 0%, transparent 70%)',
         }}
       />
 
       <div className="relative z-10 space-y-3.5">
         {/* Section Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-200">
-            <IconComponent className={`w-4 h-4 ${category.iconColor}`} />
+          <div className="flex items-center gap-2 text-sm font-display font-medium text-slate-100">
+            <IconComponent className="w-4 h-4 text-purple-400" />
             <span>{category.title}</span>
           </div>
-          <span className="text-[10px] font-mono text-slate-400 bg-slate-950/70 border border-slate-800/80 px-2 py-0.5 rounded-full">
+          <span className="text-xs font-sans text-slate-400 bg-slate-950/70 border border-slate-800/80 px-2 py-0.5 rounded-full">
             {category.skills.length} skills
           </span>
         </div>
@@ -142,9 +123,9 @@ const SkillSectionCard: React.FC<SkillSectionCardProps> = ({
           {category.skills.map((skill) => (
             <span
               key={skill}
-              className={`px-2.5 py-1 rounded-full border text-xs font-mono font-medium transition-all duration-200 select-none inline-flex items-center gap-1.5 cursor-default ${category.pillClass}`}
+              className="px-2.5 py-1 rounded-md border text-xs font-mono font-medium transition-all duration-200 select-none inline-flex items-center gap-1.5 cursor-default bg-purple-500/10 text-purple-200 border-purple-500/20 hover:border-purple-400/50 hover:bg-purple-500/20 hover:shadow-[0_0_10px_rgba(192,132,252,0.25)]"
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${category.dotClass} opacity-80`} />
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 opacity-80" />
               {skill}
             </span>
           ))}
@@ -161,27 +142,26 @@ export const SkillsApp: React.FC<{ windowId: string }> = () => {
 
   return (
     <div className="h-full w-full bg-slate-950/95 text-slate-200 flex flex-col p-4 sm:p-6 select-none overflow-y-auto font-sans relative">
-      {/* Header bar with terminal-ish tagline */}
+      {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-800/80">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+          <div className="w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400">
             <Cpu className="w-4 h-4 animate-pulse" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
+            <h2 className="text-base font-display font-semibold text-white flex items-center gap-2">
               Tech Stack
             </h2>
-            <p className="text-xs font-mono text-emerald-400 flex items-center gap-1.5">
-              <span>&gt;</span> compiling developer capabilities...
-              <span className="inline-block w-1.5 h-3 bg-emerald-400 animate-pulse" />
+            <p className="text-xs font-sans text-slate-400 flex items-center gap-1.5">
+              Core technologies &amp; engineering toolkit
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-mono text-slate-400 self-start sm:self-auto">
-          <span className="flex items-center gap-1 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg">
-            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-            {totalSkillsCount} Skills Active
+        <div className="flex items-center gap-2 text-xs font-sans text-slate-400 self-start sm:self-auto">
+          <span className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg">
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            {totalSkillsCount} skills loaded
           </span>
         </div>
       </div>
@@ -198,10 +178,10 @@ export const SkillsApp: React.FC<{ windowId: string }> = () => {
         ))}
       </div>
 
-      {/* Subtle terminal-ish footer */}
-      <div className="mt-auto pt-3 border-t border-slate-800/50 flex flex-col sm:flex-row items-center justify-between text-[11px] font-mono text-slate-500">
-        <div>Continuous learning &amp; production-grade engineering.</div>
-        <div className="text-slate-600">Curio.OS // Skills Engine</div>
+      {/* Footer */}
+      <div className="mt-auto pt-3 border-t border-slate-800/50 flex flex-col sm:flex-row items-center justify-between text-xs font-sans text-slate-400">
+        <div>Continuous learning and production-grade engineering.</div>
+        <div className="text-slate-500">Curio.OS Skills Engine</div>
       </div>
     </div>
   );

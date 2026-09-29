@@ -123,39 +123,39 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
   return (
     <div className="h-full w-full bg-slate-950/95 text-slate-200 flex flex-col p-4 select-none overflow-y-auto text-sm space-y-6 font-sans relative">
       {/* ── User Session Status Header ────────────────────────────────────────── */}
-      <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-900/90 border border-slate-800 flex items-center justify-between shadow-lg">
+      <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-900/90 border border-slate-800 flex items-center justify-between shadow-lg font-sans">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-500 to-indigo-600 flex items-center justify-center text-white text-lg font-bold shadow-md shadow-pink-500/20">
+          <div className="w-10 h-10 rounded-xl bg-purple-600/80 border border-purple-400/30 flex items-center justify-center text-white text-base font-display font-medium shadow-md shadow-purple-500/20">
             {isLoggedIn ? (user?.username.charAt(0).toUpperCase() ?? 'U') : '✨'}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-white text-sm">
+              <span className="font-display font-medium text-white text-sm">
                 {isLoggedIn ? `cutie@${user?.username}` : 'cutie@guest'}
               </span>
               <span
-                className={`text-[9px] px-2 py-0.5 rounded-full font-mono border ${
+                className={`text-xs px-2.5 py-0.5 rounded-full font-sans border ${
                   isLoggedIn
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-semibold'
-                    : 'bg-pink-500/20 text-pink-300 border-pink-500/30'
+                    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 font-medium'
+                    : 'bg-purple-500/15 text-purple-300 border-purple-500/30 font-medium'
                 }`}
               >
-                {isLoggedIn ? 'VIP Cloud Sync' : 'Anonymous Explorer'}
+                {isLoggedIn ? 'Cloud sync active' : 'Local preferences'}
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5 font-sans">
               {isLoggedIn
                 ? `Synced account: ${user?.email}`
-                : 'Preferences are saved locally on this machine.'}
+                : 'Preferences are saved locally in your browser.'}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 font-sans">
           {saving ? (
-            <span className="text-xs text-pink-400 font-mono animate-pulse">Syncing...</span>
+            <span className="text-xs text-purple-300 font-sans animate-pulse">Syncing...</span>
           ) : saveSuccess ? (
-            <span className="text-xs text-emerald-400 font-mono flex items-center gap-1">
+            <span className="text-xs text-emerald-400 font-sans flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5" /> Saved!
             </span>
           ) : null}
@@ -168,22 +168,22 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
               }}
               className="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer border border-white/5"
             >
-              <LogOut className="w-3.5 h-3.5 text-pink-400" />
-              Sign Out
+              <LogOut className="w-3.5 h-3.5 text-purple-400" />
+              Sign out
             </button>
           )}
         </div>
       </div>
 
       {/* ── Personalization: Wallpapers ─────────────────────────────────────── */}
-      <div className="space-y-3">
+      <div className="space-y-3 font-sans">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-            <Palette className="w-4 h-4 text-pink-400" />
-            <span>Desktop Wallpapers</span>
+          <div className="flex items-center gap-2 text-sm font-display font-medium text-slate-200">
+            <Palette className="w-4 h-4 text-purple-400" />
+            <span>Desktop wallpapers</span>
           </div>
-          <span className="text-[10px] font-mono text-slate-500">
-            {WALLPAPERS.length} Animated Themes
+          <span className="text-xs font-sans text-slate-400">
+            {WALLPAPERS.length} animated themes
           </span>
         </div>
 
@@ -212,7 +212,7 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
                 }}
                 className={`group relative p-3 rounded-2xl border cursor-pointer transition-all duration-300 ${
                   isSelected
-                    ? 'bg-slate-900/90 border-pink-500 ring-2 ring-pink-500/40 shadow-xl shadow-pink-500/10 scale-[1.01]'
+                    ? 'bg-slate-900/90 border-purple-500 ring-2 ring-purple-500/40 shadow-xl shadow-purple-500/10 scale-[1.01]'
                     : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900/80 hover:scale-[1.01]'
                 }`}
               >
@@ -241,7 +241,7 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
 
                   {/* Effect Badge */}
                   <div className="absolute top-2 left-2 flex items-center gap-1.5 z-10">
-                    <span className="text-[10px] font-medium text-white/95 bg-black/60 px-2 py-0.5 rounded-full backdrop-blur-md border border-white/15">
+                    <span className="text-[10px] font-medium text-white/95 bg-black/60 px-2 py-0.5 rounded-full backdrop-blur-md border border-white/15 font-sans">
                       {effectLabel}
                     </span>
                   </div>
@@ -249,8 +249,8 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
                   {/* Active Indicator */}
                   {isSelected && (
                     <div className="absolute top-2 right-2 z-10">
-                      <span className="text-[10px] font-bold text-white bg-pink-500/95 px-2.5 py-0.5 rounded-full shadow-lg shadow-pink-500/30 backdrop-blur-sm border border-pink-300/30 flex items-center gap-1">
-                        <Check className="w-2.5 h-2.5" />
+                      <span className="text-xs font-medium text-white bg-purple-600 px-2.5 py-0.5 rounded-full shadow-lg shadow-purple-500/30 backdrop-blur-sm border border-purple-400/30 flex items-center gap-1 font-sans">
+                        <Check className="w-3 h-3" />
                         Active
                       </span>
                     </div>
@@ -264,7 +264,7 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold text-slate-100 flex items-center gap-1.5">
+                  <p className="text-xs font-display font-medium text-slate-100 flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: wp.accent }} />
                     {wp.name}
                   </p>
@@ -275,14 +275,14 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
         </div>
       </div>
 
-      {/* ── Personalization: Cursor Style (New!) ────────────────────────────── */}
-      <div className="space-y-3">
+      {/* ── Personalization: Cursor Style ─────────────────────────────────── */}
+      <div className="space-y-3 font-sans">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-            <MousePointer className="w-4 h-4 text-cyan-400" />
-            <span>Pointer &amp; Cursor Style</span>
+          <div className="flex items-center gap-2 text-sm font-display font-medium text-slate-200">
+            <MousePointer className="w-4 h-4 text-purple-400" />
+            <span>Pointer and cursor style</span>
           </div>
-          <span className="text-[10px] font-mono text-slate-500">Live Custom Cursors</span>
+          <span className="text-xs font-sans text-slate-400">Custom desktop cursors</span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -298,13 +298,13 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
                 }}
                 className={`p-3 rounded-2xl border cursor-pointer transition-all duration-200 flex flex-col items-center text-center relative group ${
                   isSelected
-                    ? 'bg-slate-900/90 border-cyan-400 ring-2 ring-cyan-400/40 shadow-lg shadow-cyan-500/10 scale-[1.02]'
+                    ? 'bg-slate-900/90 border-purple-500 ring-2 ring-purple-500/40 shadow-lg shadow-purple-500/10 scale-[1.02]'
                     : 'bg-slate-900/50 border-slate-800 hover:border-slate-700 hover:bg-slate-900/80 hover:scale-[1.02]'
                 }`}
               >
                 {/* Active check pill */}
                 {isSelected && (
-                  <span className="absolute top-2 right-2 text-[9px] font-bold text-cyan-300 bg-cyan-950/70 border border-cyan-400/30 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                  <span className="absolute top-2 right-2 text-[10px] font-medium text-purple-200 bg-purple-950/70 border border-purple-400/30 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
                     <Check className="w-2.5 h-2.5" />
                   </span>
                 )}
@@ -314,7 +314,7 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
                   <img src={c.iconUrl} alt={c.name} className="w-7 h-7 drop-shadow-md" />
                 </div>
 
-                <div className="flex items-center gap-1 text-xs font-semibold text-slate-100">
+                <div className="flex items-center gap-1 text-xs font-medium text-slate-200">
                   <span>{c.emoji}</span>
                   <span className="truncate">{c.name}</span>
                 </div>
@@ -325,16 +325,16 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
       </div>
 
       {/* ── UI Accents & Motion Controls ───────────────────────────────────── */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-          <Sparkles className="w-4 h-4 text-indigo-400" />
-          <span>Theme Accents &amp; Audio</span>
+      <div className="space-y-3 font-sans">
+        <div className="flex items-center gap-2 text-sm font-display font-medium text-slate-200">
+          <Sparkles className="w-4 h-4 text-purple-400" />
+          <span>Theme accents and effects</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Accent Color picker */}
           <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2">
-            <p className="text-xs font-medium text-slate-200">Accent Color</p>
+            <p className="text-xs font-medium text-slate-200">Interactive accent</p>
             <div className="flex items-center gap-2 pt-1">
               {ACCENT_COLORS.map((color) => (
                 <button
@@ -360,8 +360,8 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
           {/* Animations Toggle */}
           <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-slate-200">Motion Effects</p>
-              <p className="text-[10px] text-slate-400">Glassmorphic motion</p>
+              <p className="text-xs font-medium text-slate-200">Motion effects</p>
+              <p className="text-xs text-slate-400">Glassmorphic motion</p>
             </div>
             <button
               onClick={() => {
@@ -371,7 +371,7 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
                 handleSaveSettings(undefined, next);
               }}
               className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
-                animations ? 'bg-pink-600' : 'bg-slate-700'
+                animations ? 'bg-purple-600' : 'bg-slate-700'
               }`}
             >
               <div
@@ -385,10 +385,10 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
           {/* Sound / Chimes Toggle */}
           <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Volume2 className="w-4 h-4 text-indigo-400 shrink-0" />
+              <Volume2 className="w-4 h-4 text-purple-400 shrink-0" />
               <div>
-                <p className="text-xs font-medium text-slate-200">Audio Chimes</p>
-                <p className="text-[10px] text-slate-400">Web Audio synthesis</p>
+                <p className="text-xs font-medium text-slate-200">Audio chimes</p>
+                <p className="text-xs text-slate-400">Web Audio synthesis</p>
               </div>
             </div>
             <button
@@ -397,7 +397,7 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
                 sound.playClick();
               }}
               className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
-                soundEnabled ? 'bg-indigo-600' : 'bg-slate-700'
+                soundEnabled ? 'bg-purple-600' : 'bg-slate-700'
               }`}
             >
               <div

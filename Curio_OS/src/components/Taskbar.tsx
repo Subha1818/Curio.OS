@@ -117,7 +117,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
           <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-pink-500 via-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md">
             <Sparkles className="w-3.5 h-3.5 animate-pulse" />
           </div>
-          <span className="text-xs font-bold tracking-wider text-slate-100 hidden sm:inline">
+          <span className="font-pixel text-[10px] tracking-wide text-purple-200 hidden sm:inline">
             Curio<span className="text-pink-400">.OS</span>
           </span>
         </button>

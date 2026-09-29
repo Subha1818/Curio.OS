@@ -93,10 +93,10 @@ const SocialCard: React.FC<SocialCardProps> = ({ profile, index, animationsEnabl
 
       {/* Connecting ripple wave overlay */}
       {isConnecting && (
-        <div className="absolute inset-0 rounded-2xl bg-pink-500/10 border-2 border-pink-400 animate-pulse pointer-events-none flex items-center justify-center backdrop-blur-xs">
-          <div className="bg-slate-950/90 text-pink-300 border border-pink-500/40 px-3 py-1 rounded-full text-xs font-mono font-semibold flex items-center gap-1.5 shadow-lg shadow-pink-500/30">
-            <span className="w-2 h-2 rounded-full bg-pink-400 animate-ping" />
-            CONNECTING...
+        <div className="absolute inset-0 rounded-2xl bg-purple-500/10 border-2 border-purple-400 animate-pulse pointer-events-none flex items-center justify-center backdrop-blur-xs">
+          <div className="bg-slate-950/90 text-purple-200 border border-purple-500/40 px-3 py-1 rounded-full text-xs font-sans font-medium flex items-center gap-1.5 shadow-lg shadow-purple-500/20">
+            <span className="w-2 h-2 rounded-full bg-purple-400 animate-ping" />
+            Connecting...
           </div>
         </div>
       )}
@@ -125,23 +125,23 @@ const SocialCard: React.FC<SocialCardProps> = ({ profile, index, animationsEnabl
         {/* Status Badge */}
         <div>
           {isComingSoon ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono tracking-wider bg-slate-800/80 text-slate-400 border border-slate-700/50">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-sans text-slate-400 bg-slate-800/80 border border-slate-700/50">
               <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-              COMING SOON
+              Coming soon
             </span>
           ) : isConnecting ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono tracking-wider bg-pink-500/20 text-pink-300 border border-pink-500/40">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-sans bg-pink-500/15 text-pink-300 border border-pink-500/40">
               <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-ping" />
-              CONNECTING
+              Connecting
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 group-hover:bg-emerald-500/20 transition-colors">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-sans text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
               <span
                 className={`w-1.5 h-1.5 rounded-full bg-emerald-400 ${
                   animationsEnabled ? 'animate-pulse' : ''
                 }`}
               />
-              ONLINE
+              Online
             </span>
           )}
         </div>
@@ -150,14 +150,14 @@ const SocialCard: React.FC<SocialCardProps> = ({ profile, index, animationsEnabl
       {/* Middle/Bottom: Info */}
       <div className="mt-5 space-y-1 relative z-10">
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-base text-white group-hover:text-pink-200 transition-colors flex items-center gap-1.5">
+          <h3 className="font-display font-semibold text-base text-white group-hover:text-purple-200 transition-colors flex items-center gap-1.5">
             {profile.name}
             {!isComingSoon && (
-              <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-pink-400 transition-colors opacity-0 group-hover:opacity-100" />
+              <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-purple-300 transition-colors opacity-0 group-hover:opacity-100" />
             )}
           </h3>
         </div>
-        <p className="font-mono text-xs text-slate-400 group-hover:text-slate-300 transition-colors">
+        <p className="font-sans text-xs text-slate-400 group-hover:text-slate-300 transition-colors">
           {profile.handle}
         </p>
       </div>
@@ -179,30 +179,29 @@ export const SocialsApp: React.FC<{ windowId: string }> = () => {
 
   return (
     <div className="h-full w-full bg-slate-950/95 text-slate-200 flex flex-col p-4 sm:p-6 select-none overflow-y-auto font-sans relative">
-      {/* Header bar with terminal-ish tagline */}
+      {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-800/80">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-pink-500/15 border border-pink-500/30 flex items-center justify-center text-pink-400">
+          <div className="w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400">
             <Radio className="w-4 h-4 animate-pulse" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
+            <h2 className="text-base font-display font-semibold text-white flex items-center gap-2">
               Subbu's Transceiver Grid
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30">
+              <span className="text-[11px] font-sans font-normal text-slate-400">
                 v2.5
               </span>
             </h2>
-            <p className="text-xs font-mono text-emerald-400 flex items-center gap-1.5">
-              <span>&gt;</span> connecting to the outside world...
-              <span className="inline-block w-1.5 h-3 bg-emerald-400 animate-pulse" />
+            <p className="text-xs font-sans text-slate-400 flex items-center gap-1.5">
+              Connecting to the outside world
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-mono text-slate-400 self-start sm:self-auto">
-          <span className="flex items-center gap-1 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg">
-            <Sparkles className="w-3.5 h-3.5 text-pink-400" />
-            {socialsData.filter((s) => s.url).length}/{socialsData.length} Live Channels
+        <div className="flex items-center gap-2 text-xs font-sans text-slate-400 self-start sm:self-auto">
+          <span className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg">
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            {socialsData.filter((s) => s.url).length} of {socialsData.length} channels online
           </span>
         </div>
       </div>
@@ -219,10 +218,10 @@ export const SocialsApp: React.FC<{ windowId: string }> = () => {
         ))}
       </div>
 
-      {/* Subtle terminal-ish footer */}
-      <div className="mt-auto pt-3 border-t border-slate-800/50 flex flex-col sm:flex-row items-center justify-between text-[11px] font-mono text-slate-500">
-        <div>Click any live transceiver to open an encrypted uplink in a new tab.</div>
-        <div className="text-slate-600">Curio.Net // External Bridges</div>
+      {/* Footer */}
+      <div className="mt-auto pt-3 border-t border-slate-800/50 flex flex-col sm:flex-row items-center justify-between text-xs font-sans text-slate-400">
+        <div>Click any live transceiver to open in a new tab.</div>
+        <div className="text-slate-500">External bridges</div>
       </div>
     </div>
   );

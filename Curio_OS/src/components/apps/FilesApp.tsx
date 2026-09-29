@@ -161,11 +161,11 @@ const PortfolioCard: React.FC<{
 
       {/* Labels */}
       <div className="p-3">
-        <p className="text-xs font-semibold text-slate-200 truncate group-hover:text-pink-300 transition-colors">
+        <p className="text-xs font-display font-medium text-slate-200 truncate group-hover:text-purple-300 transition-colors">
           {title}
         </p>
         {subtitle && (
-          <p className="text-[10px] text-slate-500 truncate mt-0.5">{subtitle}</p>
+          <p className="text-[10px] text-slate-400 font-sans truncate mt-0.5">{subtitle}</p>
         )}
       </div>
     </div>
@@ -181,9 +181,9 @@ const ProjectModal: React.FC<{ project: PortfolioProject; onClose: () => void }>
     >
       {/* Header */}
       <div className="h-10 px-4 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-200">
-          <Code2 className="w-4 h-4 text-cyan-400" />
-          <span className="truncate">{project.title}</span>
+        <div className="flex items-center gap-2 text-xs font-medium text-slate-200">
+          <Code2 className="w-4 h-4 text-purple-400" />
+          <span className="truncate font-display text-sm">{project.title}</span>
         </div>
         <button onClick={onClose} className="w-6 h-6 rounded-md hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-200 transition-colors">
           <X className="w-4 h-4" />
@@ -201,27 +201,27 @@ const ProjectModal: React.FC<{ project: PortfolioProject; onClose: () => void }>
           />
         </div>
 
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-4 font-sans">
           {/* Description */}
           <p className="text-sm text-slate-300 leading-relaxed">{project.description}</p>
 
           {/* Tech Stack */}
           <div className="flex flex-wrap gap-1.5">
             {project.techStack.map((tech) => (
-              <span key={tech} className="px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-[11px] font-medium">
+              <span key={tech} className="px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20 text-xs font-mono">
                 {tech}
               </span>
             ))}
           </div>
 
           {/* Links */}
-          <div className="flex gap-2 pt-1">
+          <div className="flex gap-2 pt-1 font-sans">
             {project.liveUrl && (
               <a
                 href={project.liveUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 border border-pink-500/40 text-xs font-semibold transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium transition-colors"
               >
                 <ExternalLink className="w-3.5 h-3.5" /> Live Demo
               </a>
@@ -231,7 +231,7 @@ const ProjectModal: React.FC<{ project: PortfolioProject; onClose: () => void }>
                 href={project.githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition-colors"
               >
                 <GithubIcon className="w-3.5 h-3.5" /> GitHub
               </a>
@@ -613,9 +613,9 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
 
       {/* ── Left Sidebar ────────────────────────────────────────────────────── */}
       <div className="w-64 shrink-0 border-r border-slate-800/80 bg-slate-900/60 p-3.5 flex flex-col gap-2 backdrop-blur-md">
-        <div className="flex items-center gap-2 px-2.5 py-1 text-slate-400 text-xs font-semibold uppercase tracking-wider mb-0.5">
-          <Home className="w-4 h-4 text-indigo-400" />
-          <span>Home Directories</span>
+        <div className="flex items-center gap-2 px-2.5 py-1 text-slate-400 text-xs font-medium mb-1 font-sans">
+          <Home className="w-3.5 h-3.5 text-purple-400" />
+          <span>Home</span>
         </div>
 
         <div className="space-y-1 pl-1.5 border-l-2 border-slate-800/80 ml-3">
@@ -627,9 +627,9 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
               <button
                 key={folder.id}
                 onClick={() => { sound.playClick(); setCurrentFolder(folder.id); setSearchQuery(''); setPreviewFile(null); setDetailItem(null); }}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all group ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all group font-sans ${
                   isActive
-                    ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40 shadow-sm font-semibold'
+                    ? 'bg-purple-500/20 text-purple-200 border border-purple-500/35 shadow-sm font-semibold'
                     : 'text-slate-300 hover:bg-slate-800/70 hover:text-white'
                 }`}
               >
@@ -656,7 +656,7 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
         </div>
 
         {/* Sidebar footer */}
-        <div className="mt-auto p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] text-slate-400">
+        <div className="mt-auto p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] text-slate-400 font-sans">
           {isLoggedIn ? (
             <div className="space-y-1">
               <div className="font-semibold text-emerald-400 flex items-center gap-1.5">
@@ -668,11 +668,11 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
             </div>
           ) : (
             <div className="space-y-1">
-              <div className="font-semibold text-pink-300 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-pink-400" /> Guest Explorer
+              <div className="font-semibold text-purple-300 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-purple-400" /> Guest Explorer
               </div>
               <p className="text-[10px] text-slate-400 leading-tight">
-                Portfolio folders are public. Explore Subbu's personal notes & manifesto!
+                Portfolio folders are public. Explore Subbu's personal notes &amp; manifesto!
               </p>
             </div>
           )}
@@ -680,28 +680,23 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
       </div>
 
       {/* ── Main Content Area ────────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-slate-900/30">
+      <div className="flex-1 flex flex-col overflow-hidden bg-slate-900/30 font-sans">
 
         {/* Toolbar */}
         <div className="h-11 border-b border-slate-800/80 px-4 flex items-center justify-between bg-slate-950/40 text-xs">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-1.5 text-slate-400 font-mono">
+          <div className="flex items-center gap-1.5 text-slate-400 font-sans">
             <span
               onClick={() => setCurrentFolder('documents')}
               className="hover:text-slate-200 cursor-pointer flex items-center gap-1"
             >
-              <Home className="w-3.5 h-3.5 text-indigo-400" /> HOME
+              <Home className="w-3.5 h-3.5 text-purple-400" /> Home
             </span>
             <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
-            <span className="text-pink-300 font-semibold">{folderDef.name}</span>
+            <span className="text-slate-100 font-medium font-display">{folderDef.name}</span>
             {isPortfolioFolder && (
-              <span className="ml-1 text-[10px] bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 px-1.5 py-0.5 rounded-full font-sans">
-                Public Portfolio
-              </span>
-            )}
-            {currentFolder === 'education' && (
-              <span className="ml-1 text-[10px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded-full font-sans">
-                Academic Journey
+              <span className="ml-1 text-[10px] bg-purple-500/15 text-purple-300 border border-purple-500/30 px-1.5 py-0.5 rounded-full font-sans">
+                Portfolio
               </span>
             )}
           </div>
@@ -709,14 +704,14 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
           {/* Right toolbar */}
           {currentFolder !== 'education' ? (
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg text-slate-300 text-xs focus-within:border-pink-500/50">
+              <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg text-slate-300 text-xs focus-within:border-purple-500/50">
                 <Search className="w-3.5 h-3.5 text-slate-500" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={`Search ${folderDef.name.toLowerCase()}...`}
-                  className="bg-transparent border-none outline-none text-xs text-slate-200 placeholder-slate-500 w-28 sm:w-40"
+                  className="bg-transparent border-none outline-none text-xs text-slate-200 placeholder-slate-500 w-28 sm:w-40 font-sans"
                 />
                 {searchQuery && (
                   <button onClick={() => setSearchQuery('')} className="text-slate-500 hover:text-slate-300">
@@ -728,24 +723,24 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
               <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5">
                 <button
                   onClick={() => { sound.playClick(); setViewMode('grid'); }}
-                  title="Grid View"
-                  className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-pink-500/20 text-pink-300' : 'text-slate-400 hover:text-slate-200'}`}
+                  title="Grid view"
+                  className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-purple-500/20 text-purple-300' : 'text-slate-400 hover:text-slate-200'}`}
                 >
                   <LayoutGrid className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => { sound.playClick(); setViewMode('list'); }}
-                  title="List View"
-                  className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-pink-500/20 text-pink-300' : 'text-slate-400 hover:text-slate-200'}`}
+                  title="List view"
+                  className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-purple-500/20 text-purple-300' : 'text-slate-400 hover:text-slate-200'}`}
                 >
                   <List className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
-              <GraduationCap className="w-3.5 h-3.5" />
-              <span>3 Milestones Recorded</span>
+            <div className="flex items-center gap-1.5 text-xs font-sans text-slate-400">
+              <GraduationCap className="w-3.5 h-3.5 text-slate-500" />
+              <span>3 milestones recorded</span>
             </div>
           )}
         </div>
@@ -836,17 +831,17 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
                     <div
                       key={file.id}
                       onClick={() => { sound.playClick(); setPreviewFile(file); }}
-                      className="group p-3 rounded-2xl bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800/80 hover:border-pink-500/40 transition-all cursor-pointer flex flex-col items-center text-center gap-2.5 shadow-sm hover:shadow-md hover:scale-[1.02]"
+                      className="group p-3 rounded-2xl bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800/80 hover:border-purple-500/40 transition-all cursor-pointer flex flex-col items-center text-center gap-2.5 shadow-sm hover:shadow-md hover:scale-[1.02]"
                     >
-                      <div className="w-12 h-12 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-center group-hover:border-pink-500/30 transition-colors">
+                      <div className="w-12 h-12 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-center group-hover:border-purple-500/30 transition-colors">
                         {renderFileIcon(file)}
                       </div>
                       <div className="w-full">
-                        <p className="text-xs font-medium text-slate-200 truncate group-hover:text-pink-300 transition-colors">{file.name}</p>
-                        <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-500 mt-0.5 font-mono">
+                        <p className="text-xs font-medium text-slate-200 truncate group-hover:text-purple-300 transition-colors">{file.name}</p>
+                        <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 mt-0.5 font-sans">
                           <span>{file.size}</span>
                           <span>•</span>
-                          <span>{file.extension.toUpperCase()}</span>
+                          <span className="capitalize">{file.extension}</span>
                         </div>
                       </div>
                     </div>
@@ -855,10 +850,10 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
               ) : (
                 <div className="w-full border border-slate-800/80 rounded-xl overflow-hidden bg-slate-900/40">
                   <table className="w-full text-left text-xs font-sans">
-                    <thead className="bg-slate-950/60 text-slate-400 font-mono text-[11px] border-b border-slate-800">
+                    <thead className="bg-slate-950/60 text-slate-400 font-sans text-xs border-b border-slate-800">
                       <tr>
                         <th className="py-2.5 px-4 font-medium">Name</th>
-                        <th className="py-2.5 px-4 font-medium">Date Modified</th>
+                        <th className="py-2.5 px-4 font-medium">Date modified</th>
                         <th className="py-2.5 px-4 font-medium">Type</th>
                         <th className="py-2.5 px-4 font-medium text-right">Size</th>
                       </tr>
@@ -868,15 +863,15 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
                         <tr
                           key={file.id}
                           onClick={() => { sound.playClick(); setPreviewFile(file); }}
-                          className="hover:bg-pink-500/10 transition-colors cursor-pointer group"
+                          className="hover:bg-purple-500/10 transition-colors cursor-pointer group"
                         >
-                          <td className="py-2.5 px-4 flex items-center gap-2.5 text-slate-200 group-hover:text-pink-300">
+                          <td className="py-2.5 px-4 flex items-center gap-2.5 text-slate-200 group-hover:text-purple-300">
                             {renderFileIcon(file)}
                             <span className="font-medium truncate">{file.name}</span>
                           </td>
-                          <td className="py-2.5 px-4 text-slate-400 text-[11px]">{file.modified}</td>
-                          <td className="py-2.5 px-4 text-slate-500 uppercase font-mono text-[10px]">{file.extension} File</td>
-                          <td className="py-2.5 px-4 text-right text-slate-400 font-mono text-[11px]">{file.size}</td>
+                          <td className="py-2.5 px-4 text-slate-400 text-xs">{file.modified}</td>
+                          <td className="py-2.5 px-4 text-slate-400 text-xs capitalize">{file.extension} file</td>
+                          <td className="py-2.5 px-4 text-right text-slate-400 font-mono text-xs">{file.size}</td>
                         </tr>
                       ))}
                     </tbody>
