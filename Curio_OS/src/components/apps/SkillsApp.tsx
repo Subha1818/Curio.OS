@@ -114,9 +114,8 @@ const SkillSectionCard: React.FC<SkillSectionCardProps> = ({
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`group relative rounded-2xl p-5 border flex flex-col justify-between select-none bg-slate-900/80 hover:bg-slate-900/95 border-slate-800 hover:border-slate-700/80 backdrop-blur-md transition-all ${
-        animationsEnabled ? 'animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both' : ''
-      }`}
+      className={`group relative rounded-2xl p-5 border flex flex-col justify-between select-none bg-slate-900/80 hover:bg-slate-900/95 border-slate-800 hover:border-slate-700/80 backdrop-blur-md transition-all ${animationsEnabled ? 'animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both' : ''
+        }`}
     >
       {/* Ambient corner glow */}
       <div
@@ -170,10 +169,7 @@ export const SkillsApp: React.FC<{ windowId: string }> = () => {
           </div>
           <div>
             <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              Subbu's Tech Stack
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                Matrix v2.0
-              </span>
+              Tech Stack
             </h2>
             <p className="text-xs font-mono text-emerald-400 flex items-center gap-1.5">
               <span>&gt;</span> compiling developer capabilities...

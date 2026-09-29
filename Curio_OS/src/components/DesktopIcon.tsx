@@ -1,4 +1,4 @@
-import { Terminal, Folder, Music, FileText, Settings, Skull, Compass, Gamepad2, MessageSquare, Share2, Cpu } from 'lucide-react';
+import { Terminal, Folder, FolderCode, Music, FileText, Settings, Skull, Compass, Gamepad2, MessageSquare, Share2, Cpu } from 'lucide-react';
 import { LetterBoxIcon } from './icons/LetterBoxIcon';
 import { sound } from '../utils/sound';
 
@@ -32,6 +32,10 @@ export const DesktopIcon: React.FC<DesktopIconProps> = ({
         return <Terminal className="w-8 h-8 text-pink-400 group-hover:scale-110 transition-transform" />;
       case 'Folder':
         return <Folder className="w-8 h-8 text-amber-400 group-hover:scale-110 transition-transform" />;
+      case 'FolderCode':
+      case 'Projects':
+      case 'Code':
+        return <FolderCode className="w-8 h-8 text-cyan-400 group-hover:scale-110 transition-transform" />;
       case 'Music':
         return <Music className="w-8 h-8 text-purple-400 group-hover:scale-110 transition-transform" />;
       case 'LetterBox':

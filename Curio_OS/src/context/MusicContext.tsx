@@ -48,7 +48,11 @@ export const MusicProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isMuted, setIsMuted] = useState(false);
   const [prevVolume, setPrevVolume] = useState(80);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(24);
+  const [duration, setDuration] = useState(() => {
+    const durStr = TRACKS[0]?.duration || '3:40';
+    const parts = durStr.split(':');
+    return parts.length === 2 ? parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10) : 220;
+  });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isMiniPlayerDismissed, setIsMiniPlayerDismissed] = useState(false);
 

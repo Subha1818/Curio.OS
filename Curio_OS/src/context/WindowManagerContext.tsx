@@ -21,7 +21,7 @@ const APP_CONFIGS: Record<
   { title: string; iconName: string; defaultWidth: number; defaultHeight: number }
 > = {
   terminal: { title: 'Curio Terminal', iconName: 'Terminal', defaultWidth: 640, defaultHeight: 440 },
-  files: { title: 'File Explorer', iconName: 'Folder', defaultWidth: 720, defaultHeight: 480 },
+  files: { title: 'File Explorer', iconName: 'Folder', defaultWidth: 780, defaultHeight: 500 },
   music: { title: 'Curio Music Player', iconName: 'Music', defaultWidth: 540, defaultHeight: 520 },
   letterbox: { title: 'LetterBox', iconName: 'LetterBox', defaultWidth: 680, defaultHeight: 520 },
   settings: { title: 'System Settings', iconName: 'Settings', defaultWidth: 580, defaultHeight: 520 },

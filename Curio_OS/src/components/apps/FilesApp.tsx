@@ -612,13 +612,13 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
     <div className="flex h-full w-full bg-slate-950/95 text-slate-200 select-none overflow-hidden text-sm font-sans relative">
 
       {/* ── Left Sidebar ────────────────────────────────────────────────────── */}
-      <div className="w-56 border-r border-slate-800/80 bg-slate-900/50 p-3 flex flex-col gap-1.5 backdrop-blur-sm">
-        <div className="flex items-center gap-1.5 px-2 py-1 text-slate-400 text-xs font-semibold uppercase tracking-wider mb-0.5">
-          <Home className="w-3.5 h-3.5 text-indigo-400" />
-          <span>HOME</span>
+      <div className="w-64 shrink-0 border-r border-slate-800/80 bg-slate-900/60 p-3.5 flex flex-col gap-2 backdrop-blur-md">
+        <div className="flex items-center gap-2 px-2.5 py-1 text-slate-400 text-xs font-semibold uppercase tracking-wider mb-0.5">
+          <Home className="w-4 h-4 text-indigo-400" />
+          <span>Home Directories</span>
         </div>
 
-        <div className="space-y-0.5 pl-1.5 border-l-2 border-slate-800 ml-3">
+        <div className="space-y-1 pl-1.5 border-l-2 border-slate-800/80 ml-3">
           {FOLDER_DEFINITIONS.map((folder) => {
             const isActive = currentFolder === folder.id;
             const count = getFolderCount(folder.id);
@@ -627,21 +627,22 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
               <button
                 key={folder.id}
                 onClick={() => { sound.playClick(); setCurrentFolder(folder.id); setSearchQuery(''); setPreviewFile(null); setDetailItem(null); }}
-                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all group ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all group ${
                   isActive
-                    ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40 shadow-sm'
-                    : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                    ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40 shadow-sm font-semibold'
+                    : 'text-slate-300 hover:bg-slate-800/70 hover:text-white'
                 }`}
               >
-                <div className="flex items-center gap-2 truncate">
+                <div className="flex items-center gap-2.5 truncate">
                   <FolderIcon
                     iconName={folder.iconName}
                     isUnlocked={folder.id === 'secret' && unlocked}
+                    className="w-4 h-4"
                   />
                   <span className="truncate">{folder.name}</span>
                 </div>
                 {folder.badge ? (
-                  <span className="text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/30 px-1 py-0.5 rounded font-mono font-bold tracking-tight">
+                  <span className="text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/30 px-1.5 py-0.5 rounded font-mono font-bold tracking-tight">
                     {folder.badge}
                   </span>
                 ) : (

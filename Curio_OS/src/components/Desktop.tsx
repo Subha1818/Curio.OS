@@ -49,7 +49,7 @@ const DESKTOP_APPS: DesktopItem[] = [
   {
     id: 'projects-shortcut',
     title: 'Projects',
-    iconName: 'Folder',
+    iconName: 'FolderCode',
     targetFolder: 'projects',
     isShortcut: true,
   },
