@@ -10,6 +10,7 @@ import { LetterBoxApp } from './apps/LetterBoxApp';
 import { SettingsApp } from './apps/SettingsApp';
 import { VoidApp } from './apps/VoidApp';
 import { SocialsApp } from './apps/SocialsApp';
+import { SkillsApp } from './apps/SkillsApp';
 import { MiniMusicPlayer } from './MiniMusicPlayer';
 import { CursorTrail } from './CursorTrail';
 import { MusicRainEffect } from './MusicRainEffect';
@@ -52,6 +53,7 @@ const DESKTOP_APPS: DesktopItem[] = [
     targetFolder: 'projects',
     isShortcut: true,
   },
+  { id: 'skills', appId: 'skills', title: 'Skills', iconName: 'Cpu' },
   { id: 'socials', appId: 'socials', title: 'Socials', iconName: 'Share2' },
   { id: 'music', appId: 'music', title: 'Music Player', iconName: 'Music' },
   { id: 'letterbox', appId: 'letterbox', title: 'LetterBox', iconName: 'LetterBox' },
@@ -159,7 +161,15 @@ export const Desktop: React.FC<DesktopProps> = ({
       const saved = localStorage.getItem('curio_desktop_icon_positions');
       if (saved) {
         const parsed = JSON.parse(saved);
-        return { ...defaults, ...parsed };
+        const screenW = typeof window !== 'undefined' ? window.innerWidth : 1200;
+        const result: Record<string, { x: number; y: number }> = { ...parsed };
+        for (const app of DESKTOP_APPS) {
+          if (!result[app.id]) {
+            const defPos = defaults[app.id] || { x: GRID_OFFSET_X, y: GRID_OFFSET_Y };
+            result[app.id] = snapToGrid(defPos.x, defPos.y, app.id, result, screenW, screenH);
+          }
+        }
+        return result;
       }
     } catch {}
     return defaults;
@@ -409,6 +419,8 @@ export const Desktop: React.FC<DesktopProps> = ({
         return <VoidApp windowId={windowId} />;
       case 'socials':
         return <SocialsApp windowId={windowId} />;
+      case 'skills':
+        return <SkillsApp windowId={windowId} />;
       default:
         return <div className="p-4 text-slate-300">App under construction</div>;
     }

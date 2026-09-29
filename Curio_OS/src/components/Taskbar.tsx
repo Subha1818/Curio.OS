@@ -13,6 +13,7 @@ import {
   Skull,
   Eye,
   Share2,
+  Cpu,
 } from 'lucide-react';
 import { LetterBoxIcon } from './icons/LetterBoxIcon';
 import type { AppId } from '../types/os';
@@ -72,6 +73,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
   const pinnedApps: { id: AppId; name: string; icon: React.ReactNode }[] = [
     { id: 'terminal', name: 'Terminal', icon: <Terminal className="w-6 h-6 text-pink-400" /> },
     { id: 'files', name: 'Files', icon: <Folder className="w-6 h-6 text-amber-400" /> },
+    { id: 'skills', name: 'Skills', icon: <Cpu className="w-6 h-6 text-emerald-400" /> },
     { id: 'socials', name: 'Socials', icon: <Share2 className="w-6 h-6 text-cyan-400" /> },
     { id: 'music', name: 'Music', icon: <Music className="w-6 h-6 text-purple-400" /> },
     { id: 'letterbox', name: 'LetterBox', icon: <LetterBoxIcon className="w-6 h-6" animated={false} /> },

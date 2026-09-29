@@ -11,6 +11,7 @@ import {
   ArrowRight,
   LogOut,
   Share2,
+  Cpu,
 } from 'lucide-react';
 import { LetterBoxIcon } from './icons/LetterBoxIcon';
 import type { AppId } from '../types/os';
@@ -51,6 +52,13 @@ export const StartMenu: React.FC<StartMenuProps> = ({ isOpen, onClose, onReboot 
       desc: "Browse directories & Subbu's Classified Vault",
       icon: <Folder className="w-5 h-5 text-amber-400" />,
       badge: 'SECRET',
+    },
+    {
+      id: 'skills',
+      name: 'Skills',
+      desc: "Subbu's technical skills, frameworks & tools",
+      icon: <Cpu className="w-5 h-5 text-emerald-400" />,
+      badge: 'TECH',
     },
     {
       id: 'socials',

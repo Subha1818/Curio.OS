@@ -1,37 +1,59 @@
 export interface DocumentTextEntry {
-  id: string;
-  filename: string;
-  content: string;
-  size?: string;
-  modified?: string;
+   id: string;
+   filename: string;
+   content: string;
+   size?: string;
+   modified?: string;
 }
 
 export const documentsContent: DocumentTextEntry[] = [
-  {
-    id: 'about-subbu',
-    filename: 'about_subbu.txt',
-    content: `==================================================
+   {
+      id: 'about-subbu',
+      filename: 'about_subbu.txt',
+      content: `==================================================
                  WHO IS SUBBU?
 ==================================================
-Hey there, explorer! 👋
 
-I'm Subhajit Patra (most folks call me Subbu).
-I'm a full-stack developer, UI tinkerer, and creative technologist from Kolkata, India.
+Hello 👋,
 
-A few quick facts about me:
-• I write code that looks good, feels snappy, and doesn't take itself too seriously.
-• My natural habitat is a dark terminal window with lofi music playing at 1:30 AM.
-• I believe operating systems should have personality, spring physics, and desktop pets.
-• When I'm not debugging or tweaking keyframes, I'm sketching anime figures or hunting down bugs (and stray cats).
+I'm Subha — a Computer Science student,to be specific a
+frontend developer, and professional overthinker
+who enjoys turning random ideas into things
+people can actually click.
 
-Want to say hi? Drop a friendly thought into LetterBox or ping me on GitHub / LinkedIn! 🌸`,
-    size: '1.2 KB',
-    modified: 'September 2026',
-  },
-  {
-    id: 'currently-building',
-    filename: 'currently_building.txt',
-    content: `==================================================
+Currently studying B.Tech in Computer Science
+at Techno Main Salt Lake.
+
+These days I'm mostly interested in:
+
+    → Building weird little web experiences
+    → Learning backend and API to master web-dev 
+    → Making things look unnecessarily cool
+
+I like websites that feel like more than
+just websites.
+
+A good interface should make you curious.
+
+That's basically why this OS exists.
+
+
+and and and....
+
+If you came here looking for a perfectly
+serious portfolio...
+
+    ...you may have taken a wrong turn.
+
+Welcome anyway.
+Wanna say hi? Drop a friendly thought into LetterBox or ping me on GitHub / LinkedIn! 🌸`,
+      size: '1.2 KB',
+      modified: 'September 2026',
+   },
+   {
+      id: 'currently-building',
+      filename: 'currently_building.txt',
+      content: `==================================================
               CURRENTLY BUILDING & LEARNING
 ==================================================
 Current status: In the zone ⚡
@@ -52,13 +74,13 @@ What's actively on my terminal screen right now:
    - Designing retro-futuristic digital art collections
 
 Got ideas or wanna collaborate? Subbu's inbox is always open! 🚀`,
-    size: '1.4 KB',
-    modified: 'September 2026',
-  },
-  {
-    id: 'developer-manifesto',
-    filename: 'developer_manifesto.txt',
-    content: `==================================================
+      size: '1.4 KB',
+      modified: 'September 2026',
+   },
+   {
+      id: 'developer-manifesto',
+      filename: 'developer_manifesto.txt',
+      content: `==================================================
              SUBBU'S DEVELOPER MANIFESTO
 ==================================================
 1. Personality > Blandness
@@ -75,13 +97,13 @@ Got ideas or wanna collaborate? Subbu's inbox is always open! 🚀`,
 
 5. Code with kindness
    Be generous with compliments, write clean documentation, and leave the codebase happier than you found it. ✨`,
-    size: '1.6 KB',
-    modified: 'September 2026',
-  },
-  {
-    id: 'things-i-like',
-    filename: 'things_i_like.txt',
-    content: `==================================================
+      size: '1.6 KB',
+      modified: 'September 2026',
+   },
+   {
+      id: 'things-i-like',
+      filename: 'things_i_like.txt',
+      content: `==================================================
                   THINGS I LIKE
 ==================================================
 🎧 Sounds & Tunes:
@@ -103,7 +125,7 @@ Got ideas or wanna collaborate? Subbu's inbox is always open! 🚀`,
    • Hot black coffee & iced matcha tea
    • Late-night coding sprees with zero notifications
    • Fluffy cats kneading on mechanical keyboards 🐾`,
-    size: '1.3 KB',
-    modified: 'September 2026',
-  },
+      size: '1.3 KB',
+      modified: 'September 2026',
+   },
 ];

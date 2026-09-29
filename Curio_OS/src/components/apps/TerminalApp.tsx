@@ -6,6 +6,7 @@ import { sound } from '../../utils/sound';
 import { subbuData } from '../../data/subbuData';
 import { socialsData } from '../../data/socialsData';
 import { educationData } from '../../data/educationData';
+import { skillsData } from '../../data/skillsData';
 import { apiGetStats, type UserStats } from '../../api/authApi';
 import type { AppId, WallpaperId } from '../../types/os';
 import { WALLPAPERS } from '../../data/wallpapers';
@@ -518,6 +519,7 @@ export const TerminalApp: React.FC<{ windowId: string }> = () => {
               <div><span className="text-amber-300">subbu -currentmission</span> — Current mission &amp; goal</div>
               <div><span className="text-amber-300">subbu -now</span> — What Subbu is doing right now</div>
               <div><span className="text-amber-300">subbu -interests</span> — Passions &amp; random curiosities</div>
+              <div><span className="text-amber-300">subbu -skills</span> — Tech stack &amp; developer capabilities</div>
               <div><span className="text-amber-300">subbu -socials</span> — Online profiles &amp; links</div>
               <div><span className="text-amber-300">subbu -education</span> — Schooling &amp; B.Tech timeline</div>
             </div>
@@ -668,6 +670,38 @@ ${subbuData.now.lastDetected}`}
             </div>
           );
           break;
+
+        case '-skills':
+        case '-tech':
+        case '-stack': {
+          pushOutput(
+            <div className="text-xs font-mono my-2 space-y-2 select-text">
+              <div className="text-pink-400 font-bold border-b border-pink-500/30 pb-1 flex items-center justify-between">
+                <span>⚡ SUBBU'S TECH STACK &amp; CAPABILITIES</span>
+                <span className="text-[10px] text-slate-400 font-normal">Curio.OS Matrix</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800">
+                  <div className="text-pink-400 font-semibold mb-1">Languages:</div>
+                  <div className="text-slate-300">{skillsData.languages.join(', ')}</div>
+                </div>
+                <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800">
+                  <div className="text-cyan-400 font-semibold mb-1">Frameworks &amp; Libraries:</div>
+                  <div className="text-slate-300">{skillsData.frameworksAndLibraries.join(', ')}</div>
+                </div>
+                <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800">
+                  <div className="text-emerald-400 font-semibold mb-1">Backend &amp; Databases:</div>
+                  <div className="text-slate-300">{skillsData.backendAndDatabases.join(', ')}</div>
+                </div>
+                <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800">
+                  <div className="text-amber-400 font-semibold mb-1">Tools &amp; Platforms:</div>
+                  <div className="text-slate-300">{skillsData.toolsAndPlatforms.join(', ')}</div>
+                </div>
+              </div>
+            </div>
+          );
+          break;
+        }
 
         case '-socials': {
           const activeSocials = socialsData.filter((s) => s.url && s.url.trim() !== '');
@@ -843,6 +877,7 @@ ${subbuData.now.lastDetected}`}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 text-slate-300">
                   <div><span className="text-amber-300">wallpaper [id]</span> — Switch wallpaper</div>
                   <div><span className="text-amber-300">settings</span> — Open Settings app</div>
+                  <div><span className="text-amber-300">skills</span> — Open Tech Stack &amp; Skills app</div>
                   <div><span className="text-amber-300">socials</span> — Open Social Profiles app</div>
                   <div><span className="text-amber-300">open &lt;app&gt;</span> — Launch app window</div>
                   <div><span className="text-amber-300">close &lt;app&gt;</span> — Close active window</div>
@@ -1079,6 +1114,17 @@ ${subbuData.now.lastDetected}`}
           response = <div className="text-xs text-emerald-400 font-mono">Opening Portfolio &amp; File Manager... 📂</div>;
           break;
 
+        case 'skills':
+        case 'tech':
+        case 'stack':
+          openApp('skills');
+          response = (
+            <div className="text-xs text-emerald-400 font-mono">
+              Opening Subbu's Tech Stack &amp; Skills... ⚡
+            </div>
+          );
+          break;
+
         case 'socials':
         case 'social':
           openApp('socials');
@@ -1207,6 +1253,10 @@ ${subbuData.now.lastDetected}`}
             files: 'files',
             file: 'files',
             explorer: 'files',
+            skills: 'skills',
+            skill: 'skills',
+            tech: 'skills',
+            stack: 'skills',
             socials: 'socials',
             social: 'socials',
             links: 'socials',
@@ -1238,7 +1288,7 @@ ${subbuData.now.lastDetected}`}
           } else {
             response = (
               <div className="text-xs text-rose-400 font-mono">
-                Unknown app '{appName}'. Available apps: <span className="text-amber-300">terminal, files, socials, music, letterbox, settings, void</span>.
+                Unknown app '{appName}'. Available apps: <span className="text-amber-300">terminal, files, skills, socials, music, letterbox, settings, void</span>.
               </div>
             );
           }
@@ -1252,6 +1302,10 @@ ${subbuData.now.lastDetected}`}
             files: 'files',
             file: 'files',
             explorer: 'files',
+            skills: 'skills',
+            skill: 'skills',
+            tech: 'skills',
+            stack: 'skills',
             socials: 'socials',
             social: 'socials',
             links: 'socials',
@@ -1276,7 +1330,7 @@ ${subbuData.now.lastDetected}`}
           if (!targetApp) {
             response = (
               <div className="text-xs text-rose-400 font-mono">
-                Unknown app '{appName}'. Available apps: <span className="text-amber-300">terminal, files, socials, music, letterbox, settings, void</span>.
+                Unknown app '{appName}'. Available apps: <span className="text-amber-300">terminal, files, skills, socials, music, letterbox, settings, void</span>.
               </div>
             );
           } else {
