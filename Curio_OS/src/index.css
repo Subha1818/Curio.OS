@@ -287,3 +287,121 @@ textarea {
   cursor: text !important;
 }
 
+/* ── Whimsical Mochi Hanging Notification Animations ── */
+@keyframes mochiDropIn {
+  0% {
+    transform: translateY(-130%) rotate(0deg);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(12px) rotate(-1.5deg);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-6px) rotate(1deg);
+  }
+  92% {
+    transform: translateY(2px) rotate(-0.5deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes mochiRetractUp {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  20% {
+    transform: translateY(8px) rotate(1deg);
+  }
+  100% {
+    transform: translateY(-140%) rotate(-2deg);
+    opacity: 0;
+  }
+}
+
+@keyframes mochiSway {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(1.2deg);
+  }
+  75% {
+    transform: rotate(-1.2deg);
+  }
+}
+
+@keyframes mochiTailWag {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(18deg);
+  }
+}
+
+@keyframes mochiEarTwitch {
+  0%, 88%, 100% {
+    transform: rotate(0deg);
+  }
+  92% {
+    transform: rotate(-8deg);
+  }
+  96% {
+    transform: rotate(6deg);
+  }
+}
+
+@keyframes mochiBellJingle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(-12deg);
+  }
+  40% {
+    transform: rotate(12deg);
+  }
+  60% {
+    transform: rotate(-6deg);
+  }
+  80% {
+    transform: rotate(6deg);
+  }
+}
+
+.animate-mochi-drop {
+  animation: mochiDropIn 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  transform-origin: top center;
+}
+
+.animate-mochi-retract {
+  animation: mochiRetractUp 0.45s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards;
+  transform-origin: top center;
+}
+
+.animate-mochi-sway {
+  animation: mochiSway 3.5s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+.animate-mochi-tail {
+  animation: mochiTailWag 1.8s ease-in-out infinite;
+  transform-origin: 24px 68px;
+}
+
+.animate-mochi-ear {
+  animation: mochiEarTwitch 4s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.animate-mochi-bell {
+  animation: mochiBellJingle 2.5s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+

@@ -41,7 +41,13 @@ const ROBOT_QUOTES = [
 ];
 
 export const DesktopCompanion: React.FC = () => {
-  const [companionType, setCompanionType] = useState<CompanionType>('cat');
+  const [companionType, setCompanionType] = useState<CompanionType>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('curio_companion_type');
+      if (saved === 'cat' || saved === 'ghost' || saved === 'robot') return saved;
+    }
+    return 'cat';
+  });
   const [companionState, setCompanionState] = useState<CompanionState>('idle');
   const [posX, setPosX] = useState<number>(200);
   const [posY, setPosY] = useState<number>(() => {
@@ -227,6 +233,10 @@ export const DesktopCompanion: React.FC = () => {
     };
     const next = nextType[companionType];
     setCompanionType(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('curio_companion_type', next);
+      window.dispatchEvent(new Event('curio_companion_changed'));
+    }
     triggerMessage(
       next === 'cat'
         ? "Mochi the Cat is back! 🐾"
