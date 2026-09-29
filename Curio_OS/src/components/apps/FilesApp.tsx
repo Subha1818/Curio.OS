@@ -513,6 +513,9 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
       const customEvent = e as CustomEvent<FolderId>;
       if (customEvent.detail) {
         setCurrentFolder(customEvent.detail);
+        setSearchQuery('');
+        setPreviewFile(null);
+        setDetailItem(null);
       }
     };
 

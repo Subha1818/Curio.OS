@@ -8,6 +8,7 @@ interface DesktopIconProps {
   title: string;
   iconName: string;
   badge?: string;
+  isShortcut?: boolean;
   isDisabled?: boolean;
   isSelected?: boolean;
   isDragging?: boolean;
@@ -19,6 +20,7 @@ export const DesktopIcon: React.FC<DesktopIconProps> = ({
   title,
   iconName,
   badge,
+  isShortcut,
   isDisabled,
   isSelected,
   isDragging,
@@ -89,6 +91,26 @@ export const DesktopIcon: React.FC<DesktopIconProps> = ({
         }`}
       >
         {getIcon()}
+
+        {isShortcut && (
+          <div
+            className="absolute -bottom-1 -left-1 w-4 h-4 bg-slate-950/95 border border-slate-700/80 rounded flex items-center justify-center shadow-md shadow-black/60 pointer-events-none"
+            title="Folder Shortcut"
+          >
+            <svg
+              viewBox="0 0 16 16"
+              className="w-2.5 h-2.5 text-cyan-300"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="8 4 12 4 12 8" />
+              <line x1="12" y1="4" x2="4" y2="12" />
+            </svg>
+          </div>
+        )}
 
         {badge && (
           <span className="absolute -top-1.5 -right-1.5 text-[9px] bg-rose-500 text-white font-bold px-1.5 py-0.2 rounded-full uppercase tracking-wider shadow">

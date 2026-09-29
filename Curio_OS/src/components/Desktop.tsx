@@ -32,27 +32,39 @@ const GRID_CELL_H = 104;
 const GRID_OFFSET_X = 24;
 const GRID_OFFSET_Y = 24;
 
-const DESKTOP_APPS: {
-  id: AppId;
+export interface DesktopItem {
+  id: string;
+  appId?: AppId;
   title: string;
   iconName: string;
   badge?: string;
-}[] = [
-  { id: 'terminal', title: 'Terminal', iconName: 'Terminal' },
-  { id: 'files', title: 'File Explorer', iconName: 'Folder' },
-  { id: 'socials', title: 'Socials', iconName: 'Share2' },
-  { id: 'music', title: 'Music Player', iconName: 'Music' },
-  { id: 'letterbox', title: 'LetterBox', iconName: 'LetterBox' },
-  { id: 'settings', title: 'Settings', iconName: 'Settings' },
-  { id: 'void', title: 'VOID.EXE', iconName: 'Skull', badge: 'DANGER' },
+  targetFolder?: string;
+  isShortcut?: boolean;
+}
+
+const DESKTOP_APPS: DesktopItem[] = [
+  { id: 'terminal', appId: 'terminal', title: 'Terminal', iconName: 'Terminal' },
+  { id: 'files', appId: 'files', title: 'File Explorer', iconName: 'Folder' },
+  {
+    id: 'projects-shortcut',
+    title: 'Projects',
+    iconName: 'Folder',
+    targetFolder: 'projects',
+    isShortcut: true,
+  },
+  { id: 'socials', appId: 'socials', title: 'Socials', iconName: 'Share2' },
+  { id: 'music', appId: 'music', title: 'Music Player', iconName: 'Music' },
+  { id: 'letterbox', appId: 'letterbox', title: 'LetterBox', iconName: 'LetterBox' },
+  { id: 'settings', appId: 'settings', title: 'Settings', iconName: 'Settings' },
+  { id: 'void', appId: 'void', title: 'VOID.EXE', iconName: 'Skull', badge: 'DANGER' },
 ];
 
 // Helper to compute default Windows-style left-aligned columns
 const computeDefaultPositions = (
-  apps: { id: AppId }[],
+  apps: { id: string }[],
   screenHeight: number
-): Record<AppId, { x: number; y: number }> => {
-  const positions: Record<AppId, { x: number; y: number }> = {} as any;
+): Record<string, { x: number; y: number }> => {
+  const positions: Record<string, { x: number; y: number }> = {};
   const maxRows = Math.max(1, Math.floor((screenHeight - GRID_OFFSET_Y - 80) / GRID_CELL_H));
 
   apps.forEach((app, idx) => {
@@ -70,8 +82,8 @@ const computeDefaultPositions = (
 const snapToGrid = (
   rawX: number,
   rawY: number,
-  iconId: AppId,
-  currentPositions: Record<AppId, { x: number; y: number }>,
+  iconId: string,
+  currentPositions: Record<string, { x: number; y: number }>,
   screenWidth: number,
   screenHeight: number
 ) => {
@@ -140,7 +152,7 @@ export const Desktop: React.FC<DesktopProps> = ({
   } | null>(null);
 
   // Desktop Icon Positions (persisted to localStorage)
-  const [iconPositions, setIconPositions] = useState<Record<AppId, { x: number; y: number }>>(() => {
+  const [iconPositions, setIconPositions] = useState<Record<string, { x: number; y: number }>>(() => {
     const screenH = typeof window !== 'undefined' ? window.innerHeight : 800;
     const defaults = computeDefaultPositions(DESKTOP_APPS, screenH);
     try {
@@ -155,13 +167,13 @@ export const Desktop: React.FC<DesktopProps> = ({
 
   // Active dragging state
   const [draggingIcon, setDraggingIcon] = useState<{
-    id: AppId;
+    id: string;
     currentX: number;
     currentY: number;
   } | null>(null);
 
   const dragPointerRef = useRef<{
-    id: AppId;
+    id: string;
     pointerId: number;
     startX: number;
     startY: number;
@@ -184,16 +196,39 @@ export const Desktop: React.FC<DesktopProps> = ({
     } catch {}
   }, []);
 
+  // Helper to open File Explorer at a specific folder
+  const openFileExplorer = useCallback((targetFolder?: string) => {
+    if (targetFolder) {
+      sessionStorage.setItem('curio_files_target_folder', targetFolder);
+    }
+    openApp('files');
+    if (targetFolder) {
+      window.dispatchEvent(new CustomEvent('curio_files_navigate', { detail: targetFolder }));
+    }
+  }, [openApp]);
+
+  // Handle launch of any desktop icon (app or folder shortcut)
+  const handleLaunchItem = useCallback((item: DesktopItem) => {
+    if (item.targetFolder) {
+      openFileExplorer(item.targetFolder);
+    } else if (item.appId) {
+      openApp(item.appId);
+    }
+  }, [openFileExplorer, openApp]);
+
   // Keyboard shortcut: Press Enter to open currently selected desktop icon
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Enter' && selectedIconId) {
-        openApp(selectedIconId as AppId);
+        const item = DESKTOP_APPS.find((a) => a.id === selectedIconId);
+        if (item) {
+          handleLaunchItem(item);
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedIconId, openApp]);
+  }, [selectedIconId, handleLaunchItem]);
 
   // Window resize handler: ensure icons stay within screen
   useEffect(() => {
@@ -208,7 +243,7 @@ export const Desktop: React.FC<DesktopProps> = ({
           const clampedX = Math.max(GRID_OFFSET_X, Math.min(screenW - 110, pos.x));
           const clampedY = Math.max(GRID_OFFSET_Y, Math.min(screenH - 150, pos.y));
           if (clampedX !== pos.x || clampedY !== pos.y) {
-            updated[id as AppId] = { x: clampedX, y: clampedY };
+            updated[id] = { x: clampedX, y: clampedY };
             changed = true;
           }
         }
@@ -220,15 +255,15 @@ export const Desktop: React.FC<DesktopProps> = ({
   }, []);
 
   // Icon Pointer Handlers (Draggable with 120fps direct transform)
-  const handleIconPointerDown = (e: React.PointerEvent, appId: AppId) => {
+  const handleIconPointerDown = (e: React.PointerEvent, itemId: string) => {
     if (e.button !== 0) return; // Only primary mouse button
     e.stopPropagation();
 
-    const currentPos = iconPositions[appId] || { x: GRID_OFFSET_X, y: GRID_OFFSET_Y };
+    const currentPos = iconPositions[itemId] || { x: GRID_OFFSET_X, y: GRID_OFFSET_Y };
     const el = e.currentTarget as HTMLElement;
 
     dragPointerRef.current = {
-      id: appId,
+      id: itemId,
       pointerId: e.pointerId,
       startX: e.clientX,
       startY: e.clientY,
@@ -420,6 +455,7 @@ export const Desktop: React.FC<DesktopProps> = ({
               title={icon.title}
               iconName={icon.iconName}
               badge={icon.badge}
+              isShortcut={icon.isShortcut}
               isSelected={selectedIconId === icon.id}
               isDragging={isDraggingThis}
               onSelect={() => {
@@ -429,7 +465,7 @@ export const Desktop: React.FC<DesktopProps> = ({
               }}
               onOpen={() => {
                 if (!preventClickRef.current) {
-                  openApp(icon.id);
+                  handleLaunchItem(icon);
                 }
               }}
             />
