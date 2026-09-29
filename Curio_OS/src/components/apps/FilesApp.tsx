@@ -671,7 +671,7 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
                 <Sparkles className="w-3.5 h-3.5 text-pink-400" /> Guest Explorer
               </div>
               <p className="text-[10px] text-slate-400 leading-tight">
-                Portfolio folders are public. Run <span className="text-amber-300 font-mono">login</span> in Terminal for your Documents.
+                Portfolio folders are public. Explore Subbu's personal notes & manifesto!
               </p>
             </div>
           )}
@@ -806,17 +806,10 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
               <div className="w-16 h-16 rounded-3xl bg-slate-800/40 border border-slate-700/50 flex items-center justify-center text-slate-500 mb-3 shadow-inner">
                 <FolderIcon iconName={folderDef.iconName} className="w-8 h-8" />
               </div>
-              <p className="text-slate-200 font-semibold text-sm">This folder is empty</p>
+              <p className="text-slate-200 font-semibold text-sm">No files found</p>
               <p className="text-slate-500 text-xs mt-1.5 max-w-sm leading-relaxed">
-                {!isLoggedIn
-                  ? "Anonymous explorers see empty Documents. Log in via Terminal to sync your notes!"
-                  : `No files in ${folderDef.name}.`}
+                No files match your query in {folderDef.name}.
               </p>
-              {!isLoggedIn && currentFolder === 'documents' && (
-                <div className="mt-4 px-3 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-300 text-xs font-mono">
-                  Tip: Check Projects & Achievements — they&apos;re always public!
-                </div>
-              )}
             </div>
 
           ) : (

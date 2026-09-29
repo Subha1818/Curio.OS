@@ -1,5 +1,7 @@
+import { documentsContent } from './documentsContent';
+
 // File System data for Curio.OS File Manager
-// Folder tree: Documents | Projects | Achievements | Photography | Drawings | Admin's Secret Folder
+// Folder tree: Personal | Education | Projects | Achievements | Resume | Drawings | Photography | Admin's Secret Folder
 //
 // Portfolio folders (Projects, Achievements, Photography, Drawings) are static,
 // admin-authored content — see src/data/portfolioContent.ts for entries.
@@ -43,9 +45,9 @@ export interface FolderDefinition {
 export const FOLDER_DEFINITIONS: FolderDefinition[] = [
   {
     id: 'documents',
-    name: 'Documents',
+    name: 'Personal',
     iconName: 'FileText',
-    description: "Official documents, resume & portfolio records",
+    description: "Subbu's personal text files, developer manifesto, and thoughts",
   },
   {
     id: 'education',
@@ -125,49 +127,18 @@ Download this resume directly using the Download button or preview the document.
   },
 ];
 
-// ── Documents folder content (static admin-provided, visible to all visitors) ──
+// ── Personal Folder Content (4 informal text files about Subbu) ────────────
 
-export const STATIC_DOCUMENTS: FileItem[] = [
-  {
-    id: 'doc-resume',
-    name: 'Subha_Resume_September_2026.pdf',
-    extension: 'pdf',
-    type: 'pdf',
-    size: '308 KB',
-    modified: 'September 2026',
-    previewUrl: '/assets/resume/Subha_Resume_September_2026.pdf',
-    downloadUrl: '/assets/resume/Subha_Resume_September_2026.pdf',
+export const STATIC_DOCUMENTS: FileItem[] = documentsContent.map((doc) => ({
+  id: doc.id,
+  name: doc.filename,
+  extension: 'txt',
+  type: 'text',
+  size: doc.size || '1.4 KB',
+  modified: doc.modified || 'September 2026',
+  content: doc.content,
+}));
 
-    content: `==================================================
-           SUBHAJIT PATRA (SUBBU) — RESUME 2026
-==================================================
-Role: Full-Stack Engineer & Creative Technologist
-Location: Kolkata, India • B.Tech CSE (2024–2028)
-GitHub: https://github.com/Subha1818
-LinkedIn: https://www.linkedin.com/in/subha1818/
-
-SUMMARY:
-Passionate software engineer building high-craft web operating systems, 
-full-stack cloud applications, and interactive user experiences. Creator of Curio.OS.
-
-CORE SKILLS:
-- Languages: TypeScript, JavaScript, Python, C++, SQL
-- Frontend: React 19, Vite, Tailwind CSS, Web Audio API, Canvas, Glassmorphism
-- Backend: Node.js, Express, Neon Postgres, REST APIs, JWT Security
-- Tools: Git, Docker, Linux, Postman, Vercel
-
-FEATURED PROJECTS:
-- Curio.OS: Glassmorphic browser operating system with custom window manager, terminal CLI, sound engine, and social transceivers.
-- LetterBox: Public brain guestbook with live feed, community upvoting, and dynamic synapse rank hierarchy.
-
-EDUCATION:
-- B.Tech in Computer Science & Engineering (2024 — 2028)
-  Techno Main Salt Lake, CGPA: 8.0 / 10.0
-- Higher Secondary (WBCHSE, 2023) — 80%
-- Secondary (WBBSE, 2021) — 91%
-==================================================`,
-  },
-];
 
 // ── Admin's Secret Folder ────────────────────────────────────────────────────
 
