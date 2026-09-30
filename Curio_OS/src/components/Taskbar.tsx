@@ -19,6 +19,7 @@ import { LetterBoxIcon } from './icons/LetterBoxIcon';
 import type { AppId } from '../types/os';
 import { useWindowManager } from '../context/WindowManagerContext';
 import { sound } from '../utils/sound';
+import { useLetterBoxActivity } from '../utils/useLetterBoxActivity';
 
 interface TaskbarProps {
   onToggleStart: () => void;
@@ -41,6 +42,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
   isVoidAwoken = false,
 }) => {
   const { windows, activeWindowId, openApp, focusWindow, minimizeWindow } = useWindowManager();
+  const hasNewLetterBoxActivity = useLetterBoxActivity();
   const [timeStr, setTimeStr] = useState('');
   const [dateStr, setDateStr] = useState('');
   const [voidGlitch, setVoidGlitch] = useState(false);
@@ -129,6 +131,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
           const win = windows.find((w) => w.appId === app.id);
           const isOpen = Boolean(win);
           const isActive = win && activeWindowId === win.id && !win.isMinimized;
+          const showNewActivity = app.id === 'letterbox' && hasNewLetterBoxActivity && !isOpen;
 
           return (
             <button
@@ -142,6 +145,14 @@ export const Taskbar: React.FC<TaskbarProps> = ({
               }`}
             >
               <div className="group-hover:scale-115 transition-transform">{app.icon}</div>
+
+              {/* LetterBox new activity indicator dot */}
+              {showNewActivity && (
+                <span className="absolute top-1.5 right-1.5 flex h-2 w-2 pointer-events-none">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500 ring-1 ring-slate-950" />
+                </span>
+              )}
 
               {/* Status pill dot */}
               {isOpen && (

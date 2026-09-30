@@ -18,6 +18,8 @@ import { DesktopCompanion } from './DesktopCompanion';
 import type { AppId, WallpaperId } from '../types/os';
 import { useWindowManager } from '../context/WindowManagerContext';
 import { sound } from '../utils/sound';
+import { useAnimationsEnabled } from '../utils/useAnimations';
+import { useLetterBoxActivity } from '../utils/useLetterBoxActivity';
 
 interface DesktopProps {
   currentWallpaper: WallpaperId;
@@ -46,6 +48,7 @@ export interface DesktopItem {
 const DESKTOP_APPS: DesktopItem[] = [
   { id: 'terminal', appId: 'terminal', title: 'Terminal', iconName: 'Terminal' },
   { id: 'files', appId: 'files', title: 'File Explorer', iconName: 'Folder' },
+  { id: 'socials', appId: 'socials', title: 'Socials', iconName: 'Share2' },
   {
     id: 'projects-shortcut',
     title: 'Projects',
@@ -53,10 +56,9 @@ const DESKTOP_APPS: DesktopItem[] = [
     targetFolder: 'projects',
     isShortcut: true,
   },
-  { id: 'skills', appId: 'skills', title: 'Skills', iconName: 'Cpu' },
-  { id: 'socials', appId: 'socials', title: 'Socials', iconName: 'Share2' },
-  { id: 'music', appId: 'music', title: 'Music Player', iconName: 'Music' },
   { id: 'letterbox', appId: 'letterbox', title: 'LetterBox', iconName: 'LetterBox' },
+  { id: 'skills', appId: 'skills', title: 'Skills', iconName: 'Cpu' },
+  { id: 'music', appId: 'music', title: 'Music Player', iconName: 'Music' },
   { id: 'settings', appId: 'settings', title: 'Settings', iconName: 'Settings' },
   { id: 'void', appId: 'void', title: 'VOID.EXE', iconName: 'Skull', badge: 'DANGER' },
 ];
@@ -138,8 +140,23 @@ export const Desktop: React.FC<DesktopProps> = ({
   onReboot,
   isJittering = false,
 }) => {
-  const { windows, openApp } = useWindowManager();
+  const { windows, activeWindowId, openApp } = useWindowManager();
+  const animationsEnabled = useAnimationsEnabled();
+  const hasNewLetters = useLetterBoxActivity();
   const [selectedIconId, setSelectedIconId] = useState<string | null>(null);
+  const [hasEntered, setHasEntered] = useState(false);
+
+  // Skip stagger or let it complete after 1.2s so it doesn't interfere with later interactions
+  useEffect(() => {
+    if (!animationsEnabled) {
+      setHasEntered(true);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setHasEntered(true);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [animationsEnabled]);
 
   // Context Menu State
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
@@ -441,16 +458,25 @@ export const Desktop: React.FC<DesktopProps> = ({
       <Wallpaper id={currentWallpaper} />
 
       {/* Draggable Desktop Applications */}
-      {DESKTOP_APPS.map((icon) => {
+      {DESKTOP_APPS.map((icon, index) => {
         const isDraggingThis = draggingIcon?.id === icon.id;
         const pos = isDraggingThis
           ? { x: draggingIcon.currentX, y: draggingIcon.currentY }
           : iconPositions[icon.id] || { x: GRID_OFFSET_X, y: GRID_OFFSET_Y };
 
+        const win = icon.appId ? windows.find((w) => w.appId === icon.appId) : undefined;
+        const isOpen = Boolean(win);
+        const isActive = Boolean(win && activeWindowId === win.id && !win.isMinimized);
+        const hasNewActivity = icon.id === 'letterbox' && hasNewLetters && !isOpen;
+
         return (
           <div
             key={icon.id}
             className={`desktop-icon absolute select-none ${
+              !hasEntered && animationsEnabled && !isDraggingThis
+                ? 'animate-desktop-icon-enter'
+                : ''
+            } ${
               isDraggingThis
                 ? 'z-40 scale-105 cursor-grabbing opacity-95 transition-none drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)]'
                 : 'z-10 transition-[left,top] duration-200 ease-out cursor-pointer'
@@ -459,6 +485,12 @@ export const Desktop: React.FC<DesktopProps> = ({
               left: `${pos.x}px`,
               top: `${pos.y}px`,
               touchAction: 'none',
+              animationDelay:
+                !hasEntered && animationsEnabled && !isDraggingThis
+                  ? `${index * 70}ms`
+                  : undefined,
+              animationFillMode:
+                !hasEntered && animationsEnabled && !isDraggingThis ? 'both' : undefined,
             }}
             onPointerDown={(e) => handleIconPointerDown(e, icon.id)}
           >
@@ -470,6 +502,9 @@ export const Desktop: React.FC<DesktopProps> = ({
               isShortcut={icon.isShortcut}
               isSelected={selectedIconId === icon.id}
               isDragging={isDraggingThis}
+              isOpen={isOpen}
+              isActive={isActive}
+              hasNewActivity={hasNewActivity}
               onSelect={() => {
                 if (!preventClickRef.current) {
                   setSelectedIconId(icon.id);

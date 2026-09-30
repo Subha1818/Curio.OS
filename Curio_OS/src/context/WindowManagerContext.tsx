@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { AppId, WindowState, WindowPosition, WindowSize } from '../types/os';
 import { sound } from '../utils/sound';
+import { markLetterBoxSeen } from '../utils/useLetterBoxActivity';
 
 interface WindowManagerContextType {
   windows: WindowState[];
@@ -48,6 +49,9 @@ export const WindowManagerProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const openApp = useCallback(
     (appId: AppId) => {
+      if (appId === 'letterbox') {
+        markLetterBoxSeen();
+      }
       const existing = windows.find((w) => w.appId === appId);
 
       if (existing) {
