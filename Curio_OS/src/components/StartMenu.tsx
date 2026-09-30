@@ -8,15 +8,13 @@ import {
   Skull,
   RotateCcw,
   Maximize,
-  ArrowRight,
-  LogOut,
   Share2,
   Cpu,
 } from 'lucide-react';
 import { LetterBoxIcon } from './icons/LetterBoxIcon';
 import type { AppId } from '../types/os';
 import { useWindowManager } from '../context/WindowManagerContext';
-import { useAuth } from '../context/AuthContext';
+import { getNickname } from '../utils/identity';
 import { sound } from '../utils/sound';
 
 interface StartMenuProps {
@@ -27,7 +25,8 @@ interface StartMenuProps {
 
 export const StartMenu: React.FC<StartMenuProps> = ({ isOpen, onClose, onReboot }) => {
   const { openApp } = useWindowManager();
-  const { isLoggedIn, user, logout } = useAuth();
+  const nickname = getNickname() || 'Mystery Visitor';
+  const hasName = !!getNickname();
   const [searchQuery, setSearchQuery] = useState('');
 
   if (!isOpen) return null;
@@ -124,45 +123,23 @@ export const StartMenu: React.FC<StartMenuProps> = ({ isOpen, onClose, onReboot 
       {/* User profile card */}
       <div className="p-4 bg-gradient-to-r from-pink-500/15 via-indigo-500/15 to-purple-500/15 border-b border-white/10 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white text-base shadow-lg ${isLoggedIn ? 'bg-gradient-to-tr from-emerald-500 to-indigo-600' : 'bg-gradient-to-tr from-pink-500 to-indigo-600'}`}>
-            {isLoggedIn ? '🦄' : '✨'}
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-base shadow-lg bg-gradient-to-tr from-pink-500 to-indigo-600">
+            ✨
           </div>
           <div>
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-white text-sm">
-                cutie@{isLoggedIn ? user?.username : 'guest'}
+                cutie@{nickname}
               </span>
-              <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-semibold ${isLoggedIn ? 'bg-emerald-500/20 text-emerald-300' : 'bg-pink-500/20 text-pink-300'}`}>
-                {isLoggedIn ? '✓ AUTH' : 'ANON'}
+              <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-semibold ${hasName ? 'bg-emerald-500/20 text-emerald-300' : 'bg-pink-500/20 text-pink-300'}`}>
+                {hasName ? 'NAMED' : 'ANON'}
               </span>
             </div>
             <p className="text-[11px] text-slate-400">
-              {isLoggedIn ? `Logged in • ${user?.email}` : 'Curio.OS Guest Explorer'}
+              Curio.OS Guest Explorer
             </p>
           </div>
         </div>
-
-        {isLoggedIn ? (
-          <button
-            onClick={() => {
-              sound.playClick();
-              logout();
-              onClose();
-            }}
-            className="text-[11px] text-rose-300 hover:text-white flex items-center gap-1 font-medium bg-rose-500/20 hover:bg-rose-500/30 px-2 py-1 rounded-lg border border-rose-500/40 transition-colors cursor-pointer"
-          >
-            <LogOut className="w-3 h-3" />
-            <span>Logout</span>
-          </button>
-        ) : (
-          <button
-            onClick={() => handleLaunch('terminal')}
-            className="text-[11px] text-pink-300 hover:text-white flex items-center gap-1 font-medium bg-pink-500/20 hover:bg-pink-500/30 px-2 py-1 rounded-lg border border-pink-500/40 transition-colors cursor-pointer"
-          >
-            <span>Auth</span>
-            <ArrowRight className="w-3 h-3" />
-          </button>
-        )}
       </div>
 
       {/* Search Bar */}

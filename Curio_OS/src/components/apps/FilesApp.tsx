@@ -14,7 +14,6 @@ import {
   List,
   X,
   Home,
-  CheckCircle2,
   FileQuestion,
   Code2,
   Trophy,
@@ -34,7 +33,6 @@ const GithubIcon: React.FC<{ className?: string }> = ({ className = 'w-3.5 h-3.5
 );
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/sound';
-import { useAuth } from '../../context/AuthContext';
 import {
   FOLDER_DEFINITIONS,
   STATIC_DOCUMENTS,
@@ -482,8 +480,6 @@ const ResumeFolderView: React.FC = () => {
 // ── Main FilesApp ─────────────────────────────────────────────────────────────
 
 export const FilesApp: React.FC<{ windowId: string }> = () => {
-  const { isLoggedIn, user } = useAuth();
-
   const [currentFolder, setCurrentFolder] = useState<FolderId>(() => {
     const target = sessionStorage.getItem('curio_files_target_folder') as FolderId | null;
     if (target) {
@@ -657,25 +653,14 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
 
         {/* Sidebar footer */}
         <div className="mt-auto p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] text-slate-400 font-sans">
-          {isLoggedIn ? (
-            <div className="space-y-1">
-              <div className="font-semibold text-emerald-400 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Authenticated
-              </div>
-              <p className="text-[10px] text-slate-400 leading-tight">
-                cutie@{user?.username}&apos;s documents synced.
-              </p>
+          <div className="space-y-1">
+            <div className="font-semibold text-purple-300 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-purple-400" /> Guest Explorer
             </div>
-          ) : (
-            <div className="space-y-1">
-              <div className="font-semibold text-purple-300 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-purple-400" /> Guest Explorer
-              </div>
-              <p className="text-[10px] text-slate-400 leading-tight">
-                Portfolio folders are public. Explore Subbu's personal notes &amp; manifesto!
-              </p>
-            </div>
-          )}
+            <p className="text-[10px] text-slate-400 leading-tight">
+              Portfolio folders are public. Explore Subbu's personal notes &amp; manifesto!
+            </p>
+          </div>
         </div>
       </div>
 

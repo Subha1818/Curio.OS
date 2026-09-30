@@ -1,16 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Palette,
   Volume2,
   Sparkles,
   MousePointer,
-  LogOut,
   Check,
   CheckCircle2,
 } from 'lucide-react';
 import { sound } from '../../utils/sound';
-import { useAuth } from '../../context/AuthContext';
-import { apiSaveUserSettings } from '../../api/authApi';
+import { getNickname } from '../../utils/identity';
 import type { WallpaperId } from '../../types/os';
 import { WALLPAPERS, getWallpaperConfig } from '../../data/wallpapers';
 import { useCursorStyle, CURSOR_OPTIONS, type CursorStyleId } from '../../utils/useCursorStyle';
@@ -40,18 +38,11 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
   soundEnabled,
   onToggleSound,
 }) => {
-  const { user, isLoggedIn, logout, updateUserSettings } = useAuth();
+  const nickname = getNickname();
   const [cursorStyle, setCursorStyle] = useCursorStyle();
 
   // Settings State
   const getInitialSettings = () => {
-    if (user?.themeSettings) {
-      return user.themeSettings as {
-        accentColor?: AccentColor;
-        animations?: boolean;
-        cursorStyle?: CursorStyleId;
-      };
-    }
     try {
       const saved = localStorage.getItem('curio_theme_settings');
       if (saved) return JSON.parse(saved);
@@ -64,26 +55,10 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
   const [accentColor, setAccentColor] = useState<AccentColor>(initialTheme.accentColor || 'pink');
   const [animations, setAnimations] = useState<boolean>(initialTheme.animations !== false);
 
-  const [saving, setSaving] = useState<boolean>(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
 
-  // Sync state if user's theme settings change
-  useEffect(() => {
-    if (user?.themeSettings) {
-      const theme = user.themeSettings as {
-        accentColor?: AccentColor;
-        animations?: boolean;
-        cursorStyle?: CursorStyleId;
-      };
-      if (theme.accentColor) setAccentColor(theme.accentColor);
-      if (theme.animations !== undefined) setAnimations(theme.animations);
-      if (theme.cursorStyle) setCursorStyle(theme.cursorStyle);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.themeSettings]);
-
-  // Handle saving settings to backend and local storage
-  const handleSaveSettings = async (
+  // Handle saving settings to local storage
+  const handleSaveSettings = (
     newAccent?: AccentColor,
     newAnims?: boolean,
     newWp?: WallpaperId,
@@ -107,17 +82,8 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
       new CustomEvent('curio_theme_changed', { detail: updatedTheme })
     );
 
-    if (isLoggedIn) {
-      setSaving(true);
-      await apiSaveUserSettings(updatedTheme, validatedWp);
-      await updateUserSettings({
-        wallpaperId: validatedWp,
-        themeSettings: updatedTheme,
-      });
-      setSaving(false);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 2000);
-    }
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 2000);
   };
 
   return (
@@ -126,51 +92,28 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({
       <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-900/90 border border-slate-800 flex items-center justify-between shadow-lg font-sans">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-purple-600/80 border border-purple-400/30 flex items-center justify-center text-white text-base font-display font-medium shadow-md shadow-purple-500/20">
-            {isLoggedIn ? (user?.username.charAt(0).toUpperCase() ?? 'U') : '✨'}
+            {nickname ? nickname.charAt(0).toUpperCase() : '✨'}
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="font-display font-medium text-white text-sm">
-                {isLoggedIn ? `cutie@${user?.username}` : 'cutie@guest'}
+                {nickname ? `cutie@${nickname}` : 'cutie@guest'}
               </span>
-              <span
-                className={`text-xs px-2.5 py-0.5 rounded-full font-sans border ${
-                  isLoggedIn
-                    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 font-medium'
-                    : 'bg-purple-500/15 text-purple-300 border-purple-500/30 font-medium'
-                }`}
-              >
-                {isLoggedIn ? 'Cloud sync active' : 'Local preferences'}
+              <span className="text-xs px-2.5 py-0.5 rounded-full font-sans border bg-purple-500/15 text-purple-300 border-purple-500/30 font-medium">
+                Local preferences
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5 font-sans">
-              {isLoggedIn
-                ? `Synced account: ${user?.email}`
-                : 'Preferences are saved locally in your browser.'}
+              Preferences are saved locally in your browser.
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 font-sans">
-          {saving ? (
-            <span className="text-xs text-purple-300 font-sans animate-pulse">Syncing...</span>
-          ) : saveSuccess ? (
+          {saveSuccess && (
             <span className="text-xs text-emerald-400 font-sans flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5" /> Saved!
             </span>
-          ) : null}
-
-          {isLoggedIn && (
-            <button
-              onClick={() => {
-                sound.playClick();
-                logout();
-              }}
-              className="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer border border-white/5"
-            >
-              <LogOut className="w-3.5 h-3.5 text-purple-400" />
-              Sign out
-            </button>
           )}
         </div>
       </div>

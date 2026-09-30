@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Lock,
-  Heart,
+  Zap,
   Mail,
   IndianRupee,
   Timer,
@@ -10,63 +10,7 @@ import {
 import { sound } from '../../utils/sound';
 import { SECRET_FOLDER_PUZZLES, type SecretPuzzle } from '../../data/secretFolderPuzzles';
 
-// ── Hardened Sincerity Evaluator ──────────────────────────────────────────────
-function evaluateHardSincerity(text: string): { score: number; feedback: string } {
-  const clean = text.toLowerCase().trim();
-  if (!clean) return { score: 0, feedback: 'Type a message appreciating Administrator Subbu...' };
-
-  const mentionsSubbu = clean.includes('subbu') || clean.includes('subhajit');
-  if (!mentionsSubbu) {
-    const rawLenScore = Math.min(25, Math.floor(clean.length / 4));
-    return {
-      score: rawLenScore,
-      feedback: 'The administrator does not recognize your devotion without his name.',
-    };
-  }
-
-  let points = 20; // Base score for naming Subbu
-
-  // Category 1: Intellectual & Architectural Mastery
-  const c1 = ['genius', 'brilliant', 'intellect', 'smartest', 'architect', 'legend', 'goat', 'master', 'visionary', 'blacksmith'];
-  if (c1.some((w) => clean.includes(w))) points += 16;
-
-  // Category 2: Appearance & Aura
-  const c2 = ['handsome', 'majestic', 'gorgeous', 'charming', 'aesthetic', 'stunning', 'dapper', 'cute', 'attractive'];
-  if (c2.some((w) => clean.includes(w))) points += 16;
-
-  // Category 3: Coding & Engineering Prowess
-  const c3 = ['code', 'developer', 'creator', 'engineer', 'craft', 'software', 'compiler', 'operating system', 'design'];
-  if (c3.some((w) => clean.includes(w))) points += 16;
-
-  // Category 4: Heart & Kindness
-  const c4 = ['kind', 'sweet', 'generous', 'caring', 'humble', 'pure', 'wholesome', 'warm', 'patient'];
-  if (c4.some((w) => clean.includes(w))) points += 16;
-
-  // Category 5: Pure Devotion & Unmatched Flattery
-  const c5 = ['love', 'marry', 'worship', 'adore', 'inspire', 'greatest', 'unmatched', 'flawless', 'perfection'];
-  if (c5.some((w) => clean.includes(w))) points += 16;
-
-  // Stringent length thresholds
-  if (clean.length < 50) {
-    points = Math.min(points, 52);
-  } else if (clean.length < 85) {
-    points = Math.min(points, 72);
-  } else if (clean.length < 120) {
-    points = Math.min(points, 88);
-  } else if (clean.length >= 140) {
-    points += 10;
-  }
-
-  const score = Math.min(100, Math.max(0, points));
-
-  let feedback = 'Sincerity insufficient... Subbu expects true eloquence.';
-  if (score === 100) feedback = 'PERFECT HARMONY! 100% Sincerity achieved.';
-  else if (score >= 85) feedback = 'Close to true devotion, yet still missing nuance.';
-  else if (score >= 60) feedback = 'Moderate praise detected. Subbu remains unimpressed.';
-  else feedback = 'Sincerity registered as mediocre.';
-
-  return { score, feedback };
-}
+// ── Security Override Reflex Game ──────────────────────────────────────────────
 
 // ── Question Types for Round 2 ────────────────────────────────────────────────
 interface MemoryQuestion {
@@ -134,10 +78,45 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
   const [totalFailedAttempts, setTotalFailedAttempts] = useState<number>(0);
 
   // ── Round 1 State ───────────────────────────────────────────────────────────
-  const [complimentInput, setComplimentInput] = useState('');
-  const [round1Attempts, setRound1Attempts] = useState(0); // 0, 1, 2 (caps at 3)
-  const [round1SubmittedScore, setRound1SubmittedScore] = useState<number | null>(null);
+  const [round1Level, setRound1Level] = useState(1);
+  const [isPlayingRound1, setIsPlayingRound1] = useState(true);
+  const [round1Feedback, setRound1Feedback] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const [round1Attempts, setRound1Attempts] = useState(0);
   const [showRound1TryAnother, setShowRound1TryAnother] = useState(false);
+  const [showRound1Success, setShowRound1Success] = useState(false);
+
+  const needleRef = useRef<HTMLDivElement>(null);
+  const posRef = useRef(0);
+  const dirRef = useRef(1);
+  const reqRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (currentRound !== 1 || !isPlayingRound1 || showRound1TryAnother || showRound1Success) return;
+    let speed = 1.2;
+    if (round1Level === 2) speed = 2.2;
+    if (round1Level === 3) speed = 3.5;
+
+    const animate = () => {
+      posRef.current += speed * dirRef.current;
+      if (posRef.current >= 100) {
+        posRef.current = 100;
+        dirRef.current = -1;
+      }
+      if (posRef.current <= 0) {
+        posRef.current = 0;
+        dirRef.current = 1;
+      }
+
+      if (needleRef.current) {
+        needleRef.current.style.left = `${posRef.current}%`;
+      }
+      reqRef.current = requestAnimationFrame(animate);
+    };
+    reqRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (reqRef.current) cancelAnimationFrame(reqRef.current);
+    };
+  }, [currentRound, isPlayingRound1, round1Level, showRound1TryAnother, showRound1Success]);
 
   // ── Round 2 State ───────────────────────────────────────────────────────────
   const [memoryData, setMemoryData] = useState<{ numbers: number[]; questions: MemoryQuestion[] }>(() =>
@@ -238,24 +217,66 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
   };
 
   // Round 1 Submission
-  const handleRound1Submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    sound.playClick();
-    const result = evaluateHardSincerity(complimentInput);
-    setRound1SubmittedScore(result.score);
+  const handleRound1Submit = (e?: React.FormEvent | React.MouseEvent) => {
+    if (e) e.preventDefault();
+    if (!isPlayingRound1) return;
 
-    if (result.score === 100) {
-      onUnlock();
+    sound.playClick();
+    
+    // Target is 42 to 58
+    const isHit = posRef.current >= 42 && posRef.current <= 58;
+
+    if (isHit) {
+      sound.playNotification();
+      setIsPlayingRound1(false);
+      setRound1Feedback({ msg: `Override ${round1Level}/3 Successful!`, type: 'success' });
+      
+      setTimeout(() => {
+        if (round1Level >= 3) {
+          setShowRound1Success(true);
+          setTimeout(() => {
+            setShowRound1Success(false);
+            setCurrentRound(2);
+            setMemoryData(generateMemoryChallenge());
+            setMemoryPhase('memorize');
+            setQuestionIndex(0);
+            setMemoryAnswerInput('');
+            setMemoryFailMessage(null);
+          }, 1600);
+        } else {
+          setRound1Level(prev => prev + 1);
+          setIsPlayingRound1(true);
+          setRound1Feedback(null);
+        }
+      }, 1000);
     } else {
+      sound.playAlert();
       const nextAttemptCount = round1Attempts + 1;
       setRound1Attempts(nextAttemptCount);
-      sound.playAlert();
+      setIsPlayingRound1(false);
+      setRound1Feedback({ msg: `Override Failed!`, type: 'error' });
 
       if (nextAttemptCount >= 3) {
-        handleFailRound(1);
+        setTimeout(() => handleFailRound(1), 1000);
+      } else {
+        setTimeout(() => {
+          setIsPlayingRound1(true);
+          setRound1Feedback(null);
+        }, 1000);
       }
     }
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && currentRound === 1 && isPlayingRound1 && !showRound1TryAnother && !showRound1Success) {
+        e.preventDefault();
+        handleRound1Submit();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentRound, isPlayingRound1, showRound1TryAnother, showRound1Success, round1Attempts, round1Level]);
 
   // Round 2 Question Submit
   const handleMemoryAnswerSubmit = (e: React.FormEvent) => {
@@ -407,7 +428,7 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
               <p className="text-[11px] text-pink-400 font-medium">
                 Round {currentRound} of 3:{' '}
                 {currentRound === 1
-                  ? 'Are You Sincere?'
+                  ? 'Security Override'
                   : currentRound === 2
                   ? 'Prove You Have a Memory'
                   : 'Reputation Rehabilitation'}
@@ -423,15 +444,24 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
           </div>
         </div>
 
-        {/* ── Round 1: "Are You Sincere?" ───────────────────────────────────── */}
+        {/* ── Round 1: "Security Override" ───────────────────────────────────── */}
         {currentRound === 1 && (
           <div className="space-y-4">
             {showRound1TryAnother ? (
               <div className="p-6 rounded-xl bg-slate-950/90 border border-slate-700 text-center space-y-2 animate-in fade-in duration-200">
-                <p className="text-sm font-bold text-slate-200 font-mono tracking-wider">
-                  Try another way.
+                <p className="text-sm font-bold text-rose-400 font-mono tracking-wider">
+                  Override Failed.
                 </p>
                 <p className="text-[11px] text-slate-500 font-mono">
+                  Rerouting to secondary protocol...
+                </p>
+              </div>
+            ) : showRound1Success ? (
+              <div className="p-6 rounded-xl bg-slate-950/90 border border-emerald-900/50 text-center space-y-2 animate-in fade-in duration-200">
+                <p className="text-sm font-bold text-emerald-400 font-mono tracking-wider">
+                  Override Successful.
+                </p>
+                <p className="text-[11px] text-emerald-600/80 font-mono">
                   Advancing to Round 2...
                 </p>
               </div>
@@ -439,56 +469,51 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
               <>
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-slate-300">Compliment Subbu:</span>
+                    <span className="font-medium text-slate-300">Sync with the signal:</span>
                     <span className="text-[11px] text-slate-400 font-mono">
-                      Attempt {Math.min(3, round1Attempts + 1)} of 3
+                      Misses: {round1Attempts} / 3
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-400 leading-relaxed">
-                    Sincerity must hit 100% to unlock immediately.
+                    Hit SPACE or click exactly when the needle aligns with the center.
                   </p>
                 </div>
 
-                <form onSubmit={handleRound1Submit} className="space-y-3">
-                  <textarea
-                    rows={3}
-                    value={complimentInput}
-                    onChange={(e) => setComplimentInput(e.target.value)}
-                    placeholder="Express your genuine praise for Subbu..."
-                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-3 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 font-sans resize-none"
-                    autoFocus
-                  />
+                <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-4 relative overflow-hidden">
+                  <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+                    <span>Lock {round1Level} of 3</span>
+                    <span>{round1Level === 1 ? 'Slow' : round1Level === 2 ? 'Fast' : 'Extreme'}</span>
+                  </div>
 
-                  {round1SubmittedScore !== null && (
-                    <div className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1.5">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-slate-300 flex items-center gap-1.5 text-[11px]">
-                          <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
-                          Evaluated Sincerity:
-                        </span>
-                        <span className="font-mono font-bold text-xs text-pink-400">
-                          ❤️ {round1SubmittedScore}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-slate-800/80 h-1.5 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-pink-500 to-rose-500 transition-all duration-300 rounded-full"
-                          style={{ width: `${round1SubmittedScore}%` }}
-                        />
-                      </div>
-                      <p className="text-[10px] text-slate-400 italic font-mono pt-0.5">
-                        {evaluateHardSincerity(complimentInput).feedback}
-                      </p>
+                  <div className="relative w-full h-8 bg-slate-900 rounded-lg border border-slate-700/50 overflow-hidden shadow-inner">
+                    {/* Target Zone */}
+                    <div className="absolute top-0 bottom-0 left-[42%] right-[42%] bg-emerald-500/20 border-x border-emerald-500/50" />
+                    
+                    {/* Needle */}
+                    <div 
+                      ref={needleRef}
+                      className="absolute top-0 bottom-0 w-1 bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] -ml-[2px]"
+                      style={{ left: '0%' }}
+                    />
+                  </div>
+
+                  {round1Feedback && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150">
+                       <span className={`text-sm font-bold font-mono tracking-wider ${round1Feedback.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                         {round1Feedback.msg}
+                       </span>
                     </div>
                   )}
+                </div>
 
-                  <button
-                    type="submit"
-                    className="w-full py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold font-mono tracking-wider transition-colors cursor-pointer shadow-md shadow-rose-600/20 uppercase"
-                  >
-                    Submit Sincerity Evaluation
-                  </button>
-                </form>
+                <button
+                  type="button"
+                  onClick={(e) => handleRound1Submit(e)}
+                  disabled={!isPlayingRound1}
+                  className="w-full py-3 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold font-mono tracking-wider transition-colors cursor-pointer shadow-md shadow-amber-600/20 uppercase flex items-center justify-center gap-2"
+                >
+                  <Zap className="w-4 h-4" /> OVERRIDE
+                </button>
               </>
             )}
           </div>

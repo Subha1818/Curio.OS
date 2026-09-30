@@ -7,11 +7,9 @@ dotenv.config();
 
 import path from 'path';
 
-import authRoutes from './routes/auth';
 import statsRoutes from './routes/stats';
 import secretRoutes from './routes/secret';
 import lettersRoutes from './routes/letters';
-import usersRoutes from './routes/users';
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '4000', 10);
@@ -31,7 +29,7 @@ app.use(cors({
   },
   credentials: true, // Required for httpOnly cookies to be sent cross-origin
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-session-id', 'x-admin-secret', 'X-Requested-With'],
 }));
 
 app.use(express.json({ limit: '10mb' }));
@@ -55,11 +53,9 @@ app.get('/health', (_req, res) => {
 });
 
 // ── Routes ─────────────────────────────────────────────
-app.use('/api/auth', authRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/secret', secretRoutes);
 app.use('/api/letters', lettersRoutes);
-app.use('/api/users', usersRoutes);
 
 // ── 404 Fallthrough ────────────────────────────────────
 app.use((_req, res) => {
@@ -78,11 +74,8 @@ app.listen(PORT, () => {
   ✨ Curio.OS API Server running
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   🌐 http://localhost:${PORT}
-  📍 /api/auth/register
-  📍 /api/auth/login
-  📍 /api/auth/logout
-  📍 /api/auth/me
-  📍 /api/auth/settings (PATCH)
+  📍 /api/letters
+  📍 /api/stats
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   🗄️  Neon Postgres: connected
   🔒 CORS allowed: ${CORS_ORIGINS.join(', ')}

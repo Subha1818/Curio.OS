@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { getNickname, setAdminSecret } from '../../utils/identity';
 import { useWindowManager } from '../../context/WindowManagerContext';
 import { useVoid } from '../../context/VoidContext';
 import { sound } from '../../utils/sound';
@@ -7,7 +7,7 @@ import { subbuData } from '../../data/subbuData';
 import { socialsData } from '../../data/socialsData';
 import { educationData } from '../../data/educationData';
 import { skillsData } from '../../data/skillsData';
-import { apiGetStats, type UserStats } from '../../api/authApi';
+import { apiGetStats, type UserStats } from '../../api/statsApi';
 import type { AppId, WallpaperId } from '../../types/os';
 import { WALLPAPERS } from '../../data/wallpapers';
 
@@ -21,15 +21,7 @@ interface HistoryLine {
   isMasked?: boolean;
 }
 
-type AuthFlowStep =
-  | 'idle'
-  | 'awaitEmail'
-  | 'awaitPassword'
-  | 'awaitUsername'
-  | 'submitting'
-  | 'done';
 
-type AuthFlowMode = 'login' | 'register';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -107,11 +99,12 @@ const MatrixRainCanvas: React.FC = () => {
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export const TerminalApp: React.FC<{ windowId: string }> = () => {
-  const { user, login, register, logout, isLoggedIn, updateUserSettings } = useAuth();
+  const currentUsername = getNickname() || 'guest';
+  const isLoggedIn = !!getNickname();
   const { openApp, closeWindow, windows } = useWindowManager();
   const { isVoidAwoken } = useVoid();
 
-  const currentUsername = user?.username;
+  
 
   // ── History state ─────────────────────────────────────────────────────────
   // Keep only the 2 welcome lines, no pink broken CURIO text, no tip line
@@ -141,12 +134,7 @@ export const TerminalApp: React.FC<{ windowId: string }> = () => {
   // ── Matrix Visual Effect state ────────────────────────────────────────────
   const [matrixActive, setMatrixActive] = useState(false);
 
-  // ── Auth flow state ───────────────────────────────────────────────────────
-  const [authStep, setAuthStep] = useState<AuthFlowStep>('idle');
-  const [authMode, setAuthMode] = useState<AuthFlowMode>('login');
-  const [authEmail, setAuthEmail] = useState('');
-  const [authPassword, setAuthPassword] = useState('');
-  const [inputMasked, setInputMasked] = useState(false);
+  const inputMasked = false;
 
   // ── Running command state ─────────────────────────────────────────────────
   const [isExecutingAsync, setIsExecutingAsync] = useState(false);
@@ -159,15 +147,7 @@ export const TerminalApp: React.FC<{ windowId: string }> = () => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [history]);
 
-  // ── Auto-run hook: triggered by LoginPopup "Login" button ─────────────────
-  useEffect(() => {
-    const autorun = sessionStorage.getItem('curio_terminal_autorun');
-    if (autorun === 'login') {
-      sessionStorage.removeItem('curio_terminal_autorun');
-      setTimeout(() => startAuthFlow('login'), 500);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -179,175 +159,12 @@ export const TerminalApp: React.FC<{ windowId: string }> = () => {
     setHistory((prev) => [...prev, { id: uid(), prompt: '', output }]);
   }, []);
 
-  const typewriterLine = useCallback(
-    (text: string, delayMs = 25): Promise<void> =>
-      new Promise((resolve) => {
-        const lineId = uid();
-        setHistory((prev) => [...prev, { id: lineId, prompt: '', output: '' }]);
-
-        let i = 0;
-        const tick = () => {
-          i++;
-          const slice = text.slice(0, i);
-          setHistory((prev) =>
-            prev.map((l) => (l.id === lineId ? { ...l, output: slice } : l))
-          );
-          if (i < text.length) {
-            setTimeout(tick, delayMs);
-          } else {
-            resolve();
-          }
-        };
-        setTimeout(tick, delayMs);
-      }),
-    []
-  );
-
-  // ── Auth flow orchestrator ─────────────────────────────────────────────────
-
-  const startAuthFlow = useCallback(
-    async (mode: AuthFlowMode) => {
-      if (authStep !== 'idle') return;
-
-      setAuthMode(mode);
-      setAuthEmail('');
-      setAuthPassword('');
-
-      pushLine({ prompt: 'guest', input: mode });
-      await new Promise((r) => setTimeout(r, 300));
-
-      await typewriterLine('Initializing secure auth channel...', 20);
-      await new Promise((r) => setTimeout(r, 200));
-
-      setAuthStep('awaitEmail');
-      setInputMasked(false);
-      pushOutput(
-        <span className="text-amber-300 font-mono text-xs">Enter email:</span>
-      );
-    },
-    [authStep, pushLine, pushOutput, typewriterLine]
-  );
-
-  // ── Submit logic for Auth ──────────────────────────────────────────────────
-
-  const handleAuthStepInput = useCallback(
-    async (value: string) => {
-      sound.playClick();
-
-      if (authStep === 'awaitEmail') {
-        setAuthEmail(value);
-        pushLine({ prompt: 'guest', input: value, isMasked: false });
-
-        setInputMasked(true);
-        setAuthStep('awaitPassword');
-        pushOutput(
-          <span className="text-amber-300 font-mono text-xs">Enter password:</span>
-        );
-        return;
-      }
-
-      if (authStep === 'awaitPassword') {
-        const password = value;
-        setAuthPassword(password);
-        pushLine({ prompt: 'guest', input: '●'.repeat(Math.min(value.length, 12)), isMasked: true });
-        setInputMasked(false);
-
-        if (authMode === 'register') {
-          setAuthStep('awaitUsername');
-          pushOutput(
-            <span className="text-amber-300 font-mono text-xs">Enter username:</span>
-          );
-          return;
-        }
-
-        // Try login
-        setAuthStep('submitting');
-        pushOutput(
-          <span className="text-slate-400 font-mono text-xs animate-pulse">Verifying credentials...</span>
-        );
-
-        const result = await login(authEmail, password);
-
-        if (result.success && result.message) {
-          pushOutput(
-            <div className="text-xs font-mono space-y-0.5">
-              <p className="text-emerald-400 font-semibold">✓ {result.message}</p>
-              <p className="text-slate-400">Prompt updated. Welcome home. 🏠</p>
-            </div>
-          );
-          setAuthStep('done');
-          setInputMasked(false);
-          setTimeout(() => setAuthStep('idle'), 500);
-          return;
-        }
-
-        if (result.notFound) {
-          pushOutput(
-            <div className="text-xs font-mono space-y-0.5">
-              <p className="text-amber-300">✦ No account found with that email.</p>
-              <p className="text-slate-400">Switching to registration — let's get you set up!</p>
-            </div>
-          );
-          setAuthMode('register');
-          setAuthStep('awaitUsername');
-          pushOutput(
-            <span className="text-amber-300 font-mono text-xs">Enter username:</span>
-          );
-          return;
-        }
-
-        pushOutput(
-          <div className="text-xs font-mono">
-            <p className="text-rose-400">✗ {result.error}</p>
-            <p className="text-slate-400">Try the login command again to retry.</p>
-          </div>
-        );
-        setAuthStep('idle');
-        setInputMasked(false);
-        return;
-      }
-
-      if (authStep === 'awaitUsername') {
-        const username = value;
-        pushLine({ prompt: 'guest', input: username });
-
-        setAuthStep('submitting');
-        pushOutput(
-          <span className="text-slate-400 font-mono text-xs animate-pulse">Creating your account...</span>
-        );
-
-        const result = await register(authEmail, authPassword, username);
-
-        if (result.success && result.message) {
-          pushOutput(
-            <div className="text-xs font-mono space-y-0.5">
-              <p className="text-emerald-400 font-semibold">✓ {result.message}</p>
-              <p className="text-slate-400">Your data is now persistent across sessions. ✨</p>
-            </div>
-          );
-          setAuthStep('done');
-          setTimeout(() => setAuthStep('idle'), 500);
-          return;
-        }
-
-        pushOutput(
-          <div className="text-xs font-mono">
-            <p className="text-rose-400">✗ {result.error}</p>
-            <p className="text-slate-400">Try the register command to retry.</p>
-          </div>
-        );
-        setAuthStep('idle');
-      }
-    },
-    [authStep, authMode, authEmail, authPassword, login, register, pushLine, pushOutput]
-  );
-
   // ── Dramatic Sudo easter egg ───────────────────────────────────────────────
 
   const triggerSudoEasterEgg = useCallback(
     async (fullCmd: string) => {
       setIsExecutingAsync(true);
-      pushLine({ prompt: currentUsername ?? 'guest', input: fullCmd });
+      pushLine({ prompt: currentUsername, input: fullCmd });
 
       pushOutput(
         <div className="text-xs text-rose-400 font-mono">
@@ -737,6 +554,11 @@ ${subbuData.now.lastDetected}`}
           break;
         }
 
+        case '-admin':
+          setAdminSecret(args[1] || '');
+          pushOutput(<div className="text-xs text-rose-400 font-mono">Admin sequence initiated. 🤫</div>);
+          break;
+
         case '-education':
           pushOutput(
             <div className="text-xs font-mono my-2 space-y-2 select-text">
@@ -799,12 +621,6 @@ ${subbuData.now.lastDetected}`}
       if (!trimmed) return;
       setCmdHistory((prev) => [...prev, trimmed]);
 
-      // If we're in an auth flow, route input there
-      if (authStep !== 'idle' && authStep !== 'done') {
-        setInput('');
-        await handleAuthStepInput(trimmed);
-        return;
-      }
 
       // Check for sudo easter egg
       if (trimmed.toLowerCase().startsWith('sudo ') || trimmed.toLowerCase() === 'sudo') {
@@ -819,7 +635,7 @@ ${subbuData.now.lastDetected}`}
       setInput('');
 
       // Add user line to history
-      pushLine({ prompt: currentUsername ?? 'guest', input: trimmed });
+      pushLine({ prompt: currentUsername, input: trimmed });
 
       // Handle subbu portfolio command
       if (cmd === 'subbu') {
@@ -851,17 +667,7 @@ ${subbuData.now.lastDetected}`}
                 </div>
               </div>
 
-              <div>
-                <div className="text-indigo-400 font-bold mb-0.5">USER &amp; AUTH</div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 text-slate-300">
-                  <div><span className="text-amber-300">login</span> — Authenticate account</div>
-                  <div><span className="text-amber-300">register</span> — Create new account</div>
-                  <div><span className="text-amber-300">logout</span> — Sign out of session</div>
-                  <div><span className="text-amber-300">user</span> — Detailed account stats</div>
-                  <div><span className="text-amber-300">profile</span> — Profile summary &amp; bio</div>
-                  <div><span className="text-amber-300">passwd</span> — Password rotation status</div>
-                </div>
-              </div>
+
 
               <div>
                 <div className="text-indigo-400 font-bold mb-0.5">COMMUNITY &amp; EXPLORATION</div>
@@ -930,8 +736,7 @@ ${subbuData.now.lastDetected}`}
               <p><span className="text-pink-400">user:</span> cutie@{currentUsername}</p>
               <p><span className="text-pink-400">status:</span> <span className="text-emerald-400">Authenticated ✓</span></p>
               <p><span className="text-pink-400">rank:</span> <span className="text-amber-300 font-semibold">{userRankBadge}</span></p>
-              <p><span className="text-pink-400">email:</span> {user?.email}</p>
-              <p><span className="text-pink-400">role:</span> Cutiepie Administrator</p>
+                  
             </div>
           ) : (
             <div className="text-xs text-slate-300 font-mono space-y-0.5">
@@ -983,52 +788,14 @@ ${subbuData.now.lastDetected}`}
           );
           break;
 
-        // ── User / Auth Commands ────────────────────────────────────────────
-        case 'login':
-          if (isLoggedIn) {
-            response = (
-              <div className="text-xs text-amber-300 font-mono">
-                Already logged in as <span className="text-pink-400">cutie@{currentUsername}</span>! Run <span className="text-amber-300 underline">logout</span> to switch accounts.
-              </div>
-            );
-            break;
-          }
-          await startAuthFlow('login');
-          return;
-
-        case 'register':
-          if (isLoggedIn) {
-            response = (
-              <div className="text-xs text-amber-300 font-mono">
-                You already have an active account (<span className="text-pink-400">{currentUsername}</span>). Log out first to register another.
-              </div>
-            );
-            break;
-          }
-          await startAuthFlow('register');
-          return;
-
-        case 'logout':
-          if (!isLoggedIn) {
-            response = <div className="text-xs text-slate-400 font-mono">You are not logged in, cutie.</div>;
-            break;
-          }
-          await logout();
-          response = (
-            <div className="text-xs font-mono space-y-0.5">
-              <p className="text-amber-300">✦ Logged out successfully. Come back soon! 👋</p>
-              <p className="text-slate-400">Prompt reset to <span className="text-pink-400">cutie@guest</span>.</p>
-            </div>
-          );
-          break;
-
+        // ── User Commands ────────────────────────────────────────────
         case 'user':
         case 'profile':
           if (!isLoggedIn) {
             response = (
               <div className="text-xs font-mono text-slate-400 space-y-1">
                 <p>Guest profile active.</p>
-                <p className="text-pink-400">Run <span className="text-amber-300">login</span> or <span className="text-amber-300">register</span> to save your persistent profile.</p>
+                <p className="text-pink-400">Set a nickname in LetterBox to personalize your experience.</p>
               </div>
             );
           } else {
@@ -1039,30 +806,11 @@ ${subbuData.now.lastDetected}`}
             response = (
               <div className="text-xs font-mono text-slate-300 space-y-1 bg-slate-900/40 p-2.5 rounded border border-pink-500/20">
                 <div className="text-pink-400 font-bold border-b border-pink-500/30 pb-0.5">
-                  USER PROFILE: cutie@{user?.username}
+                  USER PROFILE: cutie@{currentUsername}
                 </div>
-                <div><span className="text-indigo-400">Email:</span> {user?.email}</div>
                 <div><span className="text-indigo-400">Mind Rank:</span> <span className="text-amber-300 font-semibold">{stats?.rank?.badge ?? '🫧 Thought Drifter'}</span></div>
                 <div><span className="text-indigo-400">Letters Posted:</span> <span className="text-pink-300 font-semibold">{stats?.lettersPosted ?? 0}</span></div>
                 <div><span className="text-indigo-400">Likes Received:</span> <span className="text-rose-400 font-semibold">{stats?.likesReceived ?? 0} ♡</span></div>
-                <div><span className="text-indigo-400">Wallpaper:</span> {user?.wallpaperId || 'cosmic-aurora'}</div>
-                <div><span className="text-indigo-400">Member Since:</span> {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Today'}</div>
-                <div><span className="text-indigo-400">Role:</span> Cutiepie VIP Administrator</div>
-                {user?.bio && <div><span className="text-indigo-400">Bio:</span> {user.bio}</div>}
-              </div>
-            );
-          }
-          break;
-
-        case 'passwd':
-          if (!isLoggedIn) {
-            response = <div className="text-xs text-pink-400 font-mono">login first, cutie 🥺</div>;
-          } else {
-            response = (
-              <div className="text-xs text-slate-300 font-mono space-y-1">
-                <p className="text-amber-400">🔒 Password Security Protocol</p>
-                <p>Your password hash is encrypted with 12 rounds of bcrypt on Neon Postgres.</p>
-                <p className="text-slate-500">Direct CLI rotation is currently locked by Administrator Subbu for your protection 😉.</p>
               </div>
             );
           }
@@ -1215,9 +963,7 @@ ${subbuData.now.lastDetected}`}
                 localStorage.setItem('curio_wallpaper', targetConfig.id);
               } catch { /* ignore */ }
 
-              if (isLoggedIn) {
-                updateUserSettings({ wallpaperId: targetConfig.id });
-              }
+
 
               response = (
                 <div className="text-xs text-emerald-400 font-mono space-y-0.5">
@@ -1475,8 +1221,6 @@ ${subbuData.now.lastDetected}`}
       if (response) pushOutput(response);
     },
     [
-      authStep,
-      handleAuthStepInput,
       triggerSudoEasterEgg,
       currentUsername,
       pushLine,
@@ -1484,13 +1228,9 @@ ${subbuData.now.lastDetected}`}
       isLoggedIn,
       renderNeofetch,
       cmdHistory,
-      startAuthFlow,
-      logout,
-      user,
       openApp,
       windows,
       closeWindow,
-      updateUserSettings,
       matrixActive,
       pushOutput,
       isVoidAwoken,
@@ -1510,7 +1250,6 @@ ${subbuData.now.lastDetected}`}
       return;
     }
 
-    if (authStep !== 'idle') return;
 
     if (e.key === 'ArrowUp') {
       e.preventDefault();
@@ -1531,7 +1270,7 @@ ${subbuData.now.lastDetected}`}
     }
   };
 
-  const promptUser = isLoggedIn ? (currentUsername ?? 'guest') : 'guest';
+  const promptUser = currentUsername;
 
   return (
     <div
@@ -1550,7 +1289,7 @@ ${subbuData.now.lastDetected}`}
             {item.input !== undefined && (
               <div className="flex items-center gap-1.5 text-xs">
                 <Prompt
-                  username={item.input ? (isLoggedIn ? currentUsername : 'guest') : 'guest'}
+                  username={item.input ? currentUsername : 'guest'}
                   isMatrix={matrixActive}
                 />
                 <span className={matrixActive ? 'text-emerald-300 ml-1' : 'text-slate-100 ml-1'}>
@@ -1579,28 +1318,22 @@ ${subbuData.now.lastDetected}`}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          disabled={authStep === 'submitting' || isExecutingAsync}
+          disabled={isExecutingAsync}
           className={`flex-1 bg-transparent border-none outline-none font-mono text-xs focus:ring-0 p-0 ml-1 ${
             matrixActive
               ? 'text-emerald-300 placeholder-emerald-800'
               : inputMasked
               ? 'text-slate-300'
               : 'text-slate-100 placeholder-slate-600'
-          } ${authStep === 'submitting' || isExecutingAsync ? 'opacity-40' : ''}`}
+          } ${isExecutingAsync ? 'opacity-40' : ''}`}
           placeholder={
-            authStep === 'awaitEmail'
-              ? 'your@email.com'
-              : authStep === 'awaitPassword'
-              ? '••••••••'
-              : authStep === 'awaitUsername'
-              ? 'cool_username'
-              : 'type a command...'
+            'type a command...'
           }
           autoFocus
           autoComplete="off"
           spellCheck={false}
         />
-        {(authStep === 'submitting' || isExecutingAsync) && (
+        {isExecutingAsync && (
           <span className="text-pink-400 animate-pulse text-xs font-mono">⟳</span>
         )}
       </div>

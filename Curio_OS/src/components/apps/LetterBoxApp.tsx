@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   apiGetLetters,
   apiPostLetter,
@@ -8,19 +8,17 @@ import {
   type LetterItem,
 } from '../../api/letterboxApi';
 import { LETTERBOX_HINTS } from '../../data/letterboxHints';
-import { useAuth } from '../../context/AuthContext';
-import { useWindowManager } from '../../context/WindowManagerContext';
 import { useAnimationsEnabled } from '../../utils/useAnimations';
 import { sound } from '../../utils/sound';
 import { LetterBoxIcon } from '../icons/LetterBoxIcon';
+import { NamePopup } from '../NamePopup';
+import { getNickname, setAskedName } from '../../utils/identity';
 import {
   Heart,
   Share2,
   Trash2,
   Sparkles,
   Send,
-  LogIn,
-  X,
   Flame,
   Clock,
   Compass,
@@ -48,8 +46,6 @@ function formatRelativeTime(dateStr: string): string {
 }
 
 export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
-  const { user, isLoggedIn } = useAuth();
-  const { openApp } = useWindowManager();
   const animationsEnabled = useAnimationsEnabled();
 
   const [sortMode, setSortMode] = useState<'newest' | 'top'>('newest');
@@ -65,20 +61,21 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [hintIndex, setHintIndex] = useState<number>(0);
 
-  // In-Theme Login Modal state
-  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+  // Identity state
+  const [nickname, setNicknameState] = useState<string | null>(getNickname());
+  const [showNamePopup, setShowNamePopup] = useState<boolean>(false);
 
   // In-app ephemeral toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const showToast = (msg: string) => {
+  const showToast = useCallback((msg: string) => {
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     setToastMessage(msg);
     toastTimeoutRef.current = setTimeout(() => {
       setToastMessage(null);
     }, 2800);
-  };
+  }, []);
 
   // Rotating hints effect
   useEffect(() => {
@@ -90,7 +87,7 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
   }, []);
 
   // Fetch feed
-  const loadFeed = async (sort: 'newest' | 'top', cursor?: number | null) => {
+  const loadFeed = useCallback(async (sort: 'newest' | 'top', cursor?: number | null) => {
     if (cursor) {
       setLoadingMore(true);
     } else {
@@ -112,45 +109,26 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
 
     setLoading(false);
     setLoadingMore(false);
-  };
+  }, [showToast]);
 
   // Initial feed load & sort changes
   useEffect(() => {
     loadFeed(sortMode);
-  }, [sortMode, isLoggedIn]);
+  }, [sortMode, loadFeed]);
 
-  // Restore pending action after login
+  // Sync nickname if it changes elsewhere
   useEffect(() => {
-    if (isLoggedIn) {
-      const savedPending = sessionStorage.getItem('curio_letterbox_pending');
-      if (savedPending) {
-        sessionStorage.removeItem('curio_letterbox_pending');
-        try {
-          const parsed = JSON.parse(savedPending) as { action: string; content?: string; letterId?: number };
-          if (parsed.action === 'post' && parsed.content) {
-            setDraftContent(parsed.content);
-            showToast('Identity verified! Your draft has been restored.');
-          } else if (parsed.action === 'like' && parsed.letterId) {
-            handleToggleLike(parsed.letterId);
-            showToast('Identity verified! Heart recorded. 💖');
-          }
-        } catch { }
+    const interval = setInterval(() => {
+      const current = getNickname();
+      if (current !== nickname) {
+        setNicknameState(current);
       }
-    }
-  }, [isLoggedIn]);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [nickname]);
 
   // Handle Like Toggle
   const handleToggleLike = async (letterId: number) => {
-    if (!isLoggedIn) {
-      sessionStorage.setItem(
-        'curio_letterbox_pending',
-        JSON.stringify({ action: 'like', letterId })
-      );
-      sound.playAlert();
-      setShowLoginModal(true);
-      return;
-    }
-
     const target = letters.find((l) => l.id === letterId);
     if (!target) return;
 
@@ -197,20 +175,11 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
     const trimmed = draftContent.trim();
     if (!trimmed) return;
 
-    if (!isLoggedIn) {
-      sessionStorage.setItem(
-        'curio_letterbox_pending',
-        JSON.stringify({ action: 'post', content: trimmed })
-      );
-      sound.playAlert();
-      setShowLoginModal(true);
-      return;
-    }
-
     setSubmitting(true);
     sound.playClick();
 
-    const res = await apiPostLetter(trimmed);
+    const currentName = getNickname() || undefined;
+    const res = await apiPostLetter(trimmed, currentName);
 
     if (res.letter) {
       sound.playNotification();
@@ -252,14 +221,6 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
     }
   };
 
-  // Trigger login flow via terminal
-  const handleTriggerLogin = () => {
-    setShowLoginModal(false);
-    sessionStorage.setItem('curio_terminal_autorun', 'login');
-    sound.playClick();
-    openApp('terminal');
-  };
-
   return (
     <div className="h-full w-full bg-slate-950/95 text-slate-200 flex flex-col select-none overflow-hidden font-sans relative">
       {/* ── Toast Overlay ───────────────────────────────────────────────────── */}
@@ -270,6 +231,19 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
             <span>{toastMessage}</span>
           </div>
         </div>
+      )}
+
+      {showNamePopup && (
+        <NamePopup 
+          forceShow
+          onDismissForSession={() => {
+            setShowNamePopup(false);
+            setNicknameState(getNickname());
+          }} 
+          onStayAnonymous={() => {
+            setShowNamePopup(false);
+          }} 
+        />
       )}
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
@@ -340,15 +314,25 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
                 />
 
                 <div className="flex items-center justify-between pt-1">
-                  <div className="text-xs text-slate-400 font-sans">
-                    {isLoggedIn ? (
-                      <span className="text-slate-400">
-                        Posting as <span className="text-purple-300 font-medium">{user?.username}</span>
+                  <div className="text-xs text-slate-400 font-sans flex items-center gap-1.5">
+                    {nickname ? (
+                      <span>
+                        Posting as <span className="text-purple-300 font-medium">{nickname}</span>
                       </span>
                     ) : (
-                      <span className="text-slate-400">
-                        Anonymous explorer • log in via Terminal to verify
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span>Posting as Mystery Visitor.</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAskedName(); // So we don't double trigger
+                            setShowNamePopup(true);
+                          }}
+                          className="text-purple-300 hover:text-purple-200 underline underline-offset-2 transition-colors cursor-pointer"
+                        >
+                          Set Name?
+                        </button>
+                      </div>
                     )}
                   </div>
 
@@ -382,7 +366,7 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
                     sound.playClick();
                     setSortMode('newest');
                   }}
-                  className={`px-2.5 py-1 rounded-md transition-colors ${sortMode === 'newest'
+                  className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer ${sortMode === 'newest'
                       ? 'bg-purple-500/20 text-purple-200 font-medium'
                       : 'text-slate-400 hover:text-slate-200'
                     }`}
@@ -394,7 +378,7 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
                     sound.playClick();
                     setSortMode('top');
                   }}
-                  className={`px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 ${sortMode === 'top'
+                  className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer flex items-center gap-1 ${sortMode === 'top'
                       ? 'bg-purple-500/20 text-purple-200 font-medium'
                       : 'text-slate-400 hover:text-slate-200'
                     }`}
@@ -453,7 +437,7 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
                           <button
                             onClick={() => handleDeleteLetter(letter.id)}
                             title="Erase letter"
-                            className="text-slate-500 hover:text-rose-400 p-1 rounded-md transition-colors"
+                            className="text-slate-500 hover:text-rose-400 p-1 rounded-md transition-colors cursor-pointer"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -475,7 +459,7 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
                         </span>
                         <span
                           title={`${letter.authorRank.likesReceived} community likes received`}
-                          className="text-xs font-sans px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 shrink-0"
+                          className="text-xs font-sans px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 shrink-0 cursor-default"
                         >
                           {letter.authorRank.badge}
                         </span>
@@ -504,7 +488,7 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
                         <button
                           onClick={() => handleShareLetter(letter)}
                           title="Copy thought to clipboard"
-                          className="p-1 rounded-full text-slate-400 hover:text-purple-300 hover:bg-slate-800/60 transition-colors"
+                          className="p-1 rounded-full text-slate-400 hover:text-purple-300 hover:bg-slate-800/60 transition-colors cursor-pointer"
                         >
                           <Share2 className="w-3.5 h-3.5" />
                         </button>
@@ -528,55 +512,6 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
               </div>
             )}
       </div>
-
-      {/* ── In-Theme Login Modal ────────────────────────────────────────────── */}
-      {showLoginModal && (
-        <div className="absolute inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-sm rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-pink-500/40 p-6 text-center shadow-2xl relative space-y-4">
-            <button
-              onClick={() => setShowLoginModal(false)}
-              className="absolute top-4 right-4 text-slate-500 hover:text-slate-300 p-1"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <div className="w-12 h-12 rounded-2xl bg-pink-500/15 border border-pink-500/30 flex items-center justify-center mx-auto text-2xl shadow-lg shadow-pink-500/20">
-              💌
-            </div>
-
-            <div className="space-y-1">
-              <h3 className="font-mono font-bold text-sm tracking-widest text-pink-300">
-                LETTERBOX
-              </h3>
-              <p className="text-xs text-slate-300 font-sans pt-1">
-                You may observe the thoughts.
-              </p>
-              <p className="text-xs text-slate-400 font-sans">
-                But to leave one...
-                <br />
-                <span className="text-pink-300 font-semibold">you need an identity.</span>
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-2 pt-2">
-              <button
-                onClick={handleTriggerLogin}
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-indigo-600 hover:from-pink-400 hover:to-indigo-500 text-white text-xs font-bold font-mono tracking-wider shadow-lg shadow-pink-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>LOGIN</span>
-              </button>
-
-              <button
-                onClick={() => setShowLoginModal(false)}
-                className="w-full py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 text-xs font-mono transition-colors cursor-pointer"
-              >
-                CONTINUE READING
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

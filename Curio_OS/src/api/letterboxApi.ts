@@ -1,4 +1,5 @@
 // LetterBox Guestbook API Client
+import { getSessionId, getAdminSecret } from '../utils/identity';
 
 const BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:4000';
 
@@ -44,15 +45,18 @@ async function request<T>(
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
   try {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('curio_jwt_token') : null;
-    const authHeaders: Record<string, string> = {};
-    if (token) {
-      authHeaders['Authorization'] = `Bearer ${token}`;
+    const sessionId = getSessionId();
+    const adminSecret = getAdminSecret();
+    const authHeaders: Record<string, string> = {
+      'x-session-id': sessionId,
+    };
+    if (adminSecret) {
+      authHeaders['x-admin-secret'] = adminSecret;
     }
 
     const res = await fetch(`${BASE_URL}${path}`, {
       ...options,
-      credentials: 'include', // sends httpOnly cookies
+      credentials: 'omit', // No cookies needed anymore
       headers: {
         'Content-Type': 'application/json',
         ...authHeaders,
@@ -95,11 +99,12 @@ export async function apiGetLetters(
 
 // ── POST /api/letters ─────────────────────────────────────────────────────────
 export async function apiPostLetter(
-  content: string
+  content: string,
+  displayName?: string
 ): Promise<{ letter?: LetterItem; error?: string }> {
   const res = await request<{ letter: LetterItem }>('/api/letters', {
     method: 'POST',
-    body: JSON.stringify({ content }),
+    body: JSON.stringify({ content, displayName }),
   });
   if (res.error) return { error: res.error };
   return { letter: res.data?.letter };

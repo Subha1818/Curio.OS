@@ -1,13 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 
 export function useAnimationsEnabled(): boolean {
-  const { user } = useAuth();
-
   const getSavedSetting = (): boolean => {
-    if (user?.themeSettings && typeof (user.themeSettings as Record<string, unknown>).animations === 'boolean') {
-      return (user.themeSettings as { animations: boolean }).animations;
-    }
     try {
       const saved = localStorage.getItem('curio_theme_settings');
       if (saved) {
@@ -21,12 +15,6 @@ export function useAnimationsEnabled(): boolean {
   };
 
   const [enabled, setEnabled] = useState<boolean>(getSavedSetting);
-
-  useEffect(() => {
-    if (user?.themeSettings && typeof (user.themeSettings as Record<string, unknown>).animations === 'boolean') {
-      setEnabled((user.themeSettings as { animations: boolean }).animations);
-    }
-  }, [user?.themeSettings]);
 
   useEffect(() => {
     const handleUpdate = (e: Event) => {

@@ -1,6 +1,5 @@
 import { Router, Request, Response } from 'express';
 import pool from '../db/pool';
-import { authMiddleware, optionalAuthMiddleware } from '../middleware/authMiddleware';
 
 const router = Router();
 
@@ -33,46 +32,42 @@ export function getRankFromLikes(likesReceived: number): { title: string; badge:
   };
 }
 
-// Helper: Check if user is admin
-async function checkIfAdmin(userId: string): Promise<boolean> {
-  try {
-    const res = await pool.query(`SELECT is_admin FROM users WHERE id = $1`, [userId]);
-    return Boolean(res.rows[0]?.is_admin);
-  } catch {
-    return false;
-  }
+// Helper: Check if request has admin secret
+function checkIsAdmin(req: Request): boolean {
+  const adminSecret = req.headers['x-admin-secret'];
+  return !!adminSecret && adminSecret === process.env.ADMIN_SECRET;
 }
 
 // ── GET /api/letters ──────────────────────────────────────────────────────────
-// Public feed with optional auth for likedByMe & canDelete
-router.get('/', optionalAuthMiddleware, async (req: Request, res: Response): Promise<void> => {
+// Public feed
+router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
     const sort = req.query.sort === 'top' ? 'top' : 'newest';
     const limit = Math.min(50, Math.max(1, parseInt((req.query.limit as string) || '20', 10)));
     const cursor = req.query.cursor ? parseInt(req.query.cursor as string, 10) : null;
-    const currentUserId = req.user?.userId;
-    const isAdmin = currentUserId ? await checkIfAdmin(currentUserId) : false;
+    const currentSessionId = req.headers['x-session-id'] as string | undefined;
+    const isAdmin = checkIsAdmin(req);
 
     let queryText = `
       SELECT 
         l.id,
-        l.user_id,
-        u.username,
+        l.session_id,
+        l.display_name AS username,
         l.content,
         l.created_at,
-        COUNT(ll.user_id)::int AS like_count,
+        COUNT(ll.session_id)::int AS like_count,
         COALESCE(
           (SELECT COUNT(*)::int 
            FROM letter_likes ll2 
            JOIN letters l2 ON ll2.letter_id = l2.id 
-           WHERE l2.user_id = l.user_id AND ll2.user_id != l.user_id), 
+           WHERE l2.session_id = l.session_id AND ll2.session_id != l.session_id), 
           0
         ) AS author_likes_received
     `;
 
-    if (currentUserId) {
+    if (currentSessionId) {
       queryText += `,
-        EXISTS(SELECT 1 FROM letter_likes WHERE letter_id = l.id AND user_id = $1) AS liked_by_me
+        EXISTS(SELECT 1 FROM letter_likes WHERE letter_id = l.id AND session_id = $1) AS liked_by_me
       `;
     } else {
       queryText += `,
@@ -82,13 +77,12 @@ router.get('/', optionalAuthMiddleware, async (req: Request, res: Response): Pro
 
     queryText += `
       FROM letters l
-      JOIN users u ON l.user_id = u.id
       LEFT JOIN letter_likes ll ON ll.letter_id = l.id
     `;
 
     const params: (string | number)[] = [];
-    if (currentUserId) {
-      params.push(currentUserId);
+    if (currentSessionId) {
+      params.push(currentSessionId);
     }
 
     // Cursor conditions
@@ -101,7 +95,7 @@ router.get('/', optionalAuthMiddleware, async (req: Request, res: Response): Pro
     }
 
     queryText += `
-      GROUP BY l.id, l.user_id, u.username, l.content, l.created_at
+      GROUP BY l.id, l.session_id, l.display_name, l.content, l.created_at
     `;
 
     if (sort === 'top') {
@@ -119,14 +113,14 @@ router.get('/', optionalAuthMiddleware, async (req: Request, res: Response): Pro
     const letters = result.rows.map((row) => ({
       id: row.id,
       formattedId: `#${String(row.id).padStart(3, '0')}`,
-      userId: row.user_id,
+      userId: row.session_id, // map session_id to userId for frontend compatibility
       username: row.username,
-      content: String(row.content), // rendered as plain text
+      content: String(row.content), 
       createdAt: row.created_at,
       likeCount: parseInt(row.like_count || '0', 10),
       likedByMe: Boolean(row.liked_by_me),
       authorRank: getRankFromLikes(parseInt(row.author_likes_received || '0', 10)),
-      canDelete: Boolean(currentUserId && (currentUserId === row.user_id || isAdmin)),
+      canDelete: Boolean(isAdmin || (currentSessionId && currentSessionId === row.session_id)),
     }));
 
     const nextCursor =
@@ -142,12 +136,26 @@ router.get('/', optionalAuthMiddleware, async (req: Request, res: Response): Pro
 });
 
 // ── POST /api/letters ─────────────────────────────────────────────────────────
-// Auth required. Post a new letter (max 280 chars)
-router.post('/', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+// Post a new letter (max 280 chars)
+router.post('/', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId } = req.user!;
+    const sessionId = req.headers['x-session-id'] as string;
+    if (!sessionId) {
+      res.status(401).json({ error: 'Session ID is required.' });
+      return;
+    }
+
     const rawContent = (req.body.content || '') as string;
     const content = typeof rawContent === 'string' ? rawContent.trim() : '';
+    let displayName = (req.body.displayName || '') as string;
+    displayName = typeof displayName === 'string' ? displayName.trim() : '';
+
+    // Honeypot check
+    if (req.body.website || req.body.email) {
+      // Honeypot filled! Return 201 silently (bot reject)
+      res.status(201).json({ success: true });
+      return;
+    }
 
     if (!content) {
       res.status(400).json({ error: 'Letter content cannot be empty.' });
@@ -158,49 +166,60 @@ router.post('/', authMiddleware, async (req: Request, res: Response): Promise<vo
       res.status(400).json({ error: 'Letter exceeds maximum 280 characters.' });
       return;
     }
+    
+    // Basic content filter: mostly URL or profanity (simple check)
+    const urlPattern = /^(https?:\/\/[^\s]+)$/;
+    if (urlPattern.test(content)) {
+      res.status(400).json({ error: 'Post cannot be just a URL.' });
+      return;
+    }
 
-    // Rate limiting: 1 post per 30s
+    // fallback name
+    if (!displayName) {
+      const suffix = Math.floor(1000 + Math.random() * 9000);
+      displayName = `Mystery Visitor #${suffix}`;
+    }
+
+    // Rate limiting: 1 post per 60s
     const now = Date.now();
-    const lastTime = lastPostTime.get(userId) || 0;
-    if (now - lastTime < 30_000) {
-      const waitSec = Math.ceil((30_000 - (now - lastTime)) / 1000);
+    const lastTime = lastPostTime.get(sessionId) || 0;
+    if (now - lastTime < 60_000) {
+      const waitSec = Math.ceil((60_000 - (now - lastTime)) / 1000);
       res.status(429).json({ error: `Slow down! You can leave another letter in ${waitSec}s.` });
       return;
     }
 
-    // Rate limiting: max 10 per hour
-    const history = (postHistory.get(userId) || []).filter((t) => now - t < 3600_000);
-    if (history.length >= 10) {
-      res.status(429).json({ error: 'Rate limit reached: maximum 10 letters per hour.' });
+    // Rate limiting: max 15 per day
+    const history = (postHistory.get(sessionId) || []).filter((t) => now - t < 86400_000);
+    if (history.length >= 15) {
+      res.status(429).json({ error: 'Rate limit reached: maximum 15 letters per day.' });
       return;
     }
 
     // Insert into database
     const insertRes = await pool.query(
-      `INSERT INTO letters (user_id, content) 
-       VALUES ($1, $2) 
-       RETURNING id, user_id, content, created_at`,
-      [userId, content]
+      `INSERT INTO letters (session_id, display_name, content) 
+       VALUES ($1, $2, $3) 
+       RETURNING id, session_id, display_name, content, created_at`,
+      [sessionId, displayName, content]
     );
 
-    lastPostTime.set(userId, now);
+    lastPostTime.set(sessionId, now);
     history.push(now);
-    postHistory.set(userId, history);
+    postHistory.set(sessionId, history);
 
     const created = insertRes.rows[0];
 
     // Fetch author details
     const userRes = await pool.query(
-      `SELECT username, 
-        COALESCE(
+      `SELECT COALESCE(
           (SELECT COUNT(*)::int 
            FROM letter_likes ll 
            JOIN letters l ON ll.letter_id = l.id 
-           WHERE l.user_id = $1 AND ll.user_id != l.user_id), 
+           WHERE l.session_id = $1 AND ll.session_id != l.session_id), 
           0
-        ) AS rank_likes
-       FROM users WHERE id = $1`,
-      [userId]
+        ) AS rank_likes`,
+      [sessionId]
     );
 
     const author = userRes.rows[0];
@@ -209,8 +228,8 @@ router.post('/', authMiddleware, async (req: Request, res: Response): Promise<vo
       letter: {
         id: created.id,
         formattedId: `#${String(created.id).padStart(3, '0')}`,
-        userId: created.user_id,
-        username: author?.username || 'user',
+        userId: created.session_id,
+        username: created.display_name,
         content: created.content,
         createdAt: created.created_at,
         likeCount: 0,
@@ -227,10 +246,11 @@ router.post('/', authMiddleware, async (req: Request, res: Response): Promise<vo
 
 // ── DELETE /api/letters/:id ───────────────────────────────────────────────────
 // Author or admin only
-router.delete('/:id', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId } = req.user!;
+    const sessionId = req.headers['x-session-id'] as string;
     const letterId = parseInt(String(req.params.id), 10);
+    const isAdmin = checkIsAdmin(req);
 
     if (isNaN(letterId)) {
       res.status(400).json({ error: 'Invalid letter ID.' });
@@ -238,7 +258,7 @@ router.delete('/:id', authMiddleware, async (req: Request, res: Response): Promi
     }
 
     const checkRes = await pool.query(
-      `SELECT id, user_id FROM letters WHERE id = $1`,
+      `SELECT id, session_id FROM letters WHERE id = $1`,
       [letterId]
     );
 
@@ -248,9 +268,8 @@ router.delete('/:id', authMiddleware, async (req: Request, res: Response): Promi
     }
 
     const letter = checkRes.rows[0];
-    const isAdmin = await checkIfAdmin(userId);
 
-    if (letter.user_id !== userId && !isAdmin) {
+    if (letter.session_id !== sessionId && !isAdmin) {
       res.status(403).json({ error: 'You do not have permission to delete this letter.' });
       return;
     }
@@ -265,10 +284,15 @@ router.delete('/:id', authMiddleware, async (req: Request, res: Response): Promi
 });
 
 // ── POST /api/letters/:id/like ────────────────────────────────────────────────
-// Auth required. Idempotent like
-router.post('/:id/like', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+// Idempotent like
+router.post('/:id/like', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId } = req.user!;
+    const sessionId = req.headers['x-session-id'] as string;
+    if (!sessionId) {
+      res.status(401).json({ error: 'Session ID is required.' });
+      return;
+    }
+
     const letterId = parseInt(String(req.params.id), 10);
 
     if (isNaN(letterId)) {
@@ -276,14 +300,14 @@ router.post('/:id/like', authMiddleware, async (req: Request, res: Response): Pr
       return;
     }
 
-    // Rate limit likes per user (1 every 300ms)
+    // Rate limit likes per session (1 every 300ms)
     const now = Date.now();
-    const lastLike = lastLikeTime.get(userId) || 0;
+    const lastLike = lastLikeTime.get(sessionId) || 0;
     if (now - lastLike < 300) {
       res.status(429).json({ error: 'Too many requests.' });
       return;
     }
-    lastLikeTime.set(userId, now);
+    lastLikeTime.set(sessionId, now);
 
     // Verify letter exists
     const letterRes = await pool.query(`SELECT id FROM letters WHERE id = $1`, [letterId]);
@@ -293,10 +317,10 @@ router.post('/:id/like', authMiddleware, async (req: Request, res: Response): Pr
     }
 
     await pool.query(
-      `INSERT INTO letter_likes (user_id, letter_id)
+      `INSERT INTO letter_likes (session_id, letter_id)
        VALUES ($1, $2)
-       ON CONFLICT (user_id, letter_id) DO NOTHING`,
-      [userId, letterId]
+       ON CONFLICT (session_id, letter_id) DO NOTHING`,
+      [sessionId, letterId]
     );
 
     const countRes = await pool.query(
@@ -315,10 +339,15 @@ router.post('/:id/like', authMiddleware, async (req: Request, res: Response): Pr
 });
 
 // ── DELETE /api/letters/:id/like ──────────────────────────────────────────────
-// Auth required. Idempotent unlike
-router.delete('/:id/like', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+// Idempotent unlike
+router.delete('/:id/like', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId } = req.user!;
+    const sessionId = req.headers['x-session-id'] as string;
+    if (!sessionId) {
+      res.status(401).json({ error: 'Session ID is required.' });
+      return;
+    }
+
     const letterId = parseInt(String(req.params.id), 10);
 
     if (isNaN(letterId)) {
@@ -327,8 +356,8 @@ router.delete('/:id/like', authMiddleware, async (req: Request, res: Response): 
     }
 
     await pool.query(
-      `DELETE FROM letter_likes WHERE user_id = $1 AND letter_id = $2`,
-      [userId, letterId]
+      `DELETE FROM letter_likes WHERE session_id = $1 AND letter_id = $2`,
+      [sessionId, letterId]
     );
 
     const countRes = await pool.query(
@@ -352,14 +381,13 @@ router.get('/leaderboard', async (_req: Request, res: Response): Promise<void> =
   try {
     const result = await pool.query(`
       SELECT 
-        u.id, 
-        u.username, 
-        COUNT(ll.user_id)::int AS total_likes, 
+        l.session_id, 
+        MAX(l.display_name) as username, 
+        COUNT(ll.session_id)::int AS total_likes, 
         COUNT(DISTINCT l.id)::int AS letters_count
-      FROM users u
-      JOIN letters l ON l.user_id = u.id
-      LEFT JOIN letter_likes ll ON ll.letter_id = l.id AND ll.user_id != u.id
-      GROUP BY u.id, u.username
+      FROM letters l
+      LEFT JOIN letter_likes ll ON ll.letter_id = l.id AND ll.session_id != l.session_id
+      GROUP BY l.session_id
       ORDER BY total_likes DESC, letters_count DESC
       LIMIT 10
     `);
@@ -368,7 +396,7 @@ router.get('/leaderboard', async (_req: Request, res: Response): Promise<void> =
       const likes = parseInt(row.total_likes || '0', 10);
       return {
         rankPosition: index + 1,
-        userId: row.id,
+        userId: row.session_id,
         username: row.username,
         totalLikes: likes,
         lettersCount: parseInt(row.letters_count || '0', 10),

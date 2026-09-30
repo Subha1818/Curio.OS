@@ -3,36 +3,33 @@ import pool from './pool';
 const migration = `
   CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
-  -- Ensure users table has is_admin column
-  ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT false;
+  -- Drop users table (and any dependent tables due to CASCADE)
+  DROP TABLE IF EXISTS users CASCADE;
+  DROP TABLE IF EXISTS letter_likes CASCADE;
+  DROP TABLE IF EXISTS letters CASCADE;
 
-  -- Create letters table
+  -- Create letters table (session-based)
   CREATE TABLE IF NOT EXISTS letters (
     id          SERIAL PRIMARY KEY,
-    user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    session_id  TEXT NOT NULL,
+    display_name TEXT NOT NULL,
     content     VARCHAR(280) NOT NULL,
     created_at  TIMESTAMPTZ DEFAULT NOW()
   );
 
   CREATE INDEX IF NOT EXISTS idx_letters_created_at ON letters(created_at DESC);
-  CREATE INDEX IF NOT EXISTS idx_letters_user_id    ON letters(user_id);
+  CREATE INDEX IF NOT EXISTS idx_letters_session_id ON letters(session_id);
 
-  -- Create letter_likes table
+  -- Create letter_likes table (session-based)
   CREATE TABLE IF NOT EXISTS letter_likes (
-    user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    session_id  TEXT NOT NULL,
     letter_id   INTEGER NOT NULL REFERENCES letters(id) ON DELETE CASCADE,
     created_at  TIMESTAMPTZ DEFAULT NOW(),
-    PRIMARY KEY (user_id, letter_id)
+    PRIMARY KEY (session_id, letter_id)
   );
 
   CREATE INDEX IF NOT EXISTS idx_letter_likes_letter_id ON letter_likes(letter_id);
-  CREATE INDEX IF NOT EXISTS idx_letter_likes_user_id   ON letter_likes(user_id);
-
-  -- Set Subbu's account as admin if present
-  UPDATE users 
-  SET is_admin = true 
-  WHERE LOWER(username) IN ('subbu', 'subha1818', 'subhajit') 
-     OR LOWER(email) LIKE '%subhajitpatra%';
+  CREATE INDEX IF NOT EXISTS idx_letter_likes_session_id ON letter_likes(session_id);
 
   -- Drop legacy notes table as per requirement
   DROP TABLE IF EXISTS notes CASCADE;

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 
 export type CursorStyleId = 'default' | 'pixel' | 'fairy' | 'heart';
 
@@ -43,13 +42,7 @@ export const CURSOR_OPTIONS: CursorOption[] = [
 ];
 
 export function useCursorStyle(): [CursorStyleId, (style: CursorStyleId) => void] {
-  const { user } = useAuth();
-
   const getSavedStyle = (): CursorStyleId => {
-    if (user?.themeSettings && typeof (user.themeSettings as Record<string, unknown>).cursorStyle === 'string') {
-      const s = (user.themeSettings as { cursorStyle: string }).cursorStyle;
-      if (s === 'default' || s === 'pixel' || s === 'fairy' || s === 'heart') return s;
-    }
     try {
       const saved = localStorage.getItem('curio_cursor_style');
       if (saved === 'default' || saved === 'pixel' || saved === 'fairy' || saved === 'heart') return saved;
@@ -83,15 +76,6 @@ export function useCursorStyle(): [CursorStyleId, (style: CursorStyleId) => void
     } catch { /* ignore */ }
     window.dispatchEvent(new CustomEvent('curio_cursor_changed', { detail: style }));
   };
-
-  // Sync with user profile if it updates on login
-  useEffect(() => {
-    const userStyle = (user?.themeSettings as Record<string, unknown> | undefined)?.cursorStyle as CursorStyleId | undefined;
-    if (userStyle && (userStyle === 'default' || userStyle === 'pixel' || userStyle === 'fairy' || userStyle === 'heart')) {
-      setCursorStyle(userStyle);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.themeSettings]);
 
   useEffect(() => {
     applyCursorToDOM(cursorStyle);

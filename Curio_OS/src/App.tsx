@@ -1,14 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { WindowManagerProvider } from './context/WindowManagerContext';
 import { MusicProvider } from './context/MusicContext';
-import { AuthProvider, useAuth } from './context/AuthContext';
 import { VoidProvider, useVoid } from './context/VoidContext';
 import { BootSequence, getTimeBasedGreeting } from './components/BootSequence';
 import { Desktop } from './components/Desktop';
 import { Taskbar } from './components/Taskbar';
 import { StartMenu } from './components/StartMenu';
 import { NotificationCenter } from './components/NotificationCenter';
-import { LoginPopup } from './components/LoginPopup';
+import { NamePopup } from './components/NamePopup';
 import { NotificationManager } from './components/NotificationManager';
 import type { WallpaperId, SystemNotification } from './types/os';
 import { DEFAULT_WALLPAPER_ID, getWallpaperConfig } from './data/wallpapers';
@@ -18,7 +17,6 @@ import { sound } from './utils/sound';
 // ── Inner OS shell (has access to AuthContext + VoidContext) ────────────────
 function CurioShell() {
   useCursorStyle();
-  const { isLoggedIn, isRestoringSession, user } = useAuth();
   const { isVoidAwoken } = useVoid();
 
   const [hasBooted, setHasBooted] = useState<boolean>(() => {
@@ -47,9 +45,18 @@ function CurioShell() {
   const [isStartOpen, setIsStartOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isShutDown, setIsShutDown] = useState(false);
-  const [loginPopupDismissed, setLoginPopupDismissed] = useState<boolean>(() => {
-    return sessionStorage.getItem('curio_login_popup_dismissed') === 'true';
-  });
+  
+  const [showNamePopup, setShowNamePopup] = useState(false);
+  const [namePopupResolved, setNamePopupResolved] = useState(false);
+
+  useEffect(() => {
+    if (hasBooted && !namePopupResolved) {
+      const t = setTimeout(() => {
+        setShowNamePopup(true);
+      }, 35000);
+      return () => clearTimeout(t);
+    }
+  }, [hasBooted, namePopupResolved]);
 
   // ── Jitter effect state (triggered by VOID.EXE) ─────────────────────────
   const [isJittering, setIsJittering] = useState(false);
@@ -152,34 +159,6 @@ function CurioShell() {
   });
 
 
-  // ── Sync wallpaper from user profile on login ─────────────────────────────
-  useEffect(() => {
-    const wpId = user?.wallpaperId || (user?.themeSettings as Record<string, unknown> | undefined)?.wallpaperId;
-    if (wpId && typeof wpId === 'string') {
-      handleSelectWallpaper(wpId as WallpaperId);
-    }
-  }, [user?.wallpaperId, user?.themeSettings, handleSelectWallpaper]);
-
-  // ── Push a welcome notification on login ──────────────────────────────────
-  useEffect(() => {
-    if (isLoggedIn && user) {
-      setNotifications((prev) => {
-        const alreadyHas = prev.some((n) => n.id === 'login-success');
-        if (alreadyHas) return prev;
-        return [
-          {
-            id: 'login-success',
-            title: `Hii ${user.username}! 🎉`,
-            message: 'Your personalized desktop is now active. Notes and settings sync across sessions!',
-            time: 'Just now',
-            read: false,
-            type: 'heart' as const,
-          },
-          ...prev,
-        ];
-      });
-    }
-  }, [isLoggedIn, user]);
 
   const toggleSound = () => {
     const next = !soundEnabled;
@@ -187,36 +166,14 @@ function CurioShell() {
     sound.enabled = next;
   };
 
-  const handleDismissLoginPopup = () => {
-    sessionStorage.setItem('curio_login_popup_dismissed', 'true');
-    setLoginPopupDismissed(true);
-  };
-
   const hasUnread = notifications.some((n) => !n.read);
-  const showLoginPopup =
-    hasBooted &&
-    !isRestoringSession &&
-    !isLoggedIn &&
-    !loginPopupDismissed;
-
   const triggerSubbuDisappointedRef = useRef<(() => void) | null>(null);
-  const isLoginSequenceResolved =
-    hasBooted &&
-    !isRestoringSession &&
-    (isLoggedIn || loginPopupDismissed);
+  const isLoginSequenceResolved = hasBooted;
 
   const handleDesktopClick = () => {
     if (isStartOpen) setIsStartOpen(false);
     if (isNotificationsOpen) setIsNotificationsOpen(false);
   };
-
-  if (isRestoringSession && !hasBooted) {
-    return (
-      <div className="w-screen h-screen bg-slate-950 flex items-center justify-center">
-        <div className="text-pink-400 font-mono text-sm animate-pulse">Restoring session...</div>
-      </div>
-    );
-  }
 
   return (
     <div
@@ -297,11 +254,14 @@ function CurioShell() {
             isVoidAwoken={isVoidAwoken}
           />
 
-          {/* Two-stage login popup — only for anonymous guests */}
-          {showLoginPopup && (
-            <LoginPopup
-              onDismissForSession={handleDismissLoginPopup}
-              onStillNo={() => triggerSubbuDisappointedRef.current?.()}
+          {/* 35s standalone identity popup */}
+          {showNamePopup && (
+            <NamePopup
+              onDismissForSession={() => {
+                setShowNamePopup(false);
+                setNamePopupResolved(true);
+              }}
+              onStayAnonymous={() => triggerSubbuDisappointedRef.current?.()}
             />
           )}
 
@@ -333,15 +293,13 @@ function CurioShell() {
 // ── Root App — wraps providers ────────────────────────────────────────────
 export function App() {
   return (
-    <AuthProvider>
-      <VoidProvider>
-        <WindowManagerProvider>
-          <MusicProvider>
-            <CurioShell />
-          </MusicProvider>
-        </WindowManagerProvider>
-      </VoidProvider>
-    </AuthProvider>
+    <VoidProvider>
+      <WindowManagerProvider>
+        <MusicProvider>
+          <CurioShell />
+        </MusicProvider>
+      </WindowManagerProvider>
+    </VoidProvider>
   );
 }
 
