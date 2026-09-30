@@ -63,20 +63,34 @@ const DESKTOP_APPS: DesktopItem[] = [
   { id: 'void', appId: 'void', title: 'VOID.EXE', iconName: 'Skull', badge: 'DANGER' },
 ];
 
-// Helper to compute default Windows-style left-aligned columns
+// Intentional default desktop layout:
+// Col 0: Terminal, Socials, LetterBox, Music Player, Settings, VOID.EXE
+// Col 1: File Explorer, Skills, Projects (Folder Shortcut)
+export const DEFAULT_ICON_GRID: Record<string, { col: number; row: number }> = {
+  terminal: { col: 0, row: 0 },
+  files: { col: 1, row: 0 },
+  socials: { col: 0, row: 1 },
+  skills: { col: 1, row: 1 },
+  letterbox: { col: 0, row: 2 },
+  'projects-shortcut': { col: 1, row: 2 },
+  music: { col: 0, row: 3 },
+  settings: { col: 0, row: 4 },
+  void: { col: 0, row: 5 },
+};
+
+const STORAGE_KEY = 'curio_desktop_icon_positions_v3';
+
+// Helper to compute default icon positions matching screenshot 1 layout
 const computeDefaultPositions = (
-  apps: { id: string }[],
-  screenHeight: number
+  apps: { id: string }[]
 ): Record<string, { x: number; y: number }> => {
   const positions: Record<string, { x: number; y: number }> = {};
-  const maxRows = Math.max(1, Math.floor((screenHeight - GRID_OFFSET_Y - 80) / GRID_CELL_H));
 
   apps.forEach((app, idx) => {
-    const col = Math.floor(idx / maxRows);
-    const row = idx % maxRows;
+    const grid = DEFAULT_ICON_GRID[app.id] ?? { col: Math.floor(idx / 6), row: idx % 6 };
     positions[app.id] = {
-      x: GRID_OFFSET_X + col * GRID_CELL_W,
-      y: GRID_OFFSET_Y + row * GRID_CELL_H,
+      x: GRID_OFFSET_X + grid.col * GRID_CELL_W,
+      y: GRID_OFFSET_Y + grid.row * GRID_CELL_H,
     };
   });
   return positions;
@@ -172,13 +186,14 @@ export const Desktop: React.FC<DesktopProps> = ({
 
   // Desktop Icon Positions (persisted to localStorage)
   const [iconPositions, setIconPositions] = useState<Record<string, { x: number; y: number }>>(() => {
-    const screenH = typeof window !== 'undefined' ? window.innerHeight : 800;
-    const defaults = computeDefaultPositions(DESKTOP_APPS, screenH);
+    const defaults = computeDefaultPositions(DESKTOP_APPS);
     try {
-      const saved = localStorage.getItem('curio_desktop_icon_positions');
+      localStorage.removeItem('curio_desktop_icon_positions');
+      const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         const screenW = typeof window !== 'undefined' ? window.innerWidth : 1200;
+        const screenH = typeof window !== 'undefined' ? window.innerHeight : 800;
         const result: Record<string, { x: number; y: number }> = { ...parsed };
         for (const app of DESKTOP_APPS) {
           if (!result[app.id]) {
@@ -212,14 +227,13 @@ export const Desktop: React.FC<DesktopProps> = ({
 
   const preventClickRef = useRef(false);
 
-  // Auto-arrange icons back to default grid columns
+  // Auto-arrange icons back to default grid layout
   const handleAutoArrange = useCallback(() => {
     sound.playClick();
-    const screenH = typeof window !== 'undefined' ? window.innerHeight : 800;
-    const defaults = computeDefaultPositions(DESKTOP_APPS, screenH);
+    const defaults = computeDefaultPositions(DESKTOP_APPS);
     setIconPositions(defaults);
     try {
-      localStorage.setItem('curio_desktop_icon_positions', JSON.stringify(defaults));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
     } catch {}
   }, []);
 
@@ -356,7 +370,7 @@ export const Desktop: React.FC<DesktopProps> = ({
       const nextPositions = { ...iconPositions, [id]: snapped };
       setIconPositions(nextPositions);
       try {
-        localStorage.setItem('curio_desktop_icon_positions', JSON.stringify(nextPositions));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextPositions));
       } catch {}
 
       sound.playClick();

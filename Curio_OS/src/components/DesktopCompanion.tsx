@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { sound } from '../utils/sound';
+import { useWindowManager } from '../context/WindowManagerContext';
 
 type CompanionType = 'cat' | 'ghost' | 'robot';
 type CompanionState = 'idle' | 'walking' | 'sleeping' | 'happy' | 'flipping';
@@ -11,7 +12,7 @@ interface HeartParticle {
   symbol: string;
 }
 
-const CAT_QUOTES = [
+const GENERAL_CAT_QUOTES = [
   "Subbu coded this with pure caffeine and vibes ✨",
   "Remember to hydrate, or I'll knock your coffee over! 💧😼",
   "Letters in LetterBox are looking extra wholesome today 💌",
@@ -24,12 +25,22 @@ const CAT_QUOTES = [
   "You're doing great today, human! Keep going 🌸",
 ];
 
+const FILE_EXPLORER_QUOTES = [
+  "Psst... there's a whole file cabinet of secrets in there. 📁",
+  "The File Explorer knows more about Subbu than I do. 🐱",
+  "Go on, open a folder. I won't tell anyone you're curious. 🐾",
+  "Some folders are locked. Some are just waiting to be found... 🔑",
+  "I heard the Projects folder has some really good stuff in it. 👀",
+  "Click around in there. I promise it's more interesting than me. ✨",
+];
+
 const GHOST_QUOTES = [
   "Booo! Just kidding, I'm friendly 👻✨",
   "Floating through your desktop memory sectors...",
   "VOID.EXE thinks it's scary. I think it needs a hug 🕯️",
   "Whispering good vibes directly into your terminal 💫",
   "OoooOOoo... did someone say lofi beats? 🎶",
+  "Psst... have you checked the secret folders in File Explorer? 📁👻",
 ];
 
 const ROBOT_QUOTES = [
@@ -38,9 +49,20 @@ const ROBOT_QUOTES = [
   "Syntax error: seriousness not found in runtime 🛸",
   "Performing quantum diagnostic: user is awesome. 💎",
   "Recharging batteries on aesthetic lofi vibrations... 🔋",
+  "Memory scan complete: high-density projects detected in File Explorer 📂",
 ];
 
 export const DesktopCompanion: React.FC = () => {
+  const windowManager = useWindowManager();
+  const isFilesOpen = Boolean(windowManager?.windows.some((w) => w.appId === 'files'));
+  const filesEverOpenedRef = useRef(false);
+
+  useEffect(() => {
+    if (isFilesOpen) {
+      filesEverOpenedRef.current = true;
+    }
+  }, [isFilesOpen]);
+
   const [companionType, setCompanionType] = useState<CompanionType>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('curio_companion_type');
@@ -64,6 +86,7 @@ export const DesktopCompanion: React.FC = () => {
   const dragOffsetRef = useRef({ x: 0, y: 0 });
   const messageTimeoutRef = useRef<number | null>(null);
   const companionRef = useRef<HTMLDivElement | null>(null);
+  const lastQuoteRef = useRef<string | null>(null);
 
   // Show a temporary bubble message
   const triggerMessage = useCallback((text: string, duration = 6000) => {
@@ -74,24 +97,70 @@ export const DesktopCompanion: React.FC = () => {
     }, duration);
   }, []);
 
+  // Weighted quote selection favoring File Explorer lines when not yet opened
+  const pickNextQuote = useCallback((): string => {
+    if (companionType === 'ghost') {
+      const candidates = GHOST_QUOTES.filter((q) => q !== lastQuoteRef.current);
+      const chosen = candidates[Math.floor(Math.random() * candidates.length)] || GHOST_QUOTES[0];
+      lastQuoteRef.current = chosen;
+      return chosen;
+    }
+
+    if (companionType === 'robot') {
+      const candidates = ROBOT_QUOTES.filter((q) => q !== lastQuoteRef.current);
+      const chosen = candidates[Math.floor(Math.random() * candidates.length)] || ROBOT_QUOTES[0];
+      lastQuoteRef.current = chosen;
+      return chosen;
+    }
+
+    // Mochi (Cat): 2.5x weighting for File Explorer lines until visited
+    const hasViewedFiles = isFilesOpen || filesEverOpenedRef.current;
+    const fileWeight = hasViewedFiles ? 0.35 : 2.5;
+    const generalWeight = 1.0;
+
+    const weightedItems: { quote: string; weight: number }[] = [];
+
+    FILE_EXPLORER_QUOTES.forEach((q) => {
+      if (q !== lastQuoteRef.current) {
+        weightedItems.push({ quote: q, weight: fileWeight });
+      }
+    });
+
+    GENERAL_CAT_QUOTES.forEach((q) => {
+      if (q !== lastQuoteRef.current) {
+        weightedItems.push({ quote: q, weight: generalWeight });
+      }
+    });
+
+    const totalWeight = weightedItems.reduce((sum, item) => sum + item.weight, 0);
+    let rand = Math.random() * totalWeight;
+
+    for (const item of weightedItems) {
+      if (rand < item.weight) {
+        lastQuoteRef.current = item.quote;
+        return item.quote;
+      }
+      rand -= item.weight;
+    }
+
+    const fallback = FILE_EXPLORER_QUOTES[0];
+    lastQuoteRef.current = fallback;
+    return fallback;
+  }, [companionType, isFilesOpen]);
+
   // Periodic whimsical speech bubble
   useEffect(() => {
     if (isHidden) return;
     const interval = setInterval(() => {
-      if (Math.random() < 0.6 && !isDragging) {
-        const pool =
-          companionType === 'cat'
-            ? CAT_QUOTES
-            : companionType === 'ghost'
-            ? GHOST_QUOTES
-            : ROBOT_QUOTES;
-        const randomQuote = pool[Math.floor(Math.random() * pool.length)];
-        triggerMessage(randomQuote);
+      if (Math.random() < 0.65 && !isDragging) {
+        const quote = pickNextQuote();
+        triggerMessage(quote);
       }
-    }, 18000);
+    }, 16000);
 
     return () => clearInterval(interval);
-  }, [companionType, isHidden, isDragging, triggerMessage]);
+  }, [isHidden, isDragging, pickNextQuote, triggerMessage]);
+
 
   // Wandering behavior AI
   useEffect(() => {
