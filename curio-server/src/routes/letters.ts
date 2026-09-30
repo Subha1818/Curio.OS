@@ -174,10 +174,10 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // fallback name
+    // Name is mandatory to post a letter
     if (!displayName) {
-      const suffix = Math.floor(1000 + Math.random() * 9000);
-      displayName = `Mystery Visitor #${suffix}`;
+      res.status(400).json({ error: 'A name or nickname is required to leave a letter.' });
+      return;
     }
 
     // Rate limiting: 1 post per 60s

@@ -12,7 +12,7 @@ import { useAnimationsEnabled } from '../../utils/useAnimations';
 import { sound } from '../../utils/sound';
 import { LetterBoxIcon } from '../icons/LetterBoxIcon';
 import { NamePopup } from '../NamePopup';
-import { getNickname, setAskedName } from '../../utils/identity';
+import { getNickname } from '../../utils/identity';
 import {
   Heart,
   Share2,
@@ -64,6 +64,7 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
   // Identity state
   const [nickname, setNicknameState] = useState<string | null>(getNickname());
   const [showNamePopup, setShowNamePopup] = useState<boolean>(false);
+  const [namePopupReason, setNamePopupReason] = useState<'post' | 'general'>('general');
 
   // In-app ephemeral toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -170,16 +171,11 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
   };
 
   // Handle Post Letter
-  const handleSubmitLetter = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = draftContent.trim();
-    if (!trimmed) return;
-
+  const executePostLetter = async (contentToPost: string, authorName: string) => {
     setSubmitting(true);
     sound.playClick();
 
-    const currentName = getNickname() || undefined;
-    const res = await apiPostLetter(trimmed, currentName);
+    const res = await apiPostLetter(contentToPost, authorName);
 
     if (res.letter) {
       sound.playNotification();
@@ -192,6 +188,23 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
     }
 
     setSubmitting(false);
+  };
+
+  const handleSubmitLetter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = draftContent.trim();
+    if (!trimmed) return;
+
+    const currentName = getNickname();
+    if (!currentName) {
+      sound.playAlert();
+      setNamePopupReason('post');
+      setShowNamePopup(true);
+      showToast('Please set your name first to drop a letter! ✍️');
+      return;
+    }
+
+    await executePostLetter(trimmed, currentName);
   };
 
   // Handle Delete Letter
@@ -236,12 +249,22 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
       {showNamePopup && (
         <NamePopup 
           forceShow
+          reason={namePopupReason}
+          onNameSet={(newName) => {
+            setNicknameState(newName);
+            if (namePopupReason === 'post' && draftContent.trim()) {
+              executePostLetter(draftContent.trim(), newName);
+            }
+          }}
           onDismissForSession={() => {
             setShowNamePopup(false);
             setNicknameState(getNickname());
           }} 
           onStayAnonymous={() => {
             setShowNamePopup(false);
+            if (namePopupReason === 'post') {
+              showToast('A name is required to post a letter. Your draft is saved! ✨');
+            }
           }} 
         />
       )}
@@ -316,21 +339,35 @@ export const LetterBoxApp: React.FC<{ windowId: string }> = () => {
                 <div className="flex items-center justify-between pt-1">
                   <div className="text-xs text-slate-400 font-sans flex items-center gap-1.5">
                     {nickname ? (
-                      <span>
-                        Posting as <span className="text-purple-300 font-medium">{nickname}</span>
-                      </span>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <span>Posting as Mystery Visitor.</span>
+                      <div className="flex items-center gap-1.5">
+                        <span>
+                          Posting as <span className="text-purple-300 font-medium">{nickname}</span>
+                        </span>
                         <button
                           type="button"
                           onClick={() => {
-                            setAskedName(); // So we don't double trigger
+                            setNamePopupReason('general');
                             setShowNamePopup(true);
                           }}
-                          className="text-purple-300 hover:text-purple-200 underline underline-offset-2 transition-colors cursor-pointer"
+                          className="text-slate-400 hover:text-purple-300 text-[11px] underline underline-offset-2 ml-0.5 cursor-pointer"
                         >
-                          Set Name?
+                          (change)
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-amber-400/90 text-xs flex items-center gap-1 font-medium">
+                          ⚠️ Name required to post
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNamePopupReason('post');
+                            setShowNamePopup(true);
+                          }}
+                          className="text-purple-300 hover:text-purple-200 underline underline-offset-2 font-medium cursor-pointer"
+                        >
+                          Set your name
                         </button>
                       </div>
                     )}

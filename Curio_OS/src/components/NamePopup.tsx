@@ -7,13 +7,17 @@ import { sound } from '../utils/sound';
 interface NamePopupProps {
   onDismissForSession: () => void;
   onStayAnonymous: () => void;
+  onNameSet?: (name: string) => void;
   forceShow?: boolean;
+  reason?: 'post' | 'general';
 }
 
 export const NamePopup: React.FC<NamePopupProps> = ({
   onDismissForSession,
   onStayAnonymous,
+  onNameSet,
   forceShow = false,
+  reason = 'general',
 }) => {
   const [visible, setVisible] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
@@ -55,6 +59,7 @@ export const NamePopup: React.FC<NamePopupProps> = ({
     sound.playClick();
     setNickname(cleanName);
     setAskedName();
+    onNameSet?.(cleanName);
     animateOut(onDismissForSession);
   };
 
@@ -164,11 +169,16 @@ export const NamePopup: React.FC<NamePopupProps> = ({
           {/* Greeting & Headline */}
           <div className="space-y-1 mb-5">
             <p className="font-sans text-xs sm:text-sm text-purple-300 font-medium tracking-normal">
-              👋 Psst, mystery visitor...
+              {reason === 'post' ? '✍️ Dropping a letter in the guestbook?' : '👋 Psst, mystery visitor...'}
             </p>
             <h2 className="font-display text-xl sm:text-2xl font-medium text-white tracking-normal leading-snug">
               What Should we call you?
             </h2>
+            {reason === 'post' && (
+              <p className="text-xs text-purple-200/70 font-sans mt-0.5">
+                A name is required so readers know who sent this letter.
+              </p>
+            )}
           </div>
 
           {/* Form */}
@@ -199,7 +209,7 @@ export const NamePopup: React.FC<NamePopupProps> = ({
                 onClick={handleAnonymous}
                 className="text-xs text-slate-400 hover:text-purple-300 transition-colors cursor-pointer font-sans inline-flex items-center gap-1"
               >
-                I&apos;ll stay a mystery 👻
+                {reason === 'post' ? "I'll stay a mystery (cancel)" : "I'll stay a mystery 👻"}
               </button>
             </div>
           </form>
