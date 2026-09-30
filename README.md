@@ -1,4 +1,4 @@
-# 🌌 Curio.OS / DREAM.OS
+# 🌌 Curio.OS
 
 > A fantasy web desktop operating system built with React 19, TypeScript, Tailwind CSS, Express, and Neon Postgres.
 
