@@ -127,7 +127,7 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
   );
   const [memoryPhase, setMemoryPhase] = useState<'intro' | 'memorize' | 'answering'>('intro');
   const [introCountdown, setIntroCountdown] = useState(3);
-  const [memorizeCountdown, setMemorizeCountdown] = useState(5);
+  const [memorizeCountdown, setMemorizeCountdown] = useState(3);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [memoryAnswerInput, setMemoryAnswerInput] = useState('');
   const [memoryFailMessage, setMemoryFailMessage] = useState<string | null>(null);
@@ -141,6 +141,41 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
   const [placedWords, setPlacedWords] = useState<{ id: string; word: string }[]>([]);
   const [scrambleFailNotice, setScrambleFailNotice] = useState<string | null>(null);
   const [successPopup, setSuccessPopup] = useState<SecretPuzzle['popup'] | null>(null);
+
+  // Terminal Chrome & Animations (Hooks must remain at the top level!)
+  const animationsEnabled = useAnimationsEnabled();
+  const fullStatusText = `admin_protocol.sys :: round ${currentRound}/3 :: fails ${totalFailedAttempts}/6`;
+  const [displayedStatus, setDisplayedStatus] = useState(fullStatusText);
+
+  // Character reveal / typewriter animation for the terminal status line
+  useEffect(() => {
+    if (!animationsEnabled) {
+      setDisplayedStatus(fullStatusText);
+      return;
+    }
+    let i = 0;
+    setDisplayedStatus('');
+    const interval = setInterval(() => {
+      i++;
+      setDisplayedStatus(fullStatusText.slice(0, i));
+      if (i >= fullStatusText.length) {
+        clearInterval(interval);
+      }
+    }, 18);
+    return () => clearInterval(interval);
+  }, [fullStatusText, animationsEnabled]);
+
+  const consoleGlowClass = !animationsEnabled
+    ? currentRound === 1
+      ? 'border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.2),0_10px_35px_rgba(0,0,0,0.85)]'
+      : currentRound === 2
+      ? 'border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.2),0_10px_35px_rgba(0,0,0,0.85)]'
+      : 'border-fuchsia-500/50 shadow-[0_0_20px_rgba(217,70,239,0.2),0_10px_35px_rgba(0,0,0,0.85)]'
+    : currentRound === 1
+    ? 'border-cyan-500/40 animate-console-glow-cyan'
+    : currentRound === 2
+    ? 'border-blue-500/40 animate-console-glow-blue'
+    : 'border-fuchsia-500/40 animate-console-glow-magenta';
 
   // Initialize Round 3 words when puzzle changes
   const initRound3Words = (p: SecretPuzzle) => {
@@ -174,11 +209,11 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
     return () => clearInterval(interval);
   }, [currentRound, memoryPhase]);
 
-  // Round 2 memorize countdown timer
+  // Round 2 memorize countdown timer (3 seconds)
   useEffect(() => {
     if (currentRound !== 2 || memoryPhase !== 'memorize') return;
 
-    setMemorizeCountdown(5);
+    setMemorizeCountdown(3);
     const interval = setInterval(() => {
       setMemorizeCountdown((prev) => {
         if (prev <= 1) {
@@ -192,6 +227,7 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
 
     return () => clearInterval(interval);
   }, [currentRound, memoryPhase, memoryData]);
+
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
@@ -412,13 +448,16 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
   if (successPopup) {
     return (
       <div className="h-full flex items-center justify-center p-4">
-        <div className="max-w-md w-full p-6 rounded-2xl bg-slate-900 border border-emerald-500/40 shadow-2xl space-y-4 text-center animate-in zoom-in-95 duration-200">
-          <div className="text-4xl">{successPopup.emoji}</div>
-          <h3 className="text-lg font-bold text-emerald-400 font-mono tracking-wide">
+        <div className="max-w-md w-full p-6 rounded-xl bg-[#090D16]/95 border border-emerald-500/50 shadow-[0_0_30px_rgba(16,185,129,0.2),0_10px_35px_rgba(0,0,0,0.85)] backdrop-blur-xl space-y-4 text-center animate-in zoom-in-95 duration-200 relative overflow-hidden">
+          {/* Subtle scanline overlay */}
+          <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_bottom,transparent_50%,rgba(0,0,0,0.35)_51%)] bg-[length:100%_4px] opacity-20" />
+          
+          <div className="text-4xl relative z-10">{successPopup.emoji}</div>
+          <h3 className="text-lg font-bold text-emerald-400 font-mono tracking-wide relative z-10">
             {successPopup.title}
           </h3>
-          <p className="text-sm text-slate-200 font-semibold">{successPopup.subtitle}</p>
-          <p className="text-xs text-slate-400 italic bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+          <p className="text-sm text-slate-200 font-semibold relative z-10">{successPopup.subtitle}</p>
+          <p className="text-xs text-slate-300 italic bg-slate-950/80 p-3 rounded-xl border border-slate-800 relative z-10">
             &ldquo;{successPopup.jab}&rdquo;
           </p>
           <button
@@ -426,7 +465,7 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
               sound.playClick();
               onUnlock();
             }}
-            className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl text-xs tracking-wide transition-colors cursor-pointer shadow-lg shadow-emerald-900/40 flex items-center justify-center gap-1.5"
+            className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl text-xs tracking-wide transition-colors cursor-pointer shadow-lg shadow-emerald-900/40 flex items-center justify-center gap-1.5 relative z-10"
           >
             <span>Let me in</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -436,41 +475,8 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
     );
   }
 
-  const animationsEnabled = useAnimationsEnabled();
-  const fullStatusText = `admin_protocol.sys :: round ${currentRound}/3 :: fails ${totalFailedAttempts}/6`;
-  const [displayedStatus, setDisplayedStatus] = useState(fullStatusText);
-
-  // Character reveal / typewriter animation for the terminal status line
-  useEffect(() => {
-    if (!animationsEnabled) {
-      setDisplayedStatus(fullStatusText);
-      return;
-    }
-    let i = 0;
-    setDisplayedStatus('');
-    const interval = setInterval(() => {
-      i++;
-      setDisplayedStatus(fullStatusText.slice(0, i));
-      if (i >= fullStatusText.length) {
-        clearInterval(interval);
-      }
-    }, 18);
-    return () => clearInterval(interval);
-  }, [fullStatusText, animationsEnabled]);
-
-  const consoleGlowClass = !animationsEnabled
-    ? currentRound === 1
-      ? 'border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.2),0_10px_35px_rgba(0,0,0,0.85)]'
-      : currentRound === 2
-      ? 'border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.2),0_10px_35px_rgba(0,0,0,0.85)]'
-      : 'border-fuchsia-500/50 shadow-[0_0_20px_rgba(217,70,239,0.2),0_10px_35px_rgba(0,0,0,0.85)]'
-    : currentRound === 1
-    ? 'border-cyan-500/40 animate-console-glow-cyan'
-    : currentRound === 2
-    ? 'border-blue-500/40 animate-console-glow-blue'
-    : 'border-fuchsia-500/40 animate-console-glow-magenta';
-
   return (
+
     <div className="h-full flex items-center justify-center p-2">
       <div
         className={`max-w-md w-full p-5 sm:p-6 rounded-xl bg-[#090D16]/95 backdrop-blur-xl border space-y-4 relative overflow-hidden transition-all duration-300 ${consoleGlowClass}`}

@@ -660,8 +660,8 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
                 key={folder.id}
                 onClick={() => { sound.playClick(); setCurrentFolder(folder.id); setSearchQuery(''); setPreviewFile(null); setDetailItem(null); }}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all group font-sans ${isActive
-                    ? 'bg-purple-500/20 text-purple-200 border border-purple-500/35 shadow-sm font-semibold'
-                    : 'text-slate-300 hover:bg-slate-800/70 hover:text-white'
+                  ? 'bg-purple-500/20 text-purple-200 border border-purple-500/35 shadow-sm font-semibold'
+                  : 'text-slate-300 hover:bg-slate-800/70 hover:text-white'
                   }`}
               >
                 <div className="flex items-center gap-2.5 truncate">
