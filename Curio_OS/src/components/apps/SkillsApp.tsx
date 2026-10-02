@@ -94,9 +94,8 @@ const SkillSectionCard: React.FC<SkillSectionCardProps> = ({
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`group relative rounded-2xl p-5 border flex flex-col justify-between select-none bg-slate-900/80 hover:bg-slate-900/95 border-slate-800 hover:border-purple-500/40 backdrop-blur-md transition-all ${
-        animationsEnabled ? 'animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both' : ''
-      }`}
+      className={`group relative rounded-2xl p-5 border flex flex-col justify-between select-none bg-slate-900/80 hover:bg-slate-900/95 border-slate-800 hover:border-purple-500/40 backdrop-blur-md transition-all ${animationsEnabled ? 'animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both' : ''
+        }`}
     >
       {/* Ambient corner glow */}
       <div

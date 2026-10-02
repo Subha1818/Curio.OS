@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { socialsData, type SocialProfile } from '../../data/socialsData';
 import { useAnimationsEnabled } from '../../utils/useAnimations';
 import { sound } from '../../utils/sound';
-import { ExternalLink, Radio, Sparkles } from 'lucide-react';
+import { ExternalLink, Radio } from 'lucide-react';
 
 interface SocialCardProps {
   profile: SocialProfile;
@@ -75,13 +75,11 @@ const SocialCard: React.FC<SocialCardProps> = ({ profile, index, animationsEnabl
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
-      className={`group relative rounded-2xl p-5 border flex flex-col justify-between select-none ${
-        animationsEnabled ? 'animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both' : ''
-      } ${
-        isComingSoon
+      className={`group relative rounded-2xl p-5 border flex flex-col justify-between select-none ${animationsEnabled ? 'animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both' : ''
+        } ${isComingSoon
           ? 'bg-slate-900/40 border-slate-800/60 opacity-60 cursor-not-allowed'
           : 'bg-slate-900/80 hover:bg-slate-900/95 border-slate-800 hover:border-slate-700/80 cursor-pointer backdrop-blur-md'
-      }`}
+        }`}
     >
       {/* Accent corner ambient gradient */}
       <div
@@ -137,9 +135,8 @@ const SocialCard: React.FC<SocialCardProps> = ({ profile, index, animationsEnabl
           ) : (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-sans text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
               <span
-                className={`w-1.5 h-1.5 rounded-full bg-emerald-400 ${
-                  animationsEnabled ? 'animate-pulse' : ''
-                }`}
+                className={`w-1.5 h-1.5 rounded-full bg-emerald-400 ${animationsEnabled ? 'animate-pulse' : ''
+                  }`}
               />
               Online
             </span>
@@ -200,7 +197,7 @@ export const SocialsApp: React.FC<{ windowId: string }> = () => {
 
         <div className="flex items-center gap-2 text-xs font-sans text-slate-400 self-start sm:self-auto">
           <span className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg">
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+
             {socialsData.filter((s) => s.url).length} of {socialsData.length} channels online
           </span>
         </div>
