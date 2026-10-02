@@ -48,8 +48,14 @@ export interface DesktopItem {
 
 const DESKTOP_APPS: DesktopItem[] = [
   { id: 'terminal', appId: 'terminal', title: 'Terminal', iconName: 'Terminal' },
-  { id: 'files', appId: 'files', title: 'File Explorer', iconName: 'Folder' },
   { id: 'socials', appId: 'socials', title: 'Socials', iconName: 'Share2' },
+  { id: 'letterbox', appId: 'letterbox', title: 'LetterBox', iconName: 'LetterBox' },
+  { id: 'music', appId: 'music', title: 'Music Player', iconName: 'Music' },
+  { id: 'settings', appId: 'settings', title: 'Settings', iconName: 'Settings' },
+  { id: 'void', appId: 'void', title: 'VOID.EXE', iconName: 'Skull', badge: 'DANGER' },
+  { id: 'gmail', appId: 'gmail', title: 'Gmail', iconName: 'Mail' },
+  { id: 'files', appId: 'files', title: 'File Explorer', iconName: 'Folder' },
+  { id: 'skills', appId: 'skills', title: 'Skills', iconName: 'Cpu' },
   {
     id: 'projects-shortcut',
     title: 'Projects',
@@ -57,31 +63,26 @@ const DESKTOP_APPS: DesktopItem[] = [
     targetFolder: 'projects',
     isShortcut: true,
   },
-  { id: 'letterbox', appId: 'letterbox', title: 'LetterBox', iconName: 'LetterBox' },
-  { id: 'skills', appId: 'skills', title: 'Skills', iconName: 'Cpu' },
-  { id: 'music', appId: 'music', title: 'Music Player', iconName: 'Music' },
-  { id: 'settings', appId: 'settings', title: 'Settings', iconName: 'Settings' },
-  { id: 'void', appId: 'void', title: 'VOID.EXE', iconName: 'Skull', badge: 'DANGER' },
-  { id: 'gmail', appId: 'gmail', title: 'Gmail', iconName: 'Mail' },
 ];
 
-// Intentional default desktop layout:
+// Default desktop layout matching 2nd screenshot:
 // Col 0: Terminal, Socials, LetterBox, Music Player, Settings, VOID.EXE
-// Col 1: File Explorer, Skills, Projects (Folder Shortcut)
+// Col 1: [GAP - 1 empty column]
+// Col 2: Gmail, File Explorer, Skills, Projects
 export const DEFAULT_ICON_GRID: Record<string, { col: number; row: number }> = {
   terminal: { col: 0, row: 0 },
-  files: { col: 1, row: 0 },
   socials: { col: 0, row: 1 },
-  skills: { col: 1, row: 1 },
   letterbox: { col: 0, row: 2 },
-  'projects-shortcut': { col: 1, row: 2 },
   music: { col: 0, row: 3 },
-  gmail: { col: 1, row: 3 },
   settings: { col: 0, row: 4 },
   void: { col: 0, row: 5 },
+  gmail: { col: 2, row: 0 },
+  files: { col: 2, row: 1 },
+  skills: { col: 2, row: 2 },
+  'projects-shortcut': { col: 2, row: 3 },
 };
 
-const STORAGE_KEY = 'curio_desktop_icon_positions_v4';
+const STORAGE_KEY = 'curio_desktop_icon_positions_v5';
 
 // Helper to compute default icon positions matching screenshot 1 layout
 const computeDefaultPositions = (
@@ -192,6 +193,7 @@ export const Desktop: React.FC<DesktopProps> = ({
     const defaults = computeDefaultPositions(DESKTOP_APPS);
     try {
       localStorage.removeItem('curio_desktop_icon_positions');
+      localStorage.removeItem('curio_desktop_icon_positions_v4');
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);

@@ -5,7 +5,6 @@ import {
   Volume2,
   VolumeX,
   Bell,
-  Sparkles,
   Terminal,
   Folder,
   Music,

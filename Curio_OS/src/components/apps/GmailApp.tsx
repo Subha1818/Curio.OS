@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import emailjs from '@emailjs/browser';
-import { Mail, Send, CheckCircle2, AlertCircle, Clock, RefreshCw, Sparkles, User, AtSign, Tag, Lock } from 'lucide-react';
+import { Mail, Send, CheckCircle2, AlertCircle, Clock, RefreshCw, User, AtSign, Tag, Lock } from 'lucide-react';
 import { sound } from '../../utils/sound';
 
 interface GmailAppProps {

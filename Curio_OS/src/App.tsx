@@ -13,6 +13,7 @@ import type { WallpaperId, SystemNotification } from './types/os';
 import { DEFAULT_WALLPAPER_ID, getWallpaperConfig } from './data/wallpapers';
 import { useCursorStyle } from './utils/useCursorStyle';
 import { sound } from './utils/sound';
+import { getNickname, hasAskedName } from './utils/identity';
 
 // ── Inner OS shell (has access to AuthContext + VoidContext) ────────────────
 function CurioShell() {
@@ -51,9 +52,13 @@ function CurioShell() {
 
   useEffect(() => {
     if (hasBooted && !namePopupResolved) {
+      if (getNickname() || hasAskedName()) {
+        setNamePopupResolved(true);
+        return;
+      }
       const t = setTimeout(() => {
         setShowNamePopup(true);
-      }, 35000);
+      }, 2500);
       return () => clearTimeout(t);
     }
   }, [hasBooted, namePopupResolved]);
@@ -271,6 +276,9 @@ function CurioShell() {
               isLoginSequenceResolved={isLoginSequenceResolved}
               onRegisterTriggerSubbuDisappointed={(trigger) => {
                 triggerSubbuDisappointedRef.current = trigger;
+              }}
+              onAddNotification={(notif) => {
+                setNotifications((prev) => [notif, ...prev]);
               }}
             />
           )}

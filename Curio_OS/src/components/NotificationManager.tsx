@@ -2,15 +2,18 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useWindowManager } from '../context/WindowManagerContext';
 import { NotificationToast, type NotificationToastData } from './NotificationToast';
 import { QUEUED_NOTIFICATIONS, type NotificationConfigItem } from '../data/notificationConfig';
+import type { SystemNotification } from '../types/os';
 
 interface NotificationManagerProps {
   isLoginSequenceResolved: boolean;
   onRegisterTriggerSubbuDisappointed: (trigger: () => void) => void;
+  onAddNotification?: (notif: SystemNotification) => void;
 }
 
 export const NotificationManager: React.FC<NotificationManagerProps> = ({
   isLoginSequenceResolved,
   onRegisterTriggerSubbuDisappointed,
+  onAddNotification,
 }) => {
   const { windows, openApp } = useWindowManager();
   const [activeToast, setActiveToast] = useState<NotificationToastData | null>(null);
@@ -18,15 +21,17 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
   // Queue of toasts waiting to be shown if one is already active
   const toastQueueRef = useRef<NotificationToastData[]>([]);
 
-  // Stable references for timer operations
+  // Stable references
   const windowsRef = useRef(windows);
   windowsRef.current = windows;
 
   const openAppRef = useRef(openApp);
   openAppRef.current = openApp;
 
+  const onAddNotificationRef = useRef(onAddNotification);
+  onAddNotificationRef.current = onAddNotification;
+
   const queueIndexRef = useRef<number>(0);
-  const queueStartedRef = useRef<boolean>(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shownIdsRef = useRef<Set<string>>(new Set());
 
@@ -38,16 +43,17 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
     const hasLetterboxWin = currentWindows.some((w) => w.appId === 'letterbox');
     const hasVoidWin = currentWindows.some((w) => w.appId === 'void');
 
-    const activity = {
+    return {
       hasOpenedMusic: hasMusicWin || sessionStorage.getItem('curio_music_opened') === 'true',
       hasOpenedFiles: hasFilesWin || sessionStorage.getItem('curio_files_opened') === 'true',
       hasOpenedSecret: sessionStorage.getItem('curio_secret_folder_opened') === 'true',
       hasOpenedLetterbox: hasLetterboxWin || sessionStorage.getItem('curio_letterbox_opened') === 'true',
       hasOpenedVoid: hasVoidWin || sessionStorage.getItem('curio_void_opened') === 'true',
     };
-
-    return activity;
   }, []);
+
+  // Forward declaration refs for recursive scheduling without stale closures
+  const scheduleStepRef = useRef<(delayMs: number) => void>(() => {});
 
   // Display a toast safely ensuring only 1 is on screen at a time
   const showToast = useCallback((toast: NotificationToastData) => {
@@ -65,7 +71,6 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
   const handleToastDismissed = useCallback((toastId: string, isFromQueue: boolean) => {
     console.log(`[Curio Notification] Toast dismissed: ${toastId}`);
 
-    // If there is another toast waiting in the queue, show it next
     if (toastQueueRef.current.length > 0) {
       const nextToast = toastQueueRef.current.shift()!;
       setTimeout(() => setActiveToast(nextToast), 300);
@@ -73,9 +78,9 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
       setActiveToast(null);
     }
 
-    // If this was a timed queue notification, start the next 30s timer
+    // Schedule next queue item after 25s
     if (isFromQueue) {
-      scheduleStep(30000);
+      scheduleStepRef.current(25000);
     }
   }, []);
 
@@ -114,7 +119,6 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
           const item = QUEUED_NOTIFICATIONS[queueIndexRef.current];
 
           if (shownIdsRef.current.has(item.id)) {
-            console.log(`[Curio Notification] ${item.id} already shown. Skipping.`);
             queueIndexRef.current += 1;
             continue;
           }
@@ -124,14 +128,14 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
 
           if (shouldSkip) {
             console.log(
-              `%c[Curio Notification]%c Skip condition met for "${item.id}". Advancing to next step in 30s.`,
+              `%c[Curio Notification]%c Skip condition met for "${item.id}". Checking next item.`,
               'color: #eab308; font-weight: bold;',
               'color: #94a3b8;'
             );
             shownIdsRef.current.add(item.id);
             queueIndexRef.current += 1;
-            scheduleStep(30000);
-            return;
+            // Continue the loop immediately to find the next eligible notification!
+            continue;
           }
 
           // Found next eligible notification!
@@ -143,6 +147,16 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
           shownIdsRef.current.add(item.id);
           queueIndexRef.current += 1;
 
+          // Also record in system notification center
+          onAddNotificationRef.current?.({
+            id: `mochi-${item.id}-${Date.now()}`,
+            title: 'Curio.OS',
+            message: item.message,
+            time: 'Just now',
+            read: false,
+            type: 'info',
+          });
+
           const toastData: NotificationToastData = {
             id: item.id,
             emoji: item.emoji,
@@ -151,9 +165,9 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
             autoDismissMs: 7500,
             actionButton: item.actionButton
               ? {
-                label: item.actionButton.label,
-                onClick: () => handleAction(item),
-              }
+                  label: item.actionButton.label,
+                  onClick: () => handleAction(item),
+                }
               : undefined,
             onDismiss: () => {
               handleToastDismissed(item.id, true);
@@ -170,6 +184,8 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
     [checkActivity, handleAction, handleToastDismissed, showToast]
   );
 
+  scheduleStepRef.current = scheduleStep;
+
   // Standalone "Subbu is disappointed 😢" popup
   const triggerSubbuDisappointed = useCallback(() => {
     if (shownIdsRef.current.has('subbu-disappointed')) return;
@@ -180,6 +196,15 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
       'color: #ef4444; font-weight: bold;',
       'color: #f87171;'
     );
+
+    onAddNotificationRef.current?.({
+      id: `disappointed-${Date.now()}`,
+      title: 'Curio.OS',
+      message: 'Subbu is disappointed 😢',
+      time: 'Just now',
+      read: false,
+      type: 'alert',
+    });
 
     const disappointedToast: NotificationToastData = {
       id: 'subbu-disappointed',
@@ -200,30 +225,26 @@ export const NotificationManager: React.FC<NotificationManagerProps> = ({
     onRegisterTriggerSubbuDisappointed(triggerSubbuDisappointed);
   }, [onRegisterTriggerSubbuDisappointed, triggerSubbuDisappointed]);
 
-  // Start the queue as soon as login sequence is resolved
+  // Start the queue when login sequence resolves (resilient to StrictMode remounts)
   useEffect(() => {
-    if (!isLoginSequenceResolved || queueStartedRef.current) return;
+    if (!isLoginSequenceResolved) return;
 
-    queueStartedRef.current = true;
     console.log(
-      '%c[Curio Notification]%c Login resolved! Starting 10-second countdown for Music notification...',
+      '%c[Curio Notification]%c Login resolved! Initializing notification schedule...',
       'color: #38bdf8; font-weight: bold;',
       'color: #94a3b8;'
     );
 
-    // Initial 10 second delay
-    scheduleStep(10000);
-  }, [isLoginSequenceResolved, scheduleStep]);
+    // Initial 6 second delay after entering desktop
+    scheduleStep(6000);
 
-  // Cleanup on unmount only
-  useEffect(() => {
     return () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
       }
     };
-  }, []);
+  }, [isLoginSequenceResolved, scheduleStep]);
 
   if (!activeToast) return null;
 

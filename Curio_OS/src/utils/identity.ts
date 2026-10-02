@@ -16,11 +16,11 @@ export function setNickname(name: string) {
 }
 
 export function hasAskedName(): boolean {
-  return localStorage.getItem('dreamos_asked_name') === 'true';
+  return sessionStorage.getItem('curio_asked_name_session') === 'true';
 }
 
 export function setAskedName() {
-  localStorage.setItem('dreamos_asked_name', 'true');
+  sessionStorage.setItem('curio_asked_name_session', 'true');
 }
 
 export function getAdminSecret(): string | null {
