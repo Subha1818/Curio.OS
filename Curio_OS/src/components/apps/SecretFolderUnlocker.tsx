@@ -6,6 +6,9 @@ import {
   IndianRupee,
   Timer,
   RotateCcw,
+  CheckCircle2,
+  ArrowRight,
+  Brain,
 } from 'lucide-react';
 import { sound } from '../../utils/sound';
 import { SECRET_FOLDER_PUZZLES, type SecretPuzzle } from '../../data/secretFolderPuzzles';
@@ -37,8 +40,8 @@ function generateMemoryChallenge(): { numbers: number[]; questions: MemoryQuesti
     { prompt: 'What was the largest number?', expected: sorted[3] },
     { prompt: 'What was the smallest number?', expected: sorted[0] },
     { prompt: 'What was the 2nd largest number?', expected: sorted[2] },
-    { prompt: `What is the sum of the 1st + 3rd number? (${n1} + ${n3})`, expected: n1 + n3 },
-    { prompt: `What is the sum of the 2nd + 4th number? (${n2} + ${n4})`, expected: n2 + n4 },
+    { prompt: 'What is the sum of the 1st and 3rd number?', expected: n1 + n3 },
+    { prompt: 'What is the sum of the 2nd and 4th number?', expected: n2 + n4 },
     { prompt: 'What is the difference between largest and smallest?', expected: sorted[3] - sorted[0] },
   ];
 
@@ -82,8 +85,7 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
   const [isPlayingRound1, setIsPlayingRound1] = useState(true);
   const [round1Feedback, setRound1Feedback] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
   const [round1Attempts, setRound1Attempts] = useState(0);
-  const [showRound1TryAnother, setShowRound1TryAnother] = useState(false);
-  const [showRound1Success, setShowRound1Success] = useState(false);
+  const [round1Transition, setRound1Transition] = useState<{ success: boolean } | null>(null);
 
   const needleRef = useRef<HTMLDivElement>(null);
   const posRef = useRef(0);
@@ -91,7 +93,7 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
   const reqRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    if (currentRound !== 1 || !isPlayingRound1 || showRound1TryAnother || showRound1Success) return;
+    if (currentRound !== 1 || !isPlayingRound1 || round1Transition) return;
     let speed = 1.2;
     if (round1Level === 2) speed = 2.2;
     if (round1Level === 3) speed = 3.5;
@@ -116,14 +118,15 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
     return () => {
       if (reqRef.current) cancelAnimationFrame(reqRef.current);
     };
-  }, [currentRound, isPlayingRound1, round1Level, showRound1TryAnother, showRound1Success]);
+  }, [currentRound, isPlayingRound1, round1Level, round1Transition]);
 
   // ── Round 2 State ───────────────────────────────────────────────────────────
   const [memoryData, setMemoryData] = useState<{ numbers: number[]; questions: MemoryQuestion[] }>(() =>
     generateMemoryChallenge()
   );
-  const [memoryPhase, setMemoryPhase] = useState<'memorize' | 'answering'>('memorize');
-  const [memorizeCountdown, setMemorizeCountdown] = useState(3);
+  const [memoryPhase, setMemoryPhase] = useState<'intro' | 'memorize' | 'answering'>('intro');
+  const [introCountdown, setIntroCountdown] = useState(3);
+  const [memorizeCountdown, setMemorizeCountdown] = useState(5);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [memoryAnswerInput, setMemoryAnswerInput] = useState('');
   const [memoryFailMessage, setMemoryFailMessage] = useState<string | null>(null);
@@ -151,11 +154,30 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
     initRound3Words(puzzle);
   }, [puzzle]);
 
-  // Round 2 countdown timer
+  // Round 2 intro countdown timer
+  useEffect(() => {
+    if (currentRound !== 2 || memoryPhase !== 'intro') return;
+
+    setIntroCountdown(3);
+    const interval = setInterval(() => {
+      setIntroCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setMemoryPhase('memorize');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [currentRound, memoryPhase]);
+
+  // Round 2 memorize countdown timer
   useEffect(() => {
     if (currentRound !== 2 || memoryPhase !== 'memorize') return;
 
-    setMemorizeCountdown(3);
+    setMemorizeCountdown(5);
     const interval = setInterval(() => {
       setMemorizeCountdown((prev) => {
         if (prev <= 1) {
@@ -172,6 +194,19 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
+  // Transition from Round 1 to Round 2 on button click
+  const handleStartRound2 = () => {
+    sound.playClick();
+    setRound1Transition(null);
+    setCurrentRound(2);
+    setMemoryData(generateMemoryChallenge());
+    setMemoryPhase('intro');
+    setIntroCountdown(3);
+    setQuestionIndex(0);
+    setMemoryAnswerInput('');
+    setMemoryFailMessage(null);
+  };
+
   // Advance to next round when failing
   const handleFailRound = (fromRound: 1 | 2 | 3) => {
     sound.playAlert();
@@ -183,16 +218,9 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
     }
 
     if (fromRound === 1) {
-      setShowRound1TryAnother(true);
-      setTimeout(() => {
-        setShowRound1TryAnother(false);
-        setCurrentRound(2);
-        setMemoryData(generateMemoryChallenge());
-        setMemoryPhase('memorize');
-        setQuestionIndex(0);
-        setMemoryAnswerInput('');
-        setMemoryFailMessage(null);
-      }, 1600);
+      setIsPlayingRound1(false);
+      setRound1Feedback(null);
+      setRound1Transition({ success: false });
     } else if (fromRound === 2) {
       setMemoryFailMessage('❌ MEMORY TEST FAILED\nYour brain has left the chat.\nMoving to the next test...');
       setTimeout(() => {
@@ -208,7 +236,8 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
         setScrambleFailNotice(null);
         setCurrentRound(2);
         setMemoryData(generateMemoryChallenge());
-        setMemoryPhase('memorize');
+        setMemoryPhase('intro');
+        setIntroCountdown(3);
         setQuestionIndex(0);
         setMemoryAnswerInput('');
         setMemoryFailMessage(null);
@@ -233,16 +262,9 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
       
       setTimeout(() => {
         if (round1Level >= 3) {
-          setShowRound1Success(true);
-          setTimeout(() => {
-            setShowRound1Success(false);
-            setCurrentRound(2);
-            setMemoryData(generateMemoryChallenge());
-            setMemoryPhase('memorize');
-            setQuestionIndex(0);
-            setMemoryAnswerInput('');
-            setMemoryFailMessage(null);
-          }, 1600);
+          setIsPlayingRound1(false);
+          setRound1Feedback(null);
+          setRound1Transition({ success: true });
         } else {
           setRound1Level(prev => prev + 1);
           setIsPlayingRound1(true);
@@ -269,14 +291,14 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && currentRound === 1 && isPlayingRound1 && !showRound1TryAnother && !showRound1Success) {
+      if (e.code === 'Space' && currentRound === 1 && isPlayingRound1 && !round1Transition) {
         e.preventDefault();
         handleRound1Submit();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentRound, isPlayingRound1, showRound1TryAnother, showRound1Success, round1Attempts, round1Level]);
+  }, [currentRound, isPlayingRound1, round1Transition, round1Attempts, round1Level]);
 
   // Round 2 Question Submit
   const handleMemoryAnswerSubmit = (e: React.FormEvent) => {
@@ -447,23 +469,47 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
         {/* ── Round 1: "Security Override" ───────────────────────────────────── */}
         {currentRound === 1 && (
           <div className="space-y-4">
-            {showRound1TryAnother ? (
-              <div className="p-6 rounded-xl bg-slate-950/90 border border-slate-700 text-center space-y-2 animate-in fade-in duration-200">
-                <p className="text-sm font-bold text-rose-400 font-mono tracking-wider">
-                  Override Failed.
-                </p>
-                <p className="text-[11px] text-slate-500 font-mono">
-                  Rerouting to secondary protocol...
-                </p>
-              </div>
-            ) : showRound1Success ? (
-              <div className="p-6 rounded-xl bg-slate-950/90 border border-emerald-900/50 text-center space-y-2 animate-in fade-in duration-200">
-                <p className="text-sm font-bold text-emerald-400 font-mono tracking-wider">
-                  Override Successful.
-                </p>
-                <p className="text-[11px] text-emerald-600/80 font-mono">
-                  Advancing to Round 2...
-                </p>
+            {round1Transition ? (
+              <div className="p-6 rounded-2xl bg-slate-950/90 border border-slate-800 text-center space-y-4 animate-in fade-in duration-200">
+                <div
+                  className={`w-12 h-12 mx-auto rounded-2xl flex items-center justify-center border shadow-inner ${
+                    round1Transition.success
+                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-emerald-500/10'
+                      : 'bg-rose-500/10 border-rose-500/30 text-rose-400 shadow-rose-500/10'
+                  }`}
+                >
+                  {round1Transition.success ? (
+                    <CheckCircle2 className="w-6 h-6" />
+                  ) : (
+                    <RotateCcw className="w-6 h-6" />
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <h4
+                    className={`text-sm font-bold font-mono tracking-wider ${
+                      round1Transition.success ? 'text-emerald-400' : 'text-rose-400'
+                    }`}
+                  >
+                    {round1Transition.success
+                      ? 'OVERRIDE PROTOCOL COMPLETE'
+                      : 'REFLEX ATTEMPTS EXHAUSTED'}
+                  </h4>
+                  <p className="text-xs text-slate-400 font-mono">
+                    {round1Transition.success
+                      ? 'Reflex locks bypassed. Prepare for memory validation protocol.'
+                      : 'Reflex sync timed out. Rerouting to secondary memory protocol.'}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleStartRound2}
+                  className="w-full py-3 px-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl text-xs font-bold font-mono tracking-wider transition-all cursor-pointer shadow-lg shadow-cyan-600/25 flex items-center justify-center gap-2"
+                >
+                  <span>Go to next round</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
               </div>
             ) : (
               <>
@@ -530,28 +576,60 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
                 <p className="text-xs text-slate-300 font-mono">Your brain has left the chat.</p>
                 <p className="text-[11px] text-slate-400 pt-1">Moving to the next test...</p>
               </div>
+            ) : memoryPhase === 'intro' ? (
+              <div className="p-6 rounded-2xl bg-slate-950/90 border border-slate-800 text-center space-y-4 animate-in fade-in duration-200">
+                <div className="w-12 h-12 mx-auto rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-inner">
+                  <Brain className="w-6 h-6 animate-pulse" />
+                </div>
+
+                <div className="space-y-1.5">
+                  <h4 className="text-sm font-bold font-mono tracking-wider text-cyan-300">
+                    Remember these numbers
+                  </h4>
+                  <p className="text-xs text-slate-400 font-sans max-w-xs mx-auto">
+                    4 numbers will appear on screen for 5 seconds. Memorize their values and their positions carefully.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playClick();
+                    setMemoryPhase('memorize');
+                  }}
+                  className="w-full py-3 px-4 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold font-mono tracking-wider transition-all cursor-pointer shadow-md shadow-cyan-600/20 uppercase flex items-center justify-center gap-2"
+                >
+                  <span>I&apos;m Ready — Show Numbers ({introCountdown}s)</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
             ) : memoryPhase === 'memorize' ? (
               <div className="space-y-4 text-center py-2">
-                <div className="flex items-center justify-center gap-2 text-xs font-mono text-cyan-400 font-bold uppercase tracking-wider">
-                  <Timer className="w-4 h-4 animate-spin" />
-                  MEMORIZE THIS. You have {memorizeCountdown} sec
+                <div className="flex items-center justify-between text-xs font-mono text-cyan-400 font-bold uppercase tracking-wider">
+                  <span className="flex items-center gap-1.5">
+                    <Timer className="w-4 h-4 animate-spin" />
+                    Remember these numbers!
+                  </span>
+                  <span className="text-slate-400">{memorizeCountdown}s</span>
                 </div>
 
                 {/* Visible Animated Timer Bar */}
                 <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-cyan-400 transition-all duration-1000 ease-linear rounded-full"
-                    style={{ width: `${(memorizeCountdown / 3) * 100}%` }}
+                    style={{ width: `${(memorizeCountdown / 5) * 100}%` }}
                   />
                 </div>
 
-                <div className="grid grid-cols-4 gap-3 py-4">
+                <div className="grid grid-cols-4 gap-3 py-3">
                   {memoryData.numbers.map((num, i) => (
-                    <div
-                      key={i}
-                      className="aspect-square bg-slate-950 border border-cyan-500/40 rounded-2xl flex items-center justify-center text-2xl font-bold font-mono text-cyan-300 shadow-lg shadow-cyan-950/50"
-                    >
-                      {num}
+                    <div key={i} className="flex flex-col items-center gap-1.5">
+                      <div className="w-full aspect-square bg-slate-950 border border-cyan-500/40 rounded-2xl flex items-center justify-center text-2xl font-bold font-mono text-cyan-300 shadow-lg shadow-cyan-950/50">
+                        {num}
+                      </div>
+                      <span className="text-[10px] font-mono text-slate-500 font-semibold">
+                        {i === 0 ? '1st' : i === 1 ? '2nd' : i === 2 ? '3rd' : '4th'}
+                      </span>
                     </div>
                   ))}
                 </div>
