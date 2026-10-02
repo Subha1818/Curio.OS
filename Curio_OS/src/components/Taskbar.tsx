@@ -13,7 +13,7 @@ import {
   Eye,
   Share2,
   Cpu,
-  Mail,
+  MessagesSquare,
 } from 'lucide-react';
 import { LetterBoxIcon } from './icons/LetterBoxIcon';
 import type { AppId } from '../types/os';
@@ -79,7 +79,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
     { id: 'socials', name: 'Socials', icon: <Share2 className="w-6 h-6 text-cyan-400" /> },
     { id: 'music', name: 'Music', icon: <Music className="w-6 h-6 text-purple-400" /> },
     { id: 'letterbox', name: 'LetterBox', icon: <LetterBoxIcon className="w-6 h-6" animated={false} /> },
-    { id: 'gmail', name: 'Gmail', icon: <Mail className="w-6 h-6 text-[#EA4335]" /> },
+    { id: 'gmail', name: "Let's Connect", icon: <MessagesSquare className="w-6 h-6 text-emerald-400" /> },
     { id: 'settings', name: 'Settings', icon: <Settings className="w-6 h-6 text-sky-400" /> },
     { id: 'void', name: 'Void', icon: <Skull className="w-6 h-6 text-rose-500" /> },
   ];

@@ -10,10 +10,10 @@ import {
   Compass,
   Gamepad2,
   MessageSquare,
+  MessagesSquare,
   Share2,
   Cpu,
   Heart,
-  Mail,
 } from 'lucide-react';
 import { LetterBoxIcon } from './icons/LetterBoxIcon';
 import { sound } from '../utils/sound';
@@ -99,14 +99,24 @@ const ICON_ACCENTS: Record<string, IconAccent> = {
     hoverBorder: 'group-hover:border-rose-500/70',
   },
   Mail: {
-    color: '#EA4335',
-    glow: 'rgba(234, 67, 53, 0.5)',
-    hoverBorder: 'group-hover:border-red-500/70',
+    color: '#4ade80',
+    glow: 'rgba(74, 222, 128, 0.45)',
+    hoverBorder: 'group-hover:border-emerald-400/60',
   },
   Gmail: {
-    color: '#EA4335',
-    glow: 'rgba(234, 67, 53, 0.5)',
-    hoverBorder: 'group-hover:border-red-500/70',
+    color: '#4ade80',
+    glow: 'rgba(74, 222, 128, 0.45)',
+    hoverBorder: 'group-hover:border-emerald-400/60',
+  },
+  MessagesSquare: {
+    color: '#4ade80',
+    glow: 'rgba(74, 222, 128, 0.45)',
+    hoverBorder: 'group-hover:border-emerald-400/60',
+  },
+  LetsConnect: {
+    color: '#4ade80',
+    glow: 'rgba(74, 222, 128, 0.45)',
+    hoverBorder: 'group-hover:border-emerald-400/60',
   },
 };
 
@@ -224,9 +234,13 @@ export const DesktopIcon: React.FC<DesktopIconProps> = ({
       case 'Gamepad2':
         return <Gamepad2 className="w-8 h-8 text-slate-500" />;
 
+      case 'MessagesSquare':
+      case 'LetsConnect':
       case 'Mail':
       case 'Gmail':
-        return <Mail className="w-8 h-8 text-[#EA4335] group-hover:scale-110 transition-transform" />;
+        return (
+          <MessagesSquare className="w-8 h-8 text-emerald-400 group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(74,222,128,0.5)]" />
+        );
 
       default:
         return <Terminal className="w-8 h-8 text-pink-400" />;

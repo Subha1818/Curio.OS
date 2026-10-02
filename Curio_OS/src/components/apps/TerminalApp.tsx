@@ -618,7 +618,7 @@ ${subbuData.now.lastDetected}`}
                 </a>
               </div>
               <div className="text-slate-400 text-[11px] pt-1">
-                Tip: Type <span className="text-amber-300 font-semibold">gmail</span> or click the <span className="text-[#EA4335] font-semibold">Gmail</span> app on the desktop to dispatch an email right now!
+                Tip: Type <span className="text-amber-300 font-semibold">connect</span> or click the <span className="text-emerald-400 font-semibold">Let's Connect</span> app on the desktop to dispatch a message right now!
               </div>
             </div>
           );
@@ -696,7 +696,7 @@ ${subbuData.now.lastDetected}`}
                 <div className="text-indigo-400 font-bold mb-0.5">COMMUNITY &amp; EXPLORATION</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 text-slate-300">
                   <div><span className="text-amber-300">letterbox</span> — Open public guestbook &amp; thoughts</div>
-                  <div><span className="text-amber-300">gmail</span> — Open Gmail client to send Subbu an email</div>
+                  <div><span className="text-amber-300">connect</span> — Open Let's Connect client to send Subbu a message</div>
                   <div><span className="text-amber-300">files</span> — Open Portfolio &amp; File Manager</div>
                   <div><span className="text-amber-300">music</span> — Open Curio Music Player</div>
                 </div>
@@ -852,14 +852,16 @@ ${subbuData.now.lastDetected}`}
           );
           break;
 
-        case 'gmail':
-        case 'mail':
-        case 'email':
+        case 'connect':
+        case 'letsconnect':
         case 'contact':
+        case 'mail':
+        case 'gmail':
+        case 'email':
           openApp('gmail');
           response = (
-            <div className="text-xs text-[#EA4335] font-mono">
-              Opening Gmail contact client... ✉️
+            <div className="text-xs text-emerald-400 font-mono">
+              Opening Let's Connect contact client... 💬
             </div>
           );
           break;
@@ -1051,6 +1053,8 @@ ${subbuData.now.lastDetected}`}
             notes: 'letterbox',
             note: 'letterbox',
             brain: 'letterbox',
+            connect: 'gmail',
+            letsconnect: 'gmail',
             gmail: 'gmail',
             mail: 'gmail',
             email: 'gmail',

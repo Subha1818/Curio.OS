@@ -52,7 +52,7 @@ const DESKTOP_APPS: DesktopItem[] = [
   { id: 'music', appId: 'music', title: 'Music Player', iconName: 'Music' },
   { id: 'settings', appId: 'settings', title: 'Settings', iconName: 'Settings' },
   { id: 'void', appId: 'void', title: 'VOID.EXE', iconName: 'Skull', badge: 'DANGER' },
-  { id: 'gmail', appId: 'gmail', title: 'Gmail', iconName: 'Mail' },
+  { id: 'gmail', appId: 'gmail', title: "Let's Connect", iconName: 'MessagesSquare' },
   { id: 'files', appId: 'files', title: 'File Explorer', iconName: 'Folder' },
   { id: 'skills', appId: 'skills', title: 'Skills', iconName: 'Cpu' },
   {
@@ -67,7 +67,7 @@ const DESKTOP_APPS: DesktopItem[] = [
 // Default desktop layout matching 2nd screenshot:
 // Col 0: Terminal, Socials, LetterBox, Music Player, Settings, VOID.EXE
 // Col 1: [GAP - 1 empty column]
-// Col 2: Gmail, File Explorer, Skills, Projects
+// Col 2: Let's Connect, File Explorer, Skills, Projects
 export const DEFAULT_ICON_GRID: Record<string, { col: number; row: number }> = {
   terminal: { col: 0, row: 0 },
   socials: { col: 0, row: 1 },

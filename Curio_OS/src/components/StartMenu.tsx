@@ -10,7 +10,7 @@ import {
   Maximize,
   Share2,
   Cpu,
-  Mail,
+  MessagesSquare,
 } from 'lucide-react';
 import { LetterBoxIcon } from './icons/LetterBoxIcon';
 import type { AppId } from '../types/os';
@@ -82,9 +82,9 @@ export const StartMenu: React.FC<StartMenuProps> = ({ isOpen, onClose, onReboot 
     },
     {
       id: 'gmail',
-      name: 'Gmail',
-      desc: "Direct contact client • Send an email directly to Subbu's inbox",
-      icon: <Mail className="w-5 h-5 text-[#EA4335]" />,
+      name: "Let's Connect",
+      desc: "Direct contact client • Send a message directly to Subbu's inbox",
+      icon: <MessagesSquare className="w-5 h-5 text-emerald-400" />,
       badge: 'CONTACT',
     },
     {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import emailjs from '@emailjs/browser';
-import { Mail, Send, CheckCircle2, AlertCircle, Clock, RefreshCw, User, AtSign, Tag, Lock } from 'lucide-react';
+import { MessagesSquare, Send, CheckCircle2, AlertCircle, Clock, RefreshCw, User, AtSign, Tag, Lock } from 'lucide-react';
 import { sound } from '../../utils/sound';
 
 interface GmailAppProps {
@@ -192,23 +192,23 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
 
   return (
     <div className="h-full flex flex-col bg-slate-950/95 text-slate-100 font-sans select-none overflow-hidden relative">
-      {/* Subtle Mail Airmail / Envelope Watermark Texture */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.025] bg-[radial-gradient(#EA4335_1px,transparent_1px)] [background-size:20px_20px]" />
-      <div className="absolute -top-10 -right-10 w-44 h-44 rounded-full border border-dashed border-[#EA4335] pointer-events-none opacity-[0.035] -rotate-12 flex items-center justify-center">
-        <div className="w-32 h-32 rounded-full border border-[#EA4335] flex items-center justify-center font-mono text-[9px] uppercase tracking-widest text-[#EA4335]">
-          Curio Airmail
+      {/* Subtle Connection Watermark Texture */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.025] bg-[radial-gradient(#4ade80_1px,transparent_1px)] [background-size:20px_20px]" />
+      <div className="absolute -top-10 -right-10 w-44 h-44 rounded-full border border-dashed border-emerald-500/40 pointer-events-none opacity-[0.035] -rotate-12 flex items-center justify-center">
+        <div className="w-32 h-32 rounded-full border border-emerald-500/40 flex items-center justify-center font-mono text-[9px] uppercase tracking-widest text-emerald-400">
+          Curio Connect
         </div>
       </div>
 
-      {/* Mail Client Header / Sub-Toolbar */}
+      {/* Header / Sub-Toolbar */}
       <div className="px-5 py-3 border-b border-white/10 bg-slate-900/60 backdrop-blur-md flex items-center justify-between relative z-10">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-[#EA4335]/20 border border-[#EA4335]/40 flex items-center justify-center text-[#EA4335] shadow-[0_0_12px_rgba(234,67,53,0.3)]">
-            <Mail className="w-4 h-4" />
+          <div className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-[0_0_12px_rgba(74,222,128,0.3)]">
+            <MessagesSquare className="w-4 h-4" />
           </div>
           <div>
             <h2 className="text-sm font-semibold tracking-wide text-white flex items-center gap-2 font-clash">
-              New Message
+              Let's Connect
             </h2>
             <p className="text-[11px] text-slate-400">Direct transmission to Subbu's inbox</p>
           </div>

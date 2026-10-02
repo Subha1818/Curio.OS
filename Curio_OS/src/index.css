@@ -480,7 +480,7 @@ textarea {
   animation: letterboxFloatHeart 5.5s ease-in-out infinite;
 }
 
-/* ── Gmail Validation Shake ──────────────────────────────── */
+/* ── Let's Connect Validation Shake ──────────────────────── */
 @keyframes fieldShake {
   0%, 100% { transform: translateX(0); }
   20%, 60% { transform: translateX(-4px); }
