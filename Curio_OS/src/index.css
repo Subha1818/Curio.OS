@@ -479,3 +479,34 @@ textarea {
 .animate-letterbox-heart {
   animation: letterboxFloatHeart 5.5s ease-in-out infinite;
 }
+
+/* ── Gmail Validation Shake ──────────────────────────────── */
+@keyframes fieldShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+.animate-field-shake {
+  animation: fieldShake 0.35s ease-in-out;
+}
+
+/* ── Paper Airplane Flight Animation ─────────────────────── */
+@keyframes planeFlyUp {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  40% {
+    transform: translate(8px, -6px) scale(1.1) rotate(12deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(32px, -24px) scale(0.4) rotate(40deg);
+    opacity: 0;
+  }
+}
+
+.animate-plane-fly {
+  animation: planeFlyUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}

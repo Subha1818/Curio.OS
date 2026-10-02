@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import emailjs from '@emailjs/browser';
-import { Mail, Send, CheckCircle2, AlertCircle, Clock, RefreshCw, Sparkles, User, AtSign, Tag } from 'lucide-react';
+import { Mail, Send, CheckCircle2, AlertCircle, Clock, RefreshCw, Sparkles, User, AtSign, Tag, Lock } from 'lucide-react';
 import { sound } from '../../utils/sound';
 
 interface GmailAppProps {
@@ -12,6 +12,14 @@ const MAX_CHARS = 2000;
 const RATE_LIMIT_SECONDS = 60;
 const LAST_SENT_KEY = 'curio_gmail_last_sent';
 
+const MOCHI_TIPS = [
+  "Don't forget your name, so Subha knows who's being this charming. 🐾",
+  "Short and sweet works. So does long and chaotic. ✨",
+  "I won't read it. Probably. 🐱",
+  "Say something nice! He works hard on this OS. 🌸",
+  "Got a cool project or idea? Subha loves building things. 💻",
+];
+
 export const GmailApp: React.FC<GmailAppProps> = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -21,11 +29,23 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
 
   const [isSending, setIsSending] = useState(false);
   const [isSent, setIsSent] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isPlaneFlying, setIsPlaneFlying] = useState(false);
+
+  // Field validation states & inline error
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: boolean;
+    email?: boolean;
+    message?: boolean;
+  }>({});
+  const [validationTip, setValidationTip] = useState<string | null>(null);
 
   // Rate limit countdown
   const [cooldown, setCooldown] = useState<number>(0);
   const cooldownTimerRef = useRef<number | null>(null);
+
+  // Mochi speech bubble
+  const [mochiTipIdx, setMochiTipIdx] = useState(0);
+  const [mochiMood, setMochiMood] = useState<'idle' | 'happy' | 'thinking'>('idle');
 
   // Check rate limit on mount and run timer
   useEffect(() => {
@@ -57,8 +77,23 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
     };
   }, []);
 
+  // Periodic Mochi tip rotation
+  useEffect(() => {
+    const tipInterval = window.setInterval(() => {
+      setMochiTipIdx((prev) => (prev + 1) % MOCHI_TIPS.length);
+    }, 11000);
+    return () => clearInterval(tipInterval);
+  }, []);
+
   const isValidEmail = (addr: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(addr.trim());
+  };
+
+  const handleMochiPoke = () => {
+    sound.playChime();
+    setMochiMood('happy');
+    setMochiTipIdx((prev) => (prev + 1) % MOCHI_TIPS.length);
+    setTimeout(() => setMochiMood('idle'), 1500);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,28 +102,36 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
 
     // Spam honeypot detection
     if (honeypot.trim() !== '') {
-      // Fake success for bots silently
       setIsSent(true);
       return;
     }
 
-    // Validation
+    // Validation checks with per-field feedback and playful voice
     if (!name.trim()) {
-      setErrorMessage('Please tell Subbu your name or alias.');
+      setFieldErrors({ name: true });
+      setValidationTip("Looks like you forgot to tell me who you are 👀");
+      sound.playAlert();
       return;
     }
 
     if (!email.trim() || !isValidEmail(email)) {
-      setErrorMessage('Please enter a valid email address so Subbu can reply.');
+      setFieldErrors({ email: true });
+      setValidationTip("Subha will need a real email to write you back! 📬");
+      sound.playAlert();
       return;
     }
 
     if (!message.trim()) {
-      setErrorMessage('Please type a message before sending.');
+      setFieldErrors({ message: true });
+      setValidationTip("An empty letter? Don't be shy, say hi! ✨");
+      sound.playAlert();
       return;
     }
 
-    setErrorMessage(null);
+    // Clear validation issues
+    setFieldErrors({});
+    setValidationTip(null);
+    setIsPlaneFlying(true);
     setIsSending(true);
     sound.playClick();
 
@@ -96,7 +139,7 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
     const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_lxnsuml';
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'P_lFzHqGWDhysQjRW';
 
-    // Map exact template variable names: user_name, user_email, message + safe fallbacks
+    // Map template parameters
     const templateParams: Record<string, string> = {
       user_name: name.trim(),
       user_email: email.trim(),
@@ -117,14 +160,18 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
       setCooldown(RATE_LIMIT_SECONDS);
 
       sound.playSuccess();
-      setIsSent(true);
+      setTimeout(() => {
+        setIsSent(true);
+        setIsPlaneFlying(false);
+      }, 500);
     } catch (err: unknown) {
-      console.error('EmailJS send error:', err);
+      console.error('Email send error:', err);
+      setIsPlaneFlying(false);
       const msg =
         err && typeof err === 'object' && 'text' in err
           ? String((err as { text: unknown }).text)
-          : 'Failed to send dispatch. Please verify your connection or email subhajitpatra1818@gmail.com directly.';
-      setErrorMessage(msg);
+          : 'Failed to dispatch letter. Please verify your connection or write directly to subhajitpatra1818@gmail.com.';
+      setValidationTip(msg);
       sound.playAlert();
     } finally {
       setIsSending(false);
@@ -137,51 +184,60 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
     setEmail('');
     setSubject("Let's connect");
     setMessage('');
-    setErrorMessage(null);
+    setFieldErrors({});
+    setValidationTip(null);
     setIsSent(false);
+    setIsPlaneFlying(false);
   };
 
   return (
-    <div className="h-full flex flex-col bg-slate-950/95 text-slate-100 font-sans select-none overflow-hidden">
+    <div className="h-full flex flex-col bg-slate-950/95 text-slate-100 font-sans select-none overflow-hidden relative">
+      {/* Subtle Mail Airmail / Envelope Watermark Texture */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.025] bg-[radial-gradient(#EA4335_1px,transparent_1px)] [background-size:20px_20px]" />
+      <div className="absolute -top-10 -right-10 w-44 h-44 rounded-full border border-dashed border-[#EA4335] pointer-events-none opacity-[0.035] -rotate-12 flex items-center justify-center">
+        <div className="w-32 h-32 rounded-full border border-[#EA4335] flex items-center justify-center font-mono text-[9px] uppercase tracking-widest text-[#EA4335]">
+          Curio Airmail
+        </div>
+      </div>
+
       {/* Mail Client Header / Sub-Toolbar */}
-      <div className="px-5 py-3 border-b border-white/10 bg-slate-900/60 backdrop-blur-md flex items-center justify-between">
+      <div className="px-5 py-3 border-b border-white/10 bg-slate-900/60 backdrop-blur-md flex items-center justify-between relative z-10">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-[#EA4335]/20 border border-[#EA4335]/40 flex items-center justify-center text-[#EA4335] shadow-[0_0_12px_rgba(234,67,53,0.3)]">
             <Mail className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold tracking-wide text-white flex items-center gap-1.5 font-clash">
+            <h2 className="text-sm font-semibold tracking-wide text-white flex items-center gap-2 font-clash">
               New Message
-              <span className="text-[10px] font-mono font-normal px-2 py-0.5 rounded-full bg-[#EA4335]/15 text-[#EA4335] border border-[#EA4335]/30">
-                EmailJS
-              </span>
             </h2>
-            <p className="text-[11px] text-slate-400">Direct transmission to Subbu's inbox</p>
+            <p className="text-[11px] text-slate-400">Direct transmission to Subha's inbox</p>
           </div>
         </div>
 
-        {/* Live Status indicator */}
-        <div className="flex items-center gap-2 text-[11px] font-mono text-slate-400">
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-          <span>smtp-ready</span>
+        {/* In-Universe Mochi Watching Indicator */}
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/25 text-[11px] font-mono text-purple-300">
+          <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-pulse shadow-[0_0_6px_rgba(244,114,182,0.8)]" />
+          <span>Mochi is watching 🐾</span>
         </div>
       </div>
 
       {/* Main Mail Content View */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-5">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-5 relative z-10">
         {isSent ? (
-          /* Success Screen in DREAM.OS voice */
-          <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-center p-6 space-y-4 animate-fadeIn">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.3)]">
+          /* Success Screen in DREAM.OS / Curio.OS voice */
+          <div className="h-full min-h-[340px] flex flex-col items-center justify-center text-center p-6 space-y-4 animate-fadeIn">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.35)] animate-bounce">
               <CheckCircle2 className="w-8 h-8" />
             </div>
 
             <div className="max-w-md space-y-1.5">
-              <h3 className="text-lg font-bold text-white font-clash">Sent!</h3>
-              <p className="text-sm text-slate-300 leading-relaxed">
-                Subbu will see this when he resurfaces from whatever he's debugging. 💌
+              <h3 className="text-xl font-bold text-white font-clash">Message Dispatched!</h3>
+              <p className="text-sm text-slate-300 leading-relaxed font-sans">
+                Sent! Subbu will see this when he resurfaces from whatever he's debugging. 💌
               </p>
-              <p className="text-xs text-slate-500 font-mono mt-1">Delivered via EmailJS to {SUBBU_EMAIL}</p>
+              <p className="text-xs text-slate-500 font-mono pt-1">
+                Delivered straight to {SUBBU_EMAIL}
+              </p>
             </div>
 
             <div className="pt-3">
@@ -210,139 +266,224 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
               aria-hidden="true"
             />
 
-            {/* Error Banner */}
-            {errorMessage && (
-              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-rose-500/15 border border-rose-500/35 text-rose-200 text-xs shadow-md animate-shake">
-                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                <span className="flex-1">{errorMessage}</span>
+            {/* ── 1. Locked "To" Recipient Row (Visually Distinct & Static) ── */}
+            <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-xs text-slate-400 select-none">
+              <div className="flex items-center gap-2.5">
+                <span className="flex items-center gap-1 font-mono text-[11px] uppercase tracking-wider text-slate-500 font-semibold">
+                  <Lock className="w-3 h-3 text-slate-500" />
+                  To:
+                </span>
+                <div className="flex items-center gap-2 px-2.5 py-0.5 rounded-lg bg-white/[0.04] border border-white/10 text-slate-200 font-mono text-[11px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+                  <span className="font-medium text-slate-100">{SUBBU_EMAIL}</span>
+                  <span className="text-[10px] text-slate-500 ml-0.5">(Subhajit Patra)</span>
+                </div>
               </div>
-            )}
+              <span className="text-[10px] font-mono text-slate-600 hidden sm:inline">Locked recipient</span>
+            </div>
 
-            {/* To Field (Pre-filled & Locked) */}
-            <div className="flex items-center gap-3 py-2 px-3 rounded-xl bg-white/[0.03] border border-white/10 text-xs">
-              <span className="w-16 font-mono text-slate-400 font-medium">To:</span>
-              <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#EA4335]/15 border border-[#EA4335]/30 text-slate-200 font-mono text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#EA4335]" />
-                <span>{SUBBU_EMAIL}</span>
-                <span className="text-[10px] text-slate-400 ml-1">(Subhajit Patra)</span>
+            {/* Visual separator between static To and real inputs */}
+            <div className="border-t border-white/5 my-2" />
+
+            {/* ── 2. Editable Sender Inputs (From Name & Email) ── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* From Name */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+                  Your Name <span className="text-pink-400">*</span>
+                </label>
+                <div
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/60 border transition-all ${
+                    fieldErrors.name
+                      ? 'animate-field-shake border-rose-500/80 ring-1 ring-rose-500/40 bg-rose-500/5'
+                      : 'border-white/15 hover:border-white/25 focus-within:border-pink-400/80 focus-within:ring-2 focus-within:ring-pink-400/20 focus-within:shadow-[0_0_12px_rgba(244,114,182,0.15)]'
+                  }`}
+                >
+                  <User className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      if (fieldErrors.name) {
+                        setFieldErrors((prev) => ({ ...prev, name: false }));
+                        setValidationTip(null);
+                      }
+                    }}
+                    placeholder="e.g. Alex Hunter"
+                    className="w-full bg-transparent text-white font-medium placeholder:text-slate-500/60 placeholder:font-normal placeholder:italic text-xs focus:outline-none"
+                    disabled={isSending}
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* From Name Field */}
-            <div className="flex items-center gap-3 py-1.5 px-3 rounded-xl bg-white/[0.03] border border-white/10 focus-within:border-cyan-400/60 focus-within:ring-1 focus-within:ring-cyan-400/40 transition-all text-xs">
-              <span className="w-16 font-mono text-slate-400 font-medium flex items-center gap-1">
-                <User className="w-3.5 h-3.5 text-slate-500" />
-                From:
-              </span>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your Name or Handle"
-                className="flex-1 bg-transparent text-white placeholder-slate-500 text-xs focus:outline-none"
-                disabled={isSending}
-                required
-              />
-            </div>
-
-            {/* From Email Field */}
-            <div className="flex items-center gap-3 py-1.5 px-3 rounded-xl bg-white/[0.03] border border-white/10 focus-within:border-cyan-400/60 focus-within:ring-1 focus-within:ring-cyan-400/40 transition-all text-xs">
-              <span className="w-16 font-mono text-slate-400 font-medium flex items-center gap-1">
-                <AtSign className="w-3.5 h-3.5 text-slate-500" />
-                Email:
-              </span>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your.email@domain.com"
-                className="flex-1 bg-transparent text-white placeholder-slate-500 text-xs focus:outline-none font-mono"
-                disabled={isSending}
-                required
-              />
-            </div>
-
-            {/* Subject Field */}
-            <div className="flex items-center gap-3 py-1.5 px-3 rounded-xl bg-white/[0.03] border border-white/10 focus-within:border-cyan-400/60 focus-within:ring-1 focus-within:ring-cyan-400/40 transition-all text-xs">
-              <span className="w-16 font-mono text-slate-400 font-medium flex items-center gap-1">
-                <Tag className="w-3.5 h-3.5 text-slate-500" />
-                Subject:
-              </span>
-              <input
-                type="text"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                placeholder="Let's connect"
-                className="flex-1 bg-transparent text-white placeholder-slate-500 text-xs focus:outline-none"
-                disabled={isSending}
-              />
-            </div>
-
-            {/* Message Body Field */}
-            <div className="space-y-1.5 pt-1">
-              <div className="relative rounded-2xl bg-white/[0.03] border border-white/10 focus-within:border-[#EA4335]/60 focus-within:ring-1 focus-within:ring-[#EA4335]/40 transition-all overflow-hidden">
-                <textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value.slice(0, MAX_CHARS))}
-                  rows={8}
-                  placeholder="Hey Subbu! Loved checking out your Curio.OS portfolio. Wanted to talk about..."
-                  className="w-full p-4 bg-transparent text-slate-100 placeholder-slate-500 text-xs leading-relaxed focus:outline-none resize-none custom-scrollbar"
-                  disabled={isSending}
-                  required
-                />
-
-                {/* Character Counter */}
-                <div className="px-4 py-2 border-t border-white/5 bg-slate-900/40 flex items-center justify-between text-[11px] text-slate-400">
-                  <span className="flex items-center gap-1.5">
-                    <Sparkles className="w-3 h-3 text-[#EA4335]" />
-                    <span>Real email delivery via EmailJS</span>
-                  </span>
-                  <span className={`font-mono text-[10px] ${message.length >= MAX_CHARS - 100 ? 'text-amber-400' : 'text-slate-500'}`}>
-                    {message.length} / {MAX_CHARS}
-                  </span>
+              {/* From Email */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+                  Your Email <span className="text-pink-400">*</span>
+                </label>
+                <div
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/60 border transition-all ${
+                    fieldErrors.email
+                      ? 'animate-field-shake border-rose-500/80 ring-1 ring-rose-500/40 bg-rose-500/5'
+                      : 'border-white/15 hover:border-white/25 focus-within:border-pink-400/80 focus-within:ring-2 focus-within:ring-pink-400/20 focus-within:shadow-[0_0_12px_rgba(244,114,182,0.15)]'
+                  }`}
+                >
+                  <AtSign className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (fieldErrors.email) {
+                        setFieldErrors((prev) => ({ ...prev, email: false }));
+                        setValidationTip(null);
+                      }
+                    }}
+                    placeholder="your.email@domain.com"
+                    className="w-full bg-transparent text-white font-medium placeholder:text-slate-500/60 placeholder:font-normal placeholder:italic text-xs focus:outline-none font-mono"
+                    disabled={isSending}
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Submit Action Bar */}
-            <div className="flex items-center justify-between pt-2">
-              <div className="text-[11px] text-slate-500">
-                {cooldown > 0 ? (
-                  <span className="flex items-center gap-1.5 text-amber-400 font-mono">
-                    <Clock className="w-3.5 h-3.5 animate-spin" />
-                    Cooldown: wait {cooldown}s to prevent spam
-                  </span>
-                ) : (
-                  <span>Locked rate limit: 1 email / 60 seconds</span>
+            {/* ── 3. Subject Field ── */}
+            <div className="space-y-1">
+              <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+                Subject
+              </label>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/60 border border-white/15 hover:border-white/25 focus-within:border-pink-400/80 focus-within:ring-2 focus-within:ring-pink-400/20 focus-within:shadow-[0_0_12px_rgba(244,114,182,0.15)] transition-all">
+                <Tag className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                <input
+                  type="text"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  placeholder="Let's connect"
+                  className="w-full bg-transparent text-white font-medium placeholder:text-slate-500/60 placeholder:font-normal placeholder:italic text-xs focus:outline-none"
+                  disabled={isSending}
+                />
+              </div>
+            </div>
+
+            {/* ── 4. Message Body Field ── */}
+            <div className="space-y-1 pt-1">
+              <div className="flex items-center justify-between">
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+                  Message <span className="text-pink-400">*</span>
+                </label>
+                <span className={`font-mono text-[10px] ${message.length >= MAX_CHARS - 100 ? 'text-amber-400' : 'text-slate-500'}`}>
+                  {message.length} / {MAX_CHARS}
+                </span>
+              </div>
+              <div
+                className={`relative rounded-2xl bg-slate-900/60 border transition-all overflow-hidden ${
+                  fieldErrors.message
+                    ? 'animate-field-shake border-rose-500/80 ring-1 ring-rose-500/40 bg-rose-500/5'
+                    : 'border-white/15 hover:border-white/25 focus-within:border-pink-400/80 focus-within:ring-2 focus-within:ring-pink-400/20 focus-within:shadow-[0_0_12px_rgba(244,114,182,0.15)]'
+                }`}
+              >
+                <textarea
+                  value={message}
+                  onChange={(e) => {
+                    setMessage(e.target.value.slice(0, MAX_CHARS));
+                    if (fieldErrors.message) {
+                      setFieldErrors((prev) => ({ ...prev, message: false }));
+                      setValidationTip(null);
+                    }
+                  }}
+                  rows={7}
+                  placeholder="Hey Subha! Loved exploring your Curio.OS portfolio. Wanted to discuss..."
+                  className="w-full p-4 bg-transparent text-slate-100 placeholder:text-slate-500/60 placeholder:font-normal placeholder:italic text-xs leading-relaxed focus:outline-none resize-none custom-scrollbar"
+                  disabled={isSending}
+                />
+              </div>
+            </div>
+
+            {/* ── 5. Mochi In-Window Companion Tip ── */}
+            <div className="flex items-center gap-2.5 py-1">
+              <div
+                onClick={handleMochiPoke}
+                className="relative w-8 h-8 rounded-full bg-amber-500/15 border border-amber-400/30 flex items-center justify-center cursor-pointer hover:scale-110 active:scale-90 transition-transform shadow-sm group shrink-0"
+                title="Click Mochi for a tip!"
+              >
+                {/* Mini Mochi SVG Avatar */}
+                <svg viewBox="0 0 40 40" className={`w-6 h-6 transition-transform ${mochiMood === 'happy' ? 'animate-bounce' : ''}`}>
+                  <circle cx="20" cy="20" r="15" fill="#fed7aa" />
+                  <polygon points="12,12 8,2 18,8" fill="#fb923c" />
+                  <polygon points="11,10 9,4 16,8" fill="#fda4af" />
+                  <polygon points="28,12 32,2 22,8" fill="#78350f" />
+                  <polygon points="29,10 31,4 24,8" fill="#fda4af" />
+                  {mochiMood === 'happy' ? (
+                    <>
+                      <path d="M13 18 Q16 15 18 18" fill="none" stroke="#431407" strokeWidth="1.5" strokeLinecap="round" />
+                      <path d="M22 18 Q24 15 27 18" fill="none" stroke="#431407" strokeWidth="1.5" strokeLinecap="round" />
+                    </>
+                  ) : (
+                    <>
+                      <circle cx="15" cy="18" r="1.8" fill="#431407" />
+                      <circle cx="25" cy="18" r="1.8" fill="#431407" />
+                    </>
+                  )}
+                  <ellipse cx="20" cy="22" rx="1.5" ry="1" fill="#f43f5e" />
+                  <path d="M18 24 Q20 26 22 24" fill="none" stroke="#431407" strokeWidth="1" strokeLinecap="round" />
+                </svg>
+                <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-slate-950" />
+              </div>
+
+              {/* Mochi Speech Bubble */}
+              <div className="relative px-3 py-1.5 rounded-xl bg-slate-900/80 border border-purple-500/20 text-[11px] text-purple-200/90 shadow-sm flex items-center gap-1.5 animate-fadeIn">
+                <Sparkles className="w-3 h-3 text-pink-400 shrink-0" />
+                <span>{MOCHI_TIPS[mochiTipIdx]}</span>
+              </div>
+            </div>
+
+            {/* ── 6. Bottom Action Bar (Inline Validation & Rate-Limited Send Area) ── */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+              {/* Inline Validation Feedback */}
+              <div className="min-h-[20px] flex items-center">
+                {validationTip && (
+                  <div className="flex items-center gap-1.5 text-xs text-rose-300 font-mono animate-fadeIn">
+                    <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                    <span>{validationTip}</span>
+                  </div>
                 )}
               </div>
 
-              <button
-                type="submit"
-                disabled={isSending || cooldown > 0}
-                className={`relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-xs text-white shadow-lg transition-all cursor-pointer ${
-                  isSending || cooldown > 0
-                    ? 'bg-slate-800 text-slate-500 border border-white/5 cursor-not-allowed'
-                    : 'bg-[#EA4335] hover:bg-[#d6382a] active:scale-95 border border-red-400/50 shadow-[0_0_18px_rgba(234,67,53,0.45)] hover:shadow-[0_0_24px_rgba(234,67,53,0.6)]'
-                }`}
-              >
-                {isSending ? (
-                  <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
-                    <span>Dispatching...</span>
-                  </>
-                ) : cooldown > 0 ? (
-                  <>
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Wait {cooldown}s</span>
-                  </>
+              {/* Send Area (Button or In-Voice Rate Limit) */}
+              <div className="w-full sm:w-auto flex justify-end">
+                {cooldown > 0 ? (
+                  /* Rate limit folded cleanly into send position */
+                  <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900/90 border border-amber-500/30 text-xs font-mono text-amber-300 shadow-inner select-none animate-fadeIn">
+                    <Clock className="w-3.5 h-3.5 text-amber-400 animate-spin shrink-0" />
+                    <span>Give it a moment — one message at a time. ({cooldown}s)</span>
+                  </div>
                 ) : (
-                  <>
-                    <span>Send</span>
-                    <Send className="w-3.5 h-3.5" />
-                  </>
+                  /* Active Send Button with airplane micro-interaction */
+                  <button
+                    type="submit"
+                    disabled={isSending}
+                    className="group relative inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-medium text-xs text-white bg-[#EA4335] hover:bg-[#d6382a] active:scale-95 border border-red-400/50 shadow-[0_0_18px_rgba(234,67,53,0.45)] hover:shadow-[0_0_24px_rgba(234,67,53,0.6)] transition-all cursor-pointer"
+                  >
+                    {isSending ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
+                        <span>Dispatching...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Send</span>
+                        <Send
+                          className={`w-3.5 h-3.5 text-white transition-transform ${
+                            isPlaneFlying ? 'animate-plane-fly' : 'group-hover:translate-x-0.5 group-hover:-translate-y-0.5'
+                          }`}
+                        />
+                        <span className="text-red-200">✦</span>
+                      </>
+                    )}
+                  </button>
                 )}
-              </button>
+              </div>
             </div>
           </form>
         )}
