@@ -24,7 +24,7 @@ export const WALLPAPERS: WallpaperConfig[] = [
     accent: '#c084fc',
     description: 'Pixel-art purple & orange sunset over layered misty mountains and dark pine forest',
     previewGradient: 'from-purple-950 via-rose-900 to-amber-950',
-    tags: ['Sunset', 'Mountains', 'Fireflies', 'Default'],
+    tags: ['Sunset', 'Mountains', 'Fireflies'],
   },
   {
     id: 'sakura-spring',
@@ -38,7 +38,7 @@ export const WALLPAPERS: WallpaperConfig[] = [
     accent: '#f472b6',
     description: 'Pixel-art pink sakura cherry blossoms blooming over soft green hills with drifting petals',
     previewGradient: 'from-pink-950 via-rose-900 to-purple-950',
-    tags: ['Spring', 'Sakura', 'Pink', 'Blossoms', 'Petals'],
+    tags: ['Spring', 'Sakura', 'Pink', 'Blossoms', 'Petals', 'Default'],
   },
   {
     id: 'neon-rain',
@@ -79,18 +79,18 @@ export const WALLPAPERS: WallpaperConfig[] = [
   },
 ];
 
-export const DEFAULT_WALLPAPER_ID: WallpaperId = 'twilight-peaks';
+export const DEFAULT_WALLPAPER_ID: WallpaperId = 'sakura-spring';
 
 export function getWallpaperConfig(id: WallpaperId | string): WallpaperConfig {
   const found = WALLPAPERS.find((w) => w.id === id);
   if (found) return found;
 
   // Backward compatibility alias mapping for legacy wallpapers
-  if (id === 'cosmic-aurora') return WALLPAPERS[2]; // dream-void
-  if (id === 'cyber-noir') return WALLPAPERS[1];     // neon-rain
+  if (id === 'cosmic-aurora') return WALLPAPERS[3]; // dream-void
+  if (id === 'cyber-noir') return WALLPAPERS[2];     // neon-rain
   if (id === 'dream-lavender') return WALLPAPERS[0]; // twilight-peaks
   if (id === 'synth-sunset') return WALLPAPERS[0];   // twilight-peaks
-  if (id === 'matrix-green') return WALLPAPERS[1];   // neon-rain
+  if (id === 'matrix-green') return WALLPAPERS[2];   // neon-rain
 
-  return WALLPAPERS[0]; // twilight-peaks default
+  return WALLPAPERS.find((w) => w.id === DEFAULT_WALLPAPER_ID) || WALLPAPERS[1]; // sakura-spring default
 }

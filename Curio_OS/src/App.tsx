@@ -26,6 +26,15 @@ function CurioShell() {
 
   const [currentWallpaper, setCurrentWallpaper] = useState<WallpaperId>(() => {
     try {
+      const defaultMigrated = localStorage.getItem('curio_wallpaper_migrated_v2');
+      if (!defaultMigrated) {
+        localStorage.setItem('curio_wallpaper_migrated_v2', 'true');
+        const saved = localStorage.getItem('curio_wallpaper');
+        if (!saved || saved === 'twilight-peaks') {
+          localStorage.setItem('curio_wallpaper', DEFAULT_WALLPAPER_ID);
+          return DEFAULT_WALLPAPER_ID;
+        }
+      }
       const saved = localStorage.getItem('curio_wallpaper');
       if (saved) {
         return getWallpaperConfig(saved).id;

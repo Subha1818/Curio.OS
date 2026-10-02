@@ -9,7 +9,7 @@ import { educationData } from '../../data/educationData';
 import { skillsData } from '../../data/skillsData';
 import { apiGetStats, type UserStats } from '../../api/statsApi';
 import type { AppId, WallpaperId } from '../../types/os';
-import { WALLPAPERS } from '../../data/wallpapers';
+import { WALLPAPERS, DEFAULT_WALLPAPER_ID } from '../../data/wallpapers';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -933,7 +933,7 @@ ${subbuData.now.lastDetected}`}
           const isList = !sub || sub === 'list' || sub === 'help' || sub === '--help';
 
           if (isList) {
-            const currentSavedWp = localStorage.getItem('curio_wallpaper') || 'twilight-peaks';
+            const currentSavedWp = localStorage.getItem('curio_wallpaper') || DEFAULT_WALLPAPER_ID;
             response = (
               <div className="text-xs font-mono space-y-2 text-slate-300">
                 <div className="text-indigo-400 font-bold border-b border-indigo-500/30 pb-1 flex items-center justify-between">
