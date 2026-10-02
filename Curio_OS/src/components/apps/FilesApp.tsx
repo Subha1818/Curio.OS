@@ -413,11 +413,15 @@ const FilePreviewModal: React.FC<{ file: FileItem; onClose: () => void }> = ({ f
           ) : (
             <>
               {file.type === 'image' && file.previewUrl && (
-                <div
-                  className="w-full h-36 rounded-xl border border-slate-700/50 shadow-inner flex items-center justify-center text-white/80 font-sans text-xs p-3 text-center"
-                  style={{ background: file.previewUrl }}
-                >
-                  <p className="bg-black/40 px-3 py-1.5 rounded-lg backdrop-blur-md">{file.content}</p>
+                <div className="w-full rounded-xl border border-slate-700/50 shadow-inner overflow-hidden bg-black/40">
+                  <img
+                    src={file.previewUrl}
+                    alt={file.name}
+                    className="w-full max-h-72 object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
                 </div>
               )}
               <div className="p-3 rounded-xl bg-slate-950/90 border border-slate-800/80 text-slate-300 whitespace-pre-wrap leading-relaxed select-text font-mono text-[11px]">
@@ -532,6 +536,8 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
   // Preview / detail modals
   const [previewFile, setPreviewFile] = useState<FileItem | null>(null);
   const [detailItem, setDetailItem] = useState<PortfolioItem | null>(null);
+  // Lightbox for secret folder image files
+  const [secretLightboxSrc, setSecretLightboxSrc] = useState<string | null>(null);
 
   // Toast
   const [actionToast, setActionToast] = useState<{ message: string; type: 'mail' | 'donate' } | null>(null);
@@ -847,7 +853,7 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
                   {filteredDocFiles.map((file) => (
                     <div
                       key={file.id}
-                      onClick={() => { sound.playClick(); setPreviewFile(file); }}
+                      onClick={() => { sound.playClick(); file.type === 'image' && file.previewUrl ? setSecretLightboxSrc(file.previewUrl) : setPreviewFile(file); }}
                       className="group p-3 rounded-2xl bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800/80 hover:border-purple-500/40 transition-all cursor-pointer flex flex-col items-center text-center gap-2.5 shadow-sm hover:shadow-md hover:scale-[1.02]"
                     >
                       <div className="w-12 h-12 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-center group-hover:border-purple-500/30 transition-colors">
@@ -879,7 +885,7 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
                       {filteredDocFiles.map((file) => (
                         <tr
                           key={file.id}
-                          onClick={() => { sound.playClick(); setPreviewFile(file); }}
+                          onClick={() => { sound.playClick(); file.type === 'image' && file.previewUrl ? setSecretLightboxSrc(file.previewUrl) : setPreviewFile(file); }}
                           className="hover:bg-purple-500/10 transition-colors cursor-pointer group"
                         >
                           <td className="py-2.5 px-4 flex items-center gap-2.5 text-slate-200 group-hover:text-purple-300">
@@ -913,6 +919,25 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
           folderId={currentFolder}
           onClose={() => setDetailItem(null)}
         />
+      )}
+
+      {/* ── Secret folder image lightbox ─────────────────────────────────────── */}
+      {secretLightboxSrc && (
+        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSecretLightboxSrc(null)}>
+          <div className="relative max-w-2xl w-full" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setSecretLightboxSrc(null)}
+              className="absolute -top-10 right-0 text-slate-400 hover:text-white flex items-center gap-1.5 text-xs"
+            >
+              <X className="w-4 h-4" /> Close
+            </button>
+            <img
+              src={secretLightboxSrc}
+              alt="Secret vault photo"
+              className="w-full rounded-2xl shadow-2xl object-contain max-h-[70vh]"
+            />
+          </div>
+        </div>
       )}
 
       {/* ── File Preview Modal (Documents / Secret) ──────────────────────────── */}

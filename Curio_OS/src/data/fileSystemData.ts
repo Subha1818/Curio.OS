@@ -244,7 +244,6 @@ IndestructibleWebOSBuiltToWowAtFirstGlancePureJoyAndWonderSuperCutie
     modified: 'Recently',
     content: '',
     previewUrl: '/assets/secret/secret-1.jpg',
-    downloadUrl: '/assets/secret/secret-1.jpg',
   },
   {
     id: 'sec-photo-2',
@@ -255,7 +254,6 @@ IndestructibleWebOSBuiltToWowAtFirstGlancePureJoyAndWonderSuperCutie
     modified: 'Recently',
     content: '',
     previewUrl: '/assets/secret/secret-2.jpeg',
-    downloadUrl: '/assets/secret/secret-2.jpeg',
   },
   {
     id: 'sec-5',
