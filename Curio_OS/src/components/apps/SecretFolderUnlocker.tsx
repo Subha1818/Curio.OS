@@ -11,6 +11,7 @@ import {
   Brain,
 } from 'lucide-react';
 import { sound } from '../../utils/sound';
+import { useAnimationsEnabled } from '../../utils/useAnimations';
 import { SECRET_FOLDER_PUZZLES, type SecretPuzzle } from '../../data/secretFolderPuzzles';
 
 // ── Security Override Reflex Game ──────────────────────────────────────────────
@@ -425,30 +426,90 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
               sound.playClick();
               onUnlock();
             }}
-            className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-colors cursor-pointer shadow-lg shadow-emerald-900/40"
+            className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl text-xs tracking-wide transition-colors cursor-pointer shadow-lg shadow-emerald-900/40 flex items-center justify-center gap-1.5"
           >
-            {successPopup.buttonText} — UNLOCK NOW
+            <span>Let me in</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
     );
   }
 
+  const animationsEnabled = useAnimationsEnabled();
+  const fullStatusText = `admin_protocol.sys :: round ${currentRound}/3 :: fails ${totalFailedAttempts}/6`;
+  const [displayedStatus, setDisplayedStatus] = useState(fullStatusText);
+
+  // Character reveal / typewriter animation for the terminal status line
+  useEffect(() => {
+    if (!animationsEnabled) {
+      setDisplayedStatus(fullStatusText);
+      return;
+    }
+    let i = 0;
+    setDisplayedStatus('');
+    const interval = setInterval(() => {
+      i++;
+      setDisplayedStatus(fullStatusText.slice(0, i));
+      if (i >= fullStatusText.length) {
+        clearInterval(interval);
+      }
+    }, 18);
+    return () => clearInterval(interval);
+  }, [fullStatusText, animationsEnabled]);
+
+  const consoleGlowClass = !animationsEnabled
+    ? currentRound === 1
+      ? 'border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.2),0_10px_35px_rgba(0,0,0,0.85)]'
+      : currentRound === 2
+      ? 'border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.2),0_10px_35px_rgba(0,0,0,0.85)]'
+      : 'border-fuchsia-500/50 shadow-[0_0_20px_rgba(217,70,239,0.2),0_10px_35px_rgba(0,0,0,0.85)]'
+    : currentRound === 1
+    ? 'border-cyan-500/40 animate-console-glow-cyan'
+    : currentRound === 2
+    ? 'border-blue-500/40 animate-console-glow-blue'
+    : 'border-fuchsia-500/40 animate-console-glow-magenta';
+
   return (
     <div className="h-full flex items-center justify-center p-2">
-      <div className="max-w-md w-full p-6 rounded-2xl bg-slate-900/95 border border-slate-800 shadow-2xl backdrop-blur-md space-y-5">
-        {/* Header with Protocol Stage & Failure Tracker */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 shadow-inner">
-              <Lock className="w-4 h-4" />
+      <div
+        className={`max-w-md w-full p-5 sm:p-6 rounded-xl bg-[#090D16]/95 backdrop-blur-xl border space-y-4 relative overflow-hidden transition-all duration-300 ${consoleGlowClass}`}
+      >
+        {/* Retro Security Console Scanlines Overlay */}
+        <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_bottom,transparent_50%,rgba(0,0,0,0.35)_51%)] bg-[length:100%_4px] opacity-25" />
+        {animationsEnabled && (
+          <div className="absolute inset-x-0 h-16 pointer-events-none bg-gradient-to-b from-transparent via-cyan-400/[0.04] to-transparent animate-scanline" />
+        )}
+
+        {/* Terminal Monospace Status Header */}
+        <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 relative z-10">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div
+              className={`w-7 h-7 rounded-lg flex items-center justify-center border shadow-inner transition-colors ${
+                currentRound === 1
+                  ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-400'
+                  : currentRound === 2
+                  ? 'bg-blue-500/15 border-blue-500/30 text-blue-400'
+                  : 'bg-fuchsia-500/15 border-fuchsia-500/30 text-fuchsia-400'
+              }`}
+            >
+              <Lock className="w-3.5 h-3.5" />
             </div>
-            <div>
-              <h3 className="font-bold text-slate-200 text-xs tracking-wider uppercase font-mono">
-                Admin Protocol
-              </h3>
-              <p className="text-[11px] text-pink-400 font-medium">
-                Round {currentRound} of 3:{' '}
+            <div className="min-w-0">
+              <div className="flex items-center font-mono text-xs text-slate-300 truncate">
+                <span className="text-emerald-400 font-bold mr-1.5 select-none">&gt;</span>
+                <span className="tracking-normal">{displayedStatus}</span>
+                <span className="inline-block w-1.5 h-3 bg-emerald-400/70 ml-1 animate-pulse" />
+              </div>
+              <p
+                className={`text-[11px] font-sans font-medium mt-0.5 ${
+                  currentRound === 1
+                    ? 'text-cyan-400'
+                    : currentRound === 2
+                    ? 'text-blue-400'
+                    : 'text-fuchsia-400'
+                }`}
+              >
                 {currentRound === 1
                   ? 'Security Override'
                   : currentRound === 2
@@ -456,13 +517,6 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
                   : 'Reputation Rehabilitation'}
               </p>
             </div>
-          </div>
-
-          <div className="text-right">
-            <span className="text-[10px] uppercase font-mono text-slate-500 block">Total Fails</span>
-            <span className="text-xs font-mono font-bold text-amber-400">
-              {totalFailedAttempts} / 6
-            </span>
           </div>
         </div>
 
@@ -526,9 +580,11 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
                 </div>
 
                 <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-4 relative overflow-hidden">
-                  <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+                  <div className="flex justify-between items-center text-xs font-mono text-slate-400">
                     <span>Lock {round1Level} of 3</span>
-                    <span>{round1Level === 1 ? 'Slow' : round1Level === 2 ? 'Fast' : 'Extreme'}</span>
+                    <span className="text-[11px] text-slate-500">
+                      {round1Level === 1 ? 'slow' : round1Level === 2 ? 'fast' : 'extreme'}
+                    </span>
                   </div>
 
                   <div className="relative w-full h-8 bg-slate-900 rounded-lg border border-slate-700/50 overflow-hidden shadow-inner">
@@ -597,10 +653,15 @@ export const SecretFolderUnlocker: React.FC<SecretFolderUnlockerProps> = ({
                     sound.playClick();
                     setMemoryPhase('memorize');
                   }}
-                  className="w-full py-3 px-4 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold font-mono tracking-wider transition-all cursor-pointer shadow-md shadow-cyan-600/20 uppercase flex items-center justify-center gap-2"
+                  className="w-full py-2.5 px-4 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-medium font-sans transition-all cursor-pointer shadow-md shadow-cyan-600/20 flex items-center justify-center gap-2"
                 >
-                  <span>I&apos;m Ready — Show Numbers ({introCountdown}s)</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>Ready? Show me the numbers</span>
+                  {introCountdown > 0 && (
+                    <span className="px-1.5 py-0.5 rounded text-[10px] bg-cyan-950/80 border border-cyan-400/40 text-cyan-200 font-mono">
+                      {introCountdown}s
+                    </span>
+                  )}
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             ) : memoryPhase === 'memorize' ? (

@@ -15,7 +15,6 @@ import { GmailApp } from './apps/GmailApp';
 import { MiniMusicPlayer } from './MiniMusicPlayer';
 import { CursorTrail } from './CursorTrail';
 import { MusicRainEffect } from './MusicRainEffect';
-import { DesktopCompanion } from './DesktopCompanion';
 import type { AppId, WallpaperId } from '../types/os';
 import { useWindowManager } from '../context/WindowManagerContext';
 import { sound } from '../utils/sound';
@@ -591,9 +590,6 @@ export const Desktop: React.FC<DesktopProps> = ({
 
       {/* Dynamic Cursor Sparkle & Sakura Petal Trail */}
       <CursorTrail />
-
-      {/* Wandering Interactive Desktop Companion (Mochi / Spooky / Byte) */}
-      <DesktopCompanion />
 
       {/* Right Click Context Menu */}
       {contextMenu && (

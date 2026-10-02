@@ -73,7 +73,7 @@ export const DesktopCompanion: React.FC = () => {
   const [companionState, setCompanionState] = useState<CompanionState>('idle');
   const [posX, setPosX] = useState<number>(200);
   const [posY, setPosY] = useState<number>(() => {
-    return typeof window !== 'undefined' ? window.innerHeight - 170 : 500;
+    return typeof window !== 'undefined' ? window.innerHeight - 175 : 500;
   });
   const [facingLeft, setFacingLeft] = useState<boolean>(false);
   const [message, setMessage] = useState<string | null>(
@@ -82,6 +82,18 @@ export const DesktopCompanion: React.FC = () => {
   const [hearts, setHearts] = useState<HeartParticle[]>([]);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [isHidden, setIsHidden] = useState<boolean>(false);
+
+  // Keep Mochi clamped above taskbar on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1000;
+      const screenHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
+      setPosX((prev) => Math.max(20, Math.min(screenWidth - 100, prev)));
+      setPosY((prev) => Math.max(40, Math.min(screenHeight - 175, prev)));
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const dragOffsetRef = useRef({ x: 0, y: 0 });
   const messageTimeoutRef = useRef<number | null>(null);
@@ -278,8 +290,8 @@ export const DesktopCompanion: React.FC = () => {
     const screenHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
 
     const newX = Math.max(20, Math.min(screenWidth - 100, e.clientX - dragOffsetRef.current.x));
-    // 170 = ~80px sprite + 20px label + 52px taskbar + 18px margin
-    const newY = Math.max(40, Math.min(screenHeight - 170, e.clientY - dragOffsetRef.current.y));
+    // 175 = ~80px sprite + 24px label + 52px taskbar + 19px safety margin
+    const newY = Math.max(40, Math.min(screenHeight - 175, e.clientY - dragOffsetRef.current.y));
     setPosX(newX);
     setPosY(newY);
   };
