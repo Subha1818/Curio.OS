@@ -123,9 +123,8 @@ const SkillSectionCard: React.FC<SkillSectionCardProps> = ({
           {category.skills.map((skill) => (
             <span
               key={skill}
-              className="px-2.5 py-1 rounded-md border text-xs font-mono font-medium transition-all duration-200 select-none inline-flex items-center gap-1.5 cursor-default bg-purple-500/10 text-purple-200 border-purple-500/20 hover:border-purple-400/50 hover:bg-purple-500/20 hover:shadow-[0_0_10px_rgba(192,132,252,0.25)]"
+              className="px-2.5 py-1 rounded-md border text-xs font-mono font-medium transition-all duration-200 select-none cursor-default bg-purple-500/10 text-purple-200 border-purple-500/20 hover:border-purple-400/50 hover:bg-purple-500/20 hover:shadow-[0_0_10px_rgba(192,132,252,0.25)]"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 opacity-80" />
               {skill}
             </span>
           ))}
@@ -153,7 +152,7 @@ export const SkillsApp: React.FC<{ windowId: string }> = () => {
               Tech Stack
             </h2>
             <p className="text-xs font-sans text-slate-400 flex items-center gap-1.5">
-              Core technologies &amp; engineering toolkit
+              Things I actually use, not just resume fluff ✨
             </p>
           </div>
         </div>
@@ -161,7 +160,7 @@ export const SkillsApp: React.FC<{ windowId: string }> = () => {
         <div className="flex items-center gap-2 text-xs font-sans text-slate-400 self-start sm:self-auto">
           <span className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg">
             <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-            {totalSkillsCount} skills loaded
+            {totalSkillsCount} tools in the toolbox
           </span>
         </div>
       </div>

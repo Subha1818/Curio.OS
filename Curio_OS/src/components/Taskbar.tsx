@@ -117,9 +117,9 @@ export const Taskbar: React.FC<TaskbarProps> = ({
               : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
           }`}
         >
-          {/* Animated Curio Logo Mark */}
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-pink-500 via-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md">
-            <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+          {/* Start Button Logo Mark */}
+          <div className="w-6 h-6 rounded-lg bg-violet-600 flex items-center justify-center text-white shadow-md">
+            <span className="font-pixel text-[12px]">C</span>
           </div>
           <span className="font-pixel text-[10px] tracking-wide text-purple-200 hidden sm:inline">
             Curio<span className="text-pink-400">.OS</span>

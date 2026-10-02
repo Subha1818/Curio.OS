@@ -249,7 +249,7 @@ export const Window: React.FC<WindowProps> = ({ windowState, children }) => {
               ? 'bg-slate-900/90 border-slate-700/80 text-slate-100'
               : 'bg-slate-950/70 border-slate-800/60 text-slate-400'
           }`}
-          title="Drag to move window anywhere"
+          
         >
           {/* Left: Window Traffic Light Controls */}
           <div className="flex items-center gap-2">

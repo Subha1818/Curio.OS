@@ -371,7 +371,7 @@ export const Wallpaper: React.FC<WallpaperProps> = ({ id }) => {
 
     if (config.id === 'twilight-peaks') {
       return (
-        <div className="absolute inset-0 overflow-hidden select-none">
+        <div className="absolute inset-0 overflow-hidden select-none bg-[#0b0612]">
           {/* Layer 0: Sky and Sunset Clouds */}
           {config.layers[0] && (
             <img
@@ -408,7 +408,7 @@ export const Wallpaper: React.FC<WallpaperProps> = ({ id }) => {
 
     if (config.id === 'sakura-spring') {
       return (
-        <div className="absolute inset-0 overflow-hidden select-none">
+        <div className="absolute inset-0 overflow-hidden select-none bg-[#0e0b18]">
           {/* Layer 0: Pastel Pink Spring Sky Gradient */}
           {config.layers[0] && (
             <img
@@ -445,7 +445,7 @@ export const Wallpaper: React.FC<WallpaperProps> = ({ id }) => {
 
     if (config.id === 'neon-rain') {
       return (
-        <div className="absolute inset-0 overflow-hidden select-none">
+        <div className="absolute inset-0 overflow-hidden select-none bg-[#06080f]">
           {/* Layer 0: Distant Skyline & Cyber Sky */}
           {config.layers[0] && (
             <img
@@ -480,7 +480,7 @@ export const Wallpaper: React.FC<WallpaperProps> = ({ id }) => {
 
     if (config.id === 'dream-void') {
       return (
-        <div className="absolute inset-0 overflow-hidden select-none">
+        <div className="absolute inset-0 overflow-hidden select-none bg-[#04040a]">
           {/* Layer 0: Deep Interstellar Nebula */}
           {config.layers[0] && (
             <img

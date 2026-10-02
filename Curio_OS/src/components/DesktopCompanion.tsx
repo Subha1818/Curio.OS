@@ -73,7 +73,7 @@ export const DesktopCompanion: React.FC = () => {
   const [companionState, setCompanionState] = useState<CompanionState>('idle');
   const [posX, setPosX] = useState<number>(200);
   const [posY, setPosY] = useState<number>(() => {
-    return typeof window !== 'undefined' ? window.innerHeight - 150 : 500;
+    return typeof window !== 'undefined' ? window.innerHeight - 170 : 500;
   });
   const [facingLeft, setFacingLeft] = useState<boolean>(false);
   const [message, setMessage] = useState<string | null>(
@@ -278,7 +278,8 @@ export const DesktopCompanion: React.FC = () => {
     const screenHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
 
     const newX = Math.max(20, Math.min(screenWidth - 100, e.clientX - dragOffsetRef.current.x));
-    const newY = Math.max(40, Math.min(screenHeight - 110, e.clientY - dragOffsetRef.current.y));
+    // 170 = ~80px sprite + 20px label + 52px taskbar + 18px margin
+    const newY = Math.max(40, Math.min(screenHeight - 170, e.clientY - dragOffsetRef.current.y));
     setPosX(newX);
     setPosY(newY);
   };
@@ -323,7 +324,7 @@ export const DesktopCompanion: React.FC = () => {
           setIsHidden(false);
           sound.playChime();
         }}
-        className="fixed bottom-14 right-6 z-50 px-3 py-1.5 rounded-full bg-slate-900/90 border border-pink-500/40 text-xs text-pink-300 shadow-lg hover:scale-105 transition-all flex items-center gap-1.5 cursor-pointer"
+        className="fixed bottom-16 right-6 z-50 px-3 py-1.5 rounded-full bg-slate-900/90 border border-pink-500/40 text-xs text-pink-300 shadow-lg hover:scale-105 transition-all flex items-center gap-1.5 cursor-pointer"
         title="Summon Desktop Companion"
       >
         <span>🐾</span>
@@ -340,7 +341,7 @@ export const DesktopCompanion: React.FC = () => {
       onPointerUp={handlePointerUp}
       onClick={handlePet}
       onDoubleClick={handleDoubleClick}
-      className={`fixed z-50 select-none cursor-grab active:cursor-grabbing group transition-[left,top] ${
+      className={`fixed z-[60] select-none cursor-grab active:cursor-grabbing group transition-[left,top] ${
         isDragging ? 'duration-0' : 'duration-700 ease-out'
       }`}
       style={{

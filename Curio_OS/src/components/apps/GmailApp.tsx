@@ -13,11 +13,11 @@ const RATE_LIMIT_SECONDS = 60;
 const LAST_SENT_KEY = 'curio_gmail_last_sent';
 
 const MOCHI_TIPS = [
-  "Don't forget your name, so Subha knows who's being this charming. 🐾",
+  "Don't forget your name, so Subbu knows who's being this charming. 🐾",
   "Short and sweet works. So does long and chaotic. ✨",
   "I won't read it. Probably. 🐱",
   "Say something nice! He works hard on this OS. 🌸",
-  "Got a cool project or idea? Subha loves building things. 💻",
+  "Got a cool project or idea? Subbu loves building things. 💻",
 ];
 
 export const GmailApp: React.FC<GmailAppProps> = () => {
@@ -116,7 +116,7 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
 
     if (!email.trim() || !isValidEmail(email)) {
       setFieldErrors({ email: true });
-      setValidationTip("Subha will need a real email to write you back! 📬");
+      setValidationTip("Subbu will need a real email to write you back! 📬");
       sound.playAlert();
       return;
     }
@@ -210,7 +210,7 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
             <h2 className="text-sm font-semibold tracking-wide text-white flex items-center gap-2 font-clash">
               New Message
             </h2>
-            <p className="text-[11px] text-slate-400">Direct transmission to Subha's inbox</p>
+            <p className="text-[11px] text-slate-400">Direct transmission to Subbu's inbox</p>
           </div>
         </div>
 
@@ -279,7 +279,7 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
                   <span className="text-[10px] text-slate-500 ml-0.5">(Subhajit Patra)</span>
                 </div>
               </div>
-              <span className="text-[10px] font-mono text-slate-600 hidden sm:inline">Locked recipient</span>
+
             </div>
 
             {/* Visual separator between static To and real inputs */}
@@ -289,15 +289,14 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* From Name */}
               <div className="space-y-1">
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
-                  Your Name <span className="text-pink-400">*</span>
+                <label className="block text-[11px] font-medium text-slate-400">
+                  Your name <span className="text-pink-400">*</span>
                 </label>
                 <div
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/60 border transition-all ${
-                    fieldErrors.name
-                      ? 'animate-field-shake border-rose-500/80 ring-1 ring-rose-500/40 bg-rose-500/5'
-                      : 'border-white/15 hover:border-white/25 focus-within:border-pink-400/80 focus-within:ring-2 focus-within:ring-pink-400/20 focus-within:shadow-[0_0_12px_rgba(244,114,182,0.15)]'
-                  }`}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/60 border transition-all ${fieldErrors.name
+                    ? 'animate-field-shake border-rose-500/80 ring-1 ring-rose-500/40 bg-rose-500/5'
+                    : 'border-white/15 hover:border-white/25 focus-within:border-pink-400/80 focus-within:ring-2 focus-within:ring-pink-400/20 focus-within:shadow-[0_0_12px_rgba(244,114,182,0.15)]'
+                    }`}
                 >
                   <User className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                   <input
@@ -319,15 +318,14 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
 
               {/* From Email */}
               <div className="space-y-1">
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
-                  Your Email <span className="text-pink-400">*</span>
+                <label className="block text-[11px] font-medium text-slate-400">
+                  Your email <span className="text-pink-400">*</span>
                 </label>
                 <div
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/60 border transition-all ${
-                    fieldErrors.email
-                      ? 'animate-field-shake border-rose-500/80 ring-1 ring-rose-500/40 bg-rose-500/5'
-                      : 'border-white/15 hover:border-white/25 focus-within:border-pink-400/80 focus-within:ring-2 focus-within:ring-pink-400/20 focus-within:shadow-[0_0_12px_rgba(244,114,182,0.15)]'
-                  }`}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/60 border transition-all ${fieldErrors.email
+                    ? 'animate-field-shake border-rose-500/80 ring-1 ring-rose-500/40 bg-rose-500/5'
+                    : 'border-white/15 hover:border-white/25 focus-within:border-pink-400/80 focus-within:ring-2 focus-within:ring-pink-400/20 focus-within:shadow-[0_0_12px_rgba(244,114,182,0.15)]'
+                    }`}
                 >
                   <AtSign className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                   <input
@@ -350,7 +348,7 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
 
             {/* ── 3. Subject Field ── */}
             <div className="space-y-1">
-              <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+              <label className="block text-[11px] font-medium text-slate-400">
                 Subject
               </label>
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/60 border border-white/15 hover:border-white/25 focus-within:border-pink-400/80 focus-within:ring-2 focus-within:ring-pink-400/20 focus-within:shadow-[0_0_12px_rgba(244,114,182,0.15)] transition-all">
@@ -369,7 +367,7 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
             {/* ── 4. Message Body Field ── */}
             <div className="space-y-1 pt-1">
               <div className="flex items-center justify-between">
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+                <label className="block text-[11px] font-medium text-slate-400">
                   Message <span className="text-pink-400">*</span>
                 </label>
                 <span className={`font-mono text-[10px] ${message.length >= MAX_CHARS - 100 ? 'text-amber-400' : 'text-slate-500'}`}>
@@ -377,11 +375,10 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
                 </span>
               </div>
               <div
-                className={`relative rounded-2xl bg-slate-900/60 border transition-all overflow-hidden ${
-                  fieldErrors.message
-                    ? 'animate-field-shake border-rose-500/80 ring-1 ring-rose-500/40 bg-rose-500/5'
-                    : 'border-white/15 hover:border-white/25 focus-within:border-pink-400/80 focus-within:ring-2 focus-within:ring-pink-400/20 focus-within:shadow-[0_0_12px_rgba(244,114,182,0.15)]'
-                }`}
+                className={`relative rounded-2xl bg-slate-900/60 border transition-all overflow-hidden ${fieldErrors.message
+                  ? 'animate-field-shake border-rose-500/80 ring-1 ring-rose-500/40 bg-rose-500/5'
+                  : 'border-white/15 hover:border-white/25 focus-within:border-pink-400/80 focus-within:ring-2 focus-within:ring-pink-400/20 focus-within:shadow-[0_0_12px_rgba(244,114,182,0.15)]'
+                  }`}
               >
                 <textarea
                   value={message}
@@ -393,7 +390,7 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
                     }
                   }}
                   rows={7}
-                  placeholder="Hey Subha! Loved exploring your Curio.OS portfolio. Wanted to discuss..."
+                  placeholder="Hey Subbu! Loved exploring your Curio.OS portfolio. Wanted to discuss..."
                   className="w-full p-4 bg-transparent text-slate-100 placeholder:text-slate-500/60 placeholder:font-normal placeholder:italic text-xs leading-relaxed focus:outline-none resize-none custom-scrollbar"
                   disabled={isSending}
                 />
@@ -433,7 +430,7 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
 
               {/* Mochi Speech Bubble */}
               <div className="relative px-3 py-1.5 rounded-xl bg-slate-900/80 border border-purple-500/20 text-[11px] text-purple-200/90 shadow-sm flex items-center gap-1.5 animate-fadeIn">
-                <Sparkles className="w-3 h-3 text-pink-400 shrink-0" />
+
                 <span>{MOCHI_TIPS[mochiTipIdx]}</span>
               </div>
             </div>
@@ -474,11 +471,9 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
                       <>
                         <span>Send</span>
                         <Send
-                          className={`w-3.5 h-3.5 text-white transition-transform ${
-                            isPlaneFlying ? 'animate-plane-fly' : 'group-hover:translate-x-0.5 group-hover:-translate-y-0.5'
-                          }`}
+                          className={`w-3.5 h-3.5 text-white transition-transform ${isPlaneFlying ? 'animate-plane-fly' : 'group-hover:translate-x-0.5 group-hover:-translate-y-0.5'
+                            }`}
                         />
-                        <span className="text-red-200">✦</span>
                       </>
                     )}
                   </button>
