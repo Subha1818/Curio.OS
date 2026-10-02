@@ -53,8 +53,19 @@ export const portfolioContent: PortfolioContent = {
       thumbnail: '/assets/projects/thumbs/kisaansetu.jpg',
       description:
         'Smart procurement queue management system for farmers. Eliminates long waits at procurement centers by digitising the queue using real-time slot booking and SMS notifications.',
-      githubUrl: 'https://github.com/Subha1818',
+      githubUrl: 'https://github.com/Subha1818/KisaanSetu',
+      liveUrl: 'https://kisaan-setu-nine.vercel.app',
       techStack: ['React', 'Node.js', 'Express', 'MongoDB', 'Twilio SMS'],
+    },
+    {
+      id: 'ayursutra',
+      title: 'AyurSutra',
+      banner: '/assets/projects/ayursutra.png',
+      thumbnail: '/assets/projects/thumbs/ayursutra.jpg',
+      description:
+        'Holistic Panchakarma healing & Ayurvedic clinic management platform — tracks traditional therapies, practitioner schedules, and patient recovery journeys.',
+      githubUrl: 'https://github.com/Subha1818/AyurSutra',
+      techStack: ['React', 'TypeScript', 'Node.js', 'PostgreSQL'],
     },
     {
       id: 'logiflow',
@@ -63,7 +74,8 @@ export const portfolioContent: PortfolioContent = {
       thumbnail: '/assets/projects/thumbs/logiflow.jpg',
       description:
         'Route optimization and logistics visualizer. Computes shortest delivery paths using graph algorithms and renders them on an interactive map dashboard.',
-      githubUrl: 'https://github.com/Subha1818',
+      githubUrl: 'https://github.com/Subha1818/LogiFlow',
+      liveUrl: 'https://logiflow-gold.vercel.app',
       techStack: ['React', 'D3.js', 'Dijkstra', 'Node.js', 'PostgreSQL'],
     },
     {
@@ -73,28 +85,8 @@ export const portfolioContent: PortfolioContent = {
       thumbnail: '/assets/projects/thumbs/studentsphere.jpg',
       description:
         'Centralized student resource & peer learning platform — notes sharing, timetable management, campus announcements, and academic collaboration in one place.',
-      githubUrl: 'https://github.com/Subha1818',
+      githubUrl: 'https://github.com/Subha1818/Student-Sphere',
       techStack: ['React', 'Firebase', 'Tailwind CSS', 'Node.js'],
-    },
-    {
-      id: 'ayursutra',
-      title: 'AyurSutra',
-      banner: '/assets/projects/ayursutra.png',
-      thumbnail: '/assets/projects/thumbs/ayursutra.jpg',
-      description:
-        'Holistic Panchakarma healing & Ayurvedic clinic management platform — tracks traditional therapies, practitioner schedules, and patient recovery journeys.',
-      githubUrl: 'https://github.com/Subha1818',
-      techStack: ['React', 'TypeScript', 'Node.js', 'PostgreSQL'],
-    },
-    {
-      id: 'parnacare',
-      title: 'Parnacare',
-      banner: '/assets/projects/parnacare.png',
-      thumbnail: '/assets/projects/thumbs/parnacare.jpg',
-      description:
-        'Ayurvedic wellness dashboard and personalized herbal remedies directory connecting users with qualified traditional health consultants.',
-      githubUrl: 'https://github.com/Subha1818',
-      techStack: ['React', 'Node.js', 'Express', 'MongoDB'],
     },
     {
       id: 'smart-rannaghor',
@@ -103,8 +95,29 @@ export const portfolioContent: PortfolioContent = {
       thumbnail: '/assets/projects/thumbs/smart-rannaghor.jpg',
       description:
         'AI-driven kitchen inventory tracker and recipe recommender — smart pantry management and waste reduction tailored for everyday cooking.',
-      githubUrl: 'https://github.com/Subha1818',
+      githubUrl: 'https://github.com/Subha1818/SmartRannaghar',
       techStack: ['React', 'Python', 'FastAPI', 'Machine Learning'],
+    },
+    {
+      id: 'parnacare',
+      title: 'Parnacare',
+      banner: '/assets/projects/parnacare.png',
+      thumbnail: '/assets/projects/thumbs/parnacare.jpg',
+      description:
+        'Ayurvedic wellness dashboard and personalized herbal remedies directory connecting users with qualified traditional health consultants.',
+      githubUrl: 'https://github.com/Subha1818/parnacare',
+      techStack: ['React', 'Node.js', 'Express', 'MongoDB'],
+    },
+    {
+      id: 'ecommerce',
+      title: 'Ecommerce Storefront',
+      banner: '/assets/projects/ecommerce.png',
+      thumbnail: '/assets/projects/thumbs/ecommerce.jpg',
+      description:
+        'Full-featured modern e-commerce storefront with catalog browsing, shopping cart state management, checkout simulation, dynamic reviews, and responsive product grid.',
+      githubUrl: 'https://github.com/Subha1818/ecommerce-frontend',
+      liveUrl: 'https://ecommerce-frontend-opal-gamma.vercel.app',
+      techStack: ['React', 'JavaScript', 'HTML5', 'CSS3', 'Vercel'],
     },
     {
       id: 'curio-os',
@@ -148,6 +161,20 @@ export const portfolioContent: PortfolioContent = {
       description: 'Professional Coursera Certificate verified by IBM.',
     },
     {
+      id: 'aws-cloud',
+      title: 'AWS Academy Graduate — Cloud Foundations',
+      image: '/assets/achievements/aws-cloud.png',
+      thumbnail: '/assets/achievements/thumbs/aws-cloud.jpg',
+      description: 'AWS Academy Training Badge & Certificate — Cloud Architecture & Core Services.',
+    },
+    {
+      id: 'digital-marketing',
+      title: 'Digital Marketing Masterclass: AI & Social Media',
+      image: '/assets/achievements/digital-marketing.png',
+      thumbnail: '/assets/achievements/thumbs/digital-marketing.jpg',
+      description: 'Udemy Certificate of Completion (71 total hours) verified by Phil Ebiner & Diego Davila.',
+    },
+    {
       id: 'devops-bootcamp',
       title: 'DevOps Bootcamp — Zero to Hero',
       image: '/assets/achievements/devops.png',
@@ -184,7 +211,13 @@ export const portfolioContent: PortfolioContent = {
     { id: 'photo-18', image: '/assets/photography/photo-18.jpg', thumbnail: '/assets/photography/thumbs/photo-18.jpg', caption: 'Tranquil Waters — Frame 18' },
     { id: 'photo-19', image: '/assets/photography/photo-19.jpg', thumbnail: '/assets/photography/thumbs/photo-19.jpg', caption: 'Fleeting Memories — Frame 19' },
     { id: 'photo-20', image: '/assets/photography/photo-20.jpg', thumbnail: '/assets/photography/thumbs/photo-20.jpg', caption: 'The Final Silhouette — Frame 20' },
+    { id: 'photo-21', image: '/assets/photography/photo-21.jpg', thumbnail: '/assets/photography/thumbs/photo-21.jpg', caption: 'Bishnupur Terracotta Sanctuary — Frame 21' },
+    { id: 'photo-22', image: '/assets/photography/photo-22.jpg', thumbnail: '/assets/photography/thumbs/photo-22.jpg', caption: 'Monochrome Stillness / Wires in the Sky — Frame 22' },
+    { id: 'photo-23', image: '/assets/photography/photo-23.jpg', thumbnail: '/assets/photography/thumbs/photo-23.jpg', caption: 'Sacred Craft / Kumartuli Sculptors — Frame 23' },
+    { id: 'photo-24', image: '/assets/photography/photo-24.jpg', thumbnail: '/assets/photography/thumbs/photo-24.jpg', caption: 'The Mythic Gaze in Clay — Frame 24' },
+    { id: 'photo-25', image: '/assets/photography/photo-25.jpg', thumbnail: '/assets/photography/thumbs/photo-25.jpg', caption: 'Morning Mist Along the Rail Lines — Frame 25' },
   ],
+
 
   drawings: [
     { id: 'drawing-01', image: '/assets/drawings/drawing-01.jpg', thumbnail: '/assets/drawings/thumbs/drawing-01.jpg', caption: 'Anime Character Study — Sketch 01' },

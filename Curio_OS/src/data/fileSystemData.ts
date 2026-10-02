@@ -235,4 +235,24 @@ IndestructibleWebOSBuiltToWowAtFirstGlancePureJoyAndWonderSuperCutie
 
 [SHA-256 SIGNATURE VALIDATED: ADMINISTRATOR SUBBU AUTHENTICATED]`,
   },
+  {
+    id: 'sec-5',
+    name: 'README_DROPBOX.txt',
+    extension: 'txt',
+    type: 'text',
+    size: '1.2 KB',
+    modified: 'Just now',
+    previewUrl: '/assets/secret/README.txt',
+    downloadUrl: '/assets/secret/README.txt',
+    content: `========================================================================
+             CURIO.OS / DREAM.OS — ADMIN SECRET FOLDER VAULT
+========================================================================
+Dedicated folder location on disk:
+Curio_OS/public/assets/secret/
+
+Drop any files (documents, images, classified plans, easter eggs) into
+this dedicated folder to stage them for the secret vault. All files
+placed in this folder will be readily accessible in Curio.OS.
+========================================================================`,
+  },
 ];
