@@ -13,6 +13,7 @@ import {
   Share2,
   Cpu,
   Heart,
+  Mail,
 } from 'lucide-react';
 import { LetterBoxIcon } from './icons/LetterBoxIcon';
 import { sound } from '../utils/sound';
@@ -96,6 +97,16 @@ const ICON_ACCENTS: Record<string, IconAccent> = {
     color: '#f43f5e',
     glow: 'rgba(244, 63, 94, 0.55)',
     hoverBorder: 'group-hover:border-rose-500/70',
+  },
+  Mail: {
+    color: '#EA4335',
+    glow: 'rgba(234, 67, 53, 0.5)',
+    hoverBorder: 'group-hover:border-red-500/70',
+  },
+  Gmail: {
+    color: '#EA4335',
+    glow: 'rgba(234, 67, 53, 0.5)',
+    hoverBorder: 'group-hover:border-red-500/70',
   },
 };
 
@@ -212,6 +223,10 @@ export const DesktopIcon: React.FC<DesktopIconProps> = ({
 
       case 'Gamepad2':
         return <Gamepad2 className="w-8 h-8 text-slate-500" />;
+
+      case 'Mail':
+      case 'Gmail':
+        return <Mail className="w-8 h-8 text-[#EA4335] group-hover:scale-110 transition-transform" />;
 
       default:
         return <Terminal className="w-8 h-8 text-pink-400" />;

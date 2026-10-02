@@ -29,6 +29,7 @@ const APP_CONFIGS: Record<
   void: { title: 'VOID.EXE', iconName: 'Skull', defaultWidth: 460, defaultHeight: 380 },
   socials: { title: "Subbu's Socials", iconName: 'Share2', defaultWidth: 640, defaultHeight: 480 },
   skills: { title: "Subbu's Tech Stack", iconName: 'Cpu', defaultWidth: 680, defaultHeight: 520 },
+  gmail: { title: 'Gmail — New Message', iconName: 'Mail', defaultWidth: 580, defaultHeight: 520 },
 };
 
 export const WindowManagerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

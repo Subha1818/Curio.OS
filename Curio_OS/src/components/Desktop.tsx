@@ -11,6 +11,7 @@ import { SettingsApp } from './apps/SettingsApp';
 import { VoidApp } from './apps/VoidApp';
 import { SocialsApp } from './apps/SocialsApp';
 import { SkillsApp } from './apps/SkillsApp';
+import { GmailApp } from './apps/GmailApp';
 import { MiniMusicPlayer } from './MiniMusicPlayer';
 import { CursorTrail } from './CursorTrail';
 import { MusicRainEffect } from './MusicRainEffect';
@@ -61,6 +62,7 @@ const DESKTOP_APPS: DesktopItem[] = [
   { id: 'music', appId: 'music', title: 'Music Player', iconName: 'Music' },
   { id: 'settings', appId: 'settings', title: 'Settings', iconName: 'Settings' },
   { id: 'void', appId: 'void', title: 'VOID.EXE', iconName: 'Skull', badge: 'DANGER' },
+  { id: 'gmail', appId: 'gmail', title: 'Gmail', iconName: 'Mail' },
 ];
 
 // Intentional default desktop layout:
@@ -74,11 +76,12 @@ export const DEFAULT_ICON_GRID: Record<string, { col: number; row: number }> = {
   letterbox: { col: 0, row: 2 },
   'projects-shortcut': { col: 1, row: 2 },
   music: { col: 0, row: 3 },
+  gmail: { col: 1, row: 3 },
   settings: { col: 0, row: 4 },
   void: { col: 0, row: 5 },
 };
 
-const STORAGE_KEY = 'curio_desktop_icon_positions_v3';
+const STORAGE_KEY = 'curio_desktop_icon_positions_v4';
 
 // Helper to compute default icon positions matching screenshot 1 layout
 const computeDefaultPositions = (
@@ -452,6 +455,8 @@ export const Desktop: React.FC<DesktopProps> = ({
         return <SocialsApp windowId={windowId} />;
       case 'skills':
         return <SkillsApp windowId={windowId} />;
+      case 'gmail':
+        return <GmailApp windowId={windowId} />;
       default:
         return <div className="p-4 text-slate-300">App under construction</div>;
     }

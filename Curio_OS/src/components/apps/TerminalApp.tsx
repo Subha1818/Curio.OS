@@ -339,6 +339,7 @@ export const TerminalApp: React.FC<{ windowId: string }> = () => {
               <div><span className="text-amber-300">subbu -skills</span> — Tech stack &amp; developer capabilities</div>
               <div><span className="text-amber-300">subbu -socials</span> — Online profiles &amp; links</div>
               <div><span className="text-amber-300">subbu -education</span> — Schooling &amp; B.Tech timeline</div>
+              <div><span className="text-amber-300">subbu -contact</span> — Direct email &amp; contact info</div>
             </div>
           </div>
         );
@@ -601,6 +602,28 @@ ${subbuData.now.lastDetected}`}
           );
           break;
 
+        case '-contact':
+          pushOutput(
+            <div className="text-xs font-mono my-2 space-y-1.5 p-3 rounded-lg bg-slate-900/60 border border-slate-800 select-text">
+              <div className="text-pink-400 font-bold flex items-center gap-1.5">
+                ✉️ GET IN TOUCH WITH SUBBU
+              </div>
+              <div className="text-slate-300">
+                Email:{' '}
+                <a
+                  href="mailto:subhajitpatra1818@gmail.com"
+                  className="text-cyan-400 underline hover:text-cyan-300"
+                >
+                  subhajitpatra1818@gmail.com
+                </a>
+              </div>
+              <div className="text-slate-400 text-[11px] pt-1">
+                Tip: Type <span className="text-amber-300 font-semibold">gmail</span> or click the <span className="text-[#EA4335] font-semibold">Gmail</span> app on the desktop to dispatch an email right now!
+              </div>
+            </div>
+          );
+          break;
+
         default:
           pushOutput(
             <div className="text-xs text-rose-400 font-mono">
@@ -673,6 +696,7 @@ ${subbuData.now.lastDetected}`}
                 <div className="text-indigo-400 font-bold mb-0.5">COMMUNITY &amp; EXPLORATION</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 text-slate-300">
                   <div><span className="text-amber-300">letterbox</span> — Open public guestbook &amp; thoughts</div>
+                  <div><span className="text-amber-300">gmail</span> — Open Gmail client to send Subbu an email</div>
                   <div><span className="text-amber-300">files</span> — Open Portfolio &amp; File Manager</div>
                   <div><span className="text-amber-300">music</span> — Open Curio Music Player</div>
                 </div>
@@ -816,7 +840,6 @@ ${subbuData.now.lastDetected}`}
           }
           break;
 
-        // ── Community / Guestbook Commands ──────────────────────────────────
         case 'letterbox':
         case 'guestbook':
         case 'letter':
@@ -825,6 +848,18 @@ ${subbuData.now.lastDetected}`}
           response = (
             <div className="text-xs text-pink-400 font-mono">
               Opening LetterBox (Brain Guestbook)... 💌
+            </div>
+          );
+          break;
+
+        case 'gmail':
+        case 'mail':
+        case 'email':
+        case 'contact':
+          openApp('gmail');
+          response = (
+            <div className="text-xs text-[#EA4335] font-mono">
+              Opening Gmail contact client... ✉️
             </div>
           );
           break;
@@ -1016,6 +1051,10 @@ ${subbuData.now.lastDetected}`}
             notes: 'letterbox',
             note: 'letterbox',
             brain: 'letterbox',
+            gmail: 'gmail',
+            mail: 'gmail',
+            email: 'gmail',
+            contact: 'gmail',
             settings: 'settings',
             setting: 'settings',
             config: 'settings',
