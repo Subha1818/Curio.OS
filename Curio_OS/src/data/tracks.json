@@ -9,5 +9,49 @@
     "tag": "Retro Romance",
     "mood": "Nostalgic Vibe",
     "coverArt": "yeh-raaten-yeh-mausam-b72f-cover.png"
+  },
+  {
+    "id": "apocalypse-cigs-after-sex",
+    "title": "Apocalypse",
+    "artist": "Cigarettes After Sex",
+    "duration": "4:50",
+    "bpm": 92,
+    "fileName": "apocalypse-cigarettes-after-sex.mp3",
+    "tag": "Dream Pop",
+    "mood": "Ethereal Noir",
+    "coverArt": "apocalypse-cigarettes-after-sex-cover.jpg"
+  },
+  {
+    "id": "baarishein-anuv-jain",
+    "title": "Baarishein",
+    "artist": "Anuv Jain",
+    "duration": "4:23",
+    "bpm": 110,
+    "fileName": "baarishein-anuv-jain.mp3",
+    "tag": "Indie Acoustic",
+    "mood": "Rainy Nostalgia",
+    "coverArt": "baarishein-anuv-jain-cover.jpg"
+  },
+  {
+    "id": "kasoor-prateek-kuhad",
+    "title": "Kasoor",
+    "artist": "Prateek Kuhad",
+    "duration": "3:30",
+    "bpm": 98,
+    "fileName": "kasoor-prateek-kuhad.mp3",
+    "tag": "Indie Folk",
+    "mood": "Warm Heartfelt",
+    "coverArt": "kasoor-prateek-kuhad-cover.jpg"
+  },
+  {
+    "id": "tu-hai-kahan-aur",
+    "title": "Tu Hai Kahan",
+    "artist": "AUR",
+    "duration": "3:45",
+    "bpm": 90,
+    "fileName": "tu-hai-kahan-aur.mp3",
+    "tag": "Soulful R&B",
+    "mood": "Midnight Melancholy",
+    "coverArt": "tu-hai-kahan-aur-cover.jpg"
   }
 ]
