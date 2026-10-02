@@ -41,6 +41,22 @@ const publicDir = path.join(__dirname, '../public');
 app.use('/tracks', express.static(path.join(publicDir, 'tracks')));
 app.use(express.static(publicDir));
 
+// ── Root Welcome Route ──────────────────────────────────
+app.get('/', (_req, res) => {
+  res.json({
+    status: 'online',
+    message: '✨ Curio.OS Backend API is running smoothly!',
+    endpoints: {
+      health: '/health',
+      stats: '/api/stats',
+      letters: '/api/letters',
+      secret: '/api/secret',
+    },
+    version: '2.0.0',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // ── Health Check ──────────────────────────────────────
 app.get('/health', (_req, res) => {
   res.json({
