@@ -68,7 +68,7 @@ export const Window: React.FC<WindowProps> = ({ windowState, children }) => {
   const handleHeaderMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     // Don't drag if clicked on window action buttons
     if ((e.target as HTMLElement).closest('button')) return;
-    if (windowState.isMaximized) return;
+    if (windowState.isMaximized || isMobile) return;
 
     focusWindow(windowState.id);
     setIsDragging(true);
@@ -85,7 +85,7 @@ export const Window: React.FC<WindowProps> = ({ windowState, children }) => {
   // Handle Dragging (touch)
   const handleHeaderTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest('button')) return;
-    if (windowState.isMaximized) return;
+    if (windowState.isMaximized || isMobile) return;
     const touch = e.touches[0];
     focusWindow(windowState.id);
     setIsDragging(true);
@@ -300,7 +300,9 @@ export const Window: React.FC<WindowProps> = ({ windowState, children }) => {
           onMouseDown={handleHeaderMouseDown}
           onTouchStart={handleHeaderTouchStart}
           onDoubleClick={() => toggleMaximize(windowState.id)}
-          className={`h-10 px-3.5 flex items-center justify-between border-b backdrop-blur-xl transition-colors cursor-grab active:cursor-grabbing ${
+          className={`h-10 px-3.5 flex items-center justify-between border-b backdrop-blur-xl transition-colors ${
+            isMobile ? 'cursor-default select-none' : 'cursor-grab active:cursor-grabbing'
+          } ${
             isFocused
               ? 'bg-slate-900/90 border-slate-700/80 text-slate-100'
               : 'bg-slate-950/70 border-slate-800/60 text-slate-400'
@@ -352,7 +354,7 @@ export const Window: React.FC<WindowProps> = ({ windowState, children }) => {
 
           {/* Center: Title + Drag Cue */}
           <div className="flex items-center gap-1.5 font-display font-medium text-xs sm:text-sm tracking-normal pointer-events-none text-slate-200">
-            <GripHorizontal className="w-3.5 h-3.5 text-slate-500" />
+            {!isMobile && <GripHorizontal className="w-3.5 h-3.5 text-slate-500" />}
             <span className="truncate max-w-[200px] sm:max-w-xs">{windowState.title}</span>
           </div>
 

@@ -276,9 +276,14 @@ export const Desktop: React.FC<DesktopProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedIconId, handleLaunchItem]);
 
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
+
   // Window resize handler: ensure icons stay within screen
   useEffect(() => {
     const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
       setIconPositions((prev) => {
         let changed = false;
         const updated = { ...prev };
@@ -300,8 +305,9 @@ export const Desktop: React.FC<DesktopProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Icon Pointer Handlers (Draggable with 120fps direct transform)
+  // Icon Pointer Handlers (Draggable with 120fps direct transform on desktop, disabled on mobile)
   const handleIconPointerDown = (e: React.PointerEvent, itemId: string) => {
+    if (isMobile || e.pointerType === 'touch') return;
     if (e.button !== 0) return; // Only primary mouse button
     e.stopPropagation();
 
@@ -505,7 +511,7 @@ export const Desktop: React.FC<DesktopProps> = ({
             style={{
               left: `${pos.x}px`,
               top: `${pos.y}px`,
-              touchAction: 'none',
+              touchAction: isMobile ? 'manipulation' : 'none',
               animationDelay:
                 !hasEntered && animationsEnabled && !isDraggingThis
                   ? `${index * 70}ms`
@@ -513,7 +519,7 @@ export const Desktop: React.FC<DesktopProps> = ({
               animationFillMode:
                 !hasEntered && animationsEnabled && !isDraggingThis ? 'both' : undefined,
             }}
-            onPointerDown={(e) => handleIconPointerDown(e, icon.id)}
+            onPointerDown={(e) => !isMobile && handleIconPointerDown(e, icon.id)}
           >
             <DesktopIcon
               id={icon.id}

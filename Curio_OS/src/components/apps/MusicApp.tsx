@@ -76,9 +76,8 @@ export const MusicApp: React.FC<{ windowId: string }> = () => {
         {/* Animated Vinyl Turntable */}
         <div className="relative flex-shrink-0 group">
           <div
-            className={`w-28 h-28 rounded-full bg-gradient-to-tr from-slate-950 via-slate-900 to-slate-800 border-4 border-slate-700/80 shadow-2xl flex items-center justify-center transition-transform ${
-              isPlaying ? 'animate-spin' : ''
-            }`}
+            className={`w-28 h-28 rounded-full bg-gradient-to-tr from-slate-950 via-slate-900 to-slate-800 border-4 border-slate-700/80 shadow-2xl flex items-center justify-center transition-transform ${isPlaying ? 'animate-spin' : ''
+              }`}
             style={{ animationDuration: '4.5s' }}
           >
             {/* Vinyl grooves */}
@@ -228,10 +227,10 @@ export const MusicApp: React.FC<{ windowId: string }> = () => {
             <span>All Tracks ({tracks.length})</span>
           </div>
         </div>
-        <div className="text-[10px] font-mono text-slate-400 flex items-center gap-1.5">
+        {/* <div className="text-[10px] font-mono text-slate-400 flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-pulse" />
           <span>Curio Vinyl Audio • Plays in background when minimized</span>
-        </div>
+        </div> */}
       </div>
 
       {/* Tracks List */}
@@ -250,19 +249,17 @@ export const MusicApp: React.FC<{ windowId: string }> = () => {
                   playTrack(idx);
                 }
               }}
-              className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${
-                isSelected
+              className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${isSelected
                   ? 'bg-gradient-to-r from-indigo-600/35 to-pink-600/25 border border-indigo-400/40 shadow-md'
                   : 'bg-white/[0.03] hover:bg-white/[0.08] border border-transparent'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-3 min-w-0">
                 <div
-                  className={`w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center text-xs font-mono flex-shrink-0 transition-colors ${
-                    isSelected
+                  className={`w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center text-xs font-mono flex-shrink-0 transition-colors ${isSelected
                       ? 'bg-gradient-to-tr from-pink-500 to-indigo-600 text-white shadow-md'
                       : 'bg-slate-800 text-slate-400'
-                  }`}
+                    }`}
                 >
                   {track.coverArt && (!isSelected || !isPlaying) ? (
                     <img
@@ -280,9 +277,8 @@ export const MusicApp: React.FC<{ windowId: string }> = () => {
                 </div>
                 <div className="min-w-0">
                   <p
-                    className={`text-xs truncate ${
-                      isSelected ? 'text-white font-bold' : 'text-slate-200 font-medium'
-                    }`}
+                    className={`text-xs truncate ${isSelected ? 'text-white font-bold' : 'text-slate-200 font-medium'
+                      }`}
                   >
                     {track.title}
                   </p>

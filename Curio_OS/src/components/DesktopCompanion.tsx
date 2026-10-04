@@ -278,8 +278,10 @@ export const DesktopCompanion: React.FC = () => {
     }, 700);
   };
 
-  // Dragging support
+  // Dragging support (desktop mouse only, disabled on mobile touch)
   const handlePointerDown = (e: React.PointerEvent) => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) return;
+    if (e.pointerType === 'touch') return;
     // Only drag with primary mouse button
     if (e.button !== 0) return;
     setIsDragging(true);
