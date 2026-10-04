@@ -63,6 +63,10 @@ export const BootSequence: React.FC<BootSequenceProps> = ({ onComplete }) => {
   const [phase, setPhase] = useState<'sleeping' | 'stretching' | 'awake'>(() =>
     checkReducedMotion() ? 'awake' : 'sleeping'
   );
+  const [caption, setCaption] = useState<string>(() =>
+    checkReducedMotion() ? "I'm your Guide" : 'waking up...'
+  );
+  const [captionVisible, setCaptionVisible] = useState<boolean>(true);
   const [progress, setProgress] = useState(0);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const completedRef = useRef(false);
@@ -103,36 +107,44 @@ export const BootSequence: React.FC<BootSequenceProps> = ({ onComplete }) => {
       };
     }
 
-    // Sequence when animations are enabled (~2.6s total):
-    // 0.0s - 1.1s: sleeping & breathing
-    // 1.1s - 1.9s: stretching & yawning
-    // 1.9s - 2.6s: awake (eyes open)
-    // 2.6s: fade out to desktop
+    // Sequence when animations are enabled (~3.3s total):
+    // 0.0s - 1.1s: sleeping & breathing ("waking up...")
+    // 1.1s - 1.8s: stretching & yawning
+    // 1.55s: "waking up..." text gently fades out
+    // 1.85s: "I'm your Guide ✨" fades in as Mochi opens sparkly eyes
+    // 3.3s: fade out to desktop
     const stretchTimer = setTimeout(() => {
       setPhase('stretching');
     }, 1100);
 
-    const awakeTimer = setTimeout(() => {
-      setPhase('awake');
-    }, 1900);
+    const textFadeTimer = setTimeout(() => {
+      setCaptionVisible(false);
+    }, 1550);
 
-    // Progress bar ticker (runs over ~2.5s)
+    const awakeTimer = setTimeout(() => {
+      setCaption("I'm your Guide");
+      setCaptionVisible(true);
+      setPhase('awake');
+    }, 1850);
+
+    // Progress bar ticker (runs smoothly over ~3.0s)
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(progressInterval);
           return 100;
         }
-        return prev + 3;
+        return prev + 2;
       });
-    }, 70);
+    }, 60);
 
     const finishTimer = setTimeout(() => {
       finishBootImmediately();
-    }, 2650);
+    }, 3300);
 
     return () => {
       clearTimeout(stretchTimer);
+      clearTimeout(textFadeTimer);
       clearTimeout(awakeTimer);
       clearTimeout(finishTimer);
       clearInterval(progressInterval);
@@ -374,10 +386,26 @@ export const BootSequence: React.FC<BootSequenceProps> = ({ onComplete }) => {
           </svg>
         </div>
 
-        {/* Caption: exactly one short line beneath Mochi, lowercase, quiet/muted styling */}
-        <p className="text-xs text-slate-400/60 font-sans tracking-widest lowercase select-none">
-          waking up...
-        </p>
+        {/* Caption: transitions smoothly from "waking up..." to "I'm your Guide" */}
+        <div className="h-6 flex items-center justify-center">
+          <p
+            className={`text-xs font-sans select-none transition-all duration-300 flex items-center justify-center gap-1.5 ${
+              captionVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+            } ${
+              caption === "I'm your Guide"
+                ? 'text-pink-300 font-medium tracking-wider drop-shadow-[0_0_10px_rgba(244,114,182,0.6)]'
+                : 'text-slate-400/60 lowercase tracking-widest'
+            }`}
+          >
+            {caption === "I'm your Guide" && (
+              <span className="text-pink-400 animate-pulse text-[11px]">✨</span>
+            )}
+            <span>{caption}</span>
+            {caption === "I'm your Guide" && (
+              <span className="text-pink-400 animate-pulse text-[11px]">✨</span>
+            )}
+          </p>
+        </div>
 
         {/* Minimal Progress Cue: thin, borderless progress line */}
         <div className="w-24 h-[2px] bg-white/5 rounded-full overflow-hidden">

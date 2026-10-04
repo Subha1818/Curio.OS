@@ -86,6 +86,8 @@ export const subbuData: SubbuData = {
       skills: [
         { name: 'Git', bar: '████████████████' },
         { name: 'Figma', bar: '██████████████' },
+        { name: 'Framer', bar: '██████████████' },
+        { name: 'Canva', bar: '████████████████' },
       ],
     },
     {
