@@ -35,6 +35,17 @@ export const Window: React.FC<WindowProps> = ({ windowState, children }) => {
 
   // Keep refs in sync when windowState changes from outside (e.g. tile/maximize)
   const [isOpeningSpring, setIsOpeningSpring] = useState(true);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     setIsOpeningSpring(true);
@@ -248,7 +259,7 @@ export const Window: React.FC<WindowProps> = ({ windowState, children }) => {
         top: 0,
         left: 0,
         width: '100vw',
-        height: 'calc(100vh - 52px)', // leave taskbar visible
+        height: isMobile ? '100dvh' : 'calc(100vh - 52px)',
         zIndex: windowState.zIndex,
         borderRadius: 0,
         display: windowState.isMinimized ? 'none' : 'flex',

@@ -73,7 +73,11 @@ export const DesktopCompanion: React.FC = () => {
   const [companionState, setCompanionState] = useState<CompanionState>('idle');
   const [posX, setPosX] = useState<number>(200);
   const [posY, setPosY] = useState<number>(() => {
-    return typeof window !== 'undefined' ? window.innerHeight - 175 : 500;
+    if (typeof window !== 'undefined') {
+      const isMobile = window.innerWidth < 768;
+      return window.innerHeight - (isMobile ? 120 : 175);
+    }
+    return 500;
   });
   const [facingLeft, setFacingLeft] = useState<boolean>(false);
   const [message, setMessage] = useState<string | null>(
@@ -88,8 +92,10 @@ export const DesktopCompanion: React.FC = () => {
     const handleResize = () => {
       const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1000;
       const screenHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
+      const isMobile = screenWidth < 768;
+      const bottomMargin = isMobile ? 110 : 175;
       setPosX((prev) => Math.max(20, Math.min(screenWidth - 100, prev)));
-      setPosY((prev) => Math.max(40, Math.min(screenHeight - 175, prev)));
+      setPosY((prev) => Math.max(40, Math.min(screenHeight - bottomMargin, prev)));
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -289,9 +295,10 @@ export const DesktopCompanion: React.FC = () => {
     const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1000;
     const screenHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
 
+    const isMobile = screenWidth < 768;
+    const bottomMargin = isMobile ? 110 : 175;
     const newX = Math.max(20, Math.min(screenWidth - 100, e.clientX - dragOffsetRef.current.x));
-    // 175 = ~80px sprite + 24px label + 52px taskbar + 19px safety margin
-    const newY = Math.max(40, Math.min(screenHeight - 175, e.clientY - dragOffsetRef.current.y));
+    const newY = Math.max(40, Math.min(screenHeight - bottomMargin, e.clientY - dragOffsetRef.current.y));
     setPosX(newX);
     setPosY(newY);
   };
@@ -353,7 +360,7 @@ export const DesktopCompanion: React.FC = () => {
       onPointerUp={handlePointerUp}
       onClick={handlePet}
       onDoubleClick={handleDoubleClick}
-      className={`fixed z-[60] select-none cursor-grab active:cursor-grabbing group transition-[left,top] ${
+      className={`absolute z-[25] select-none cursor-grab active:cursor-grabbing group transition-[left,top] ${
         isDragging ? 'duration-0' : 'duration-700 ease-out'
       }`}
       style={{

@@ -9,7 +9,6 @@ import { StartMenu } from './components/StartMenu';
 import { NotificationCenter } from './components/NotificationCenter';
 import { NamePopup } from './components/NamePopup';
 import { NotificationManager } from './components/NotificationManager';
-import { DesktopCompanion } from './components/DesktopCompanion';
 import type { WallpaperId, SystemNotification } from './types/os';
 import { DEFAULT_WALLPAPER_ID, getWallpaperConfig } from './data/wallpapers';
 import { useCursorStyle } from './utils/useCursorStyle';
@@ -251,8 +250,6 @@ function CurioShell() {
             onDismiss={(id) => setNotifications((prev) => prev.filter((n) => n.id !== id))}
           />
 
-          {/* Wandering Interactive Desktop Companion (Mochi / Spooky / Byte) */}
-          <DesktopCompanion />
 
           <Taskbar
             isStartOpen={isStartOpen}

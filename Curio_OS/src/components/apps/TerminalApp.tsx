@@ -1319,14 +1319,16 @@ ${subbuData.now.lastDetected}`}
     <div
       className={`relative h-full w-full ${
         matrixActive ? 'bg-black text-emerald-400' : 'bg-slate-950/95 text-slate-200'
-      } font-mono p-4 overflow-y-auto flex flex-col text-sm select-text transition-colors duration-300`}
-      onClick={() => inputRef.current?.focus()}
+      } font-mono overflow-hidden flex flex-col text-sm select-text transition-colors duration-300`}
     >
       {/* Matrix rain canvas background when active */}
       {matrixActive && <MatrixRainCanvas />}
 
-      {/* History lines */}
-      <div className="relative z-10 flex-1 space-y-1.5">
+      {/* History scrollable lines */}
+      <div
+        className="relative z-10 flex-1 min-h-0 overflow-y-auto overscroll-contain p-3.5 sm:p-4 space-y-1.5"
+        onClick={() => inputRef.current?.focus()}
+      >
         {history.map((item) => (
           <div key={item.id}>
             {item.input !== undefined && (
@@ -1348,11 +1350,30 @@ ${subbuData.now.lastDetected}`}
         <div ref={bottomRef} />
       </div>
 
-      {/* Input line */}
+      {/* Mobile quick command tap chips */}
+      <div className="flex sm:hidden items-center gap-1.5 px-3 py-1.5 bg-slate-900/90 border-t border-slate-800/80 overflow-x-auto scrollbar-none shrink-0 z-20">
+        <span className="text-[10px] text-slate-500 font-mono shrink-0">Quick:</span>
+        {['help', 'subbu', 'subbu -projects', 'clear', 'fortune', 'joke'].map((cmd) => (
+          <button
+            key={cmd}
+            type="button"
+            onClick={() => {
+              executeCommand(cmd);
+              inputRef.current?.focus();
+            }}
+            className="px-2 py-0.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-purple-300 border border-slate-700/80 text-[10px] font-mono shrink-0 active:scale-95"
+          >
+            {cmd}
+          </button>
+        ))}
+      </div>
+
+      {/* Pinned Input line */}
       <div
-        className={`relative z-10 flex items-center gap-1.5 pt-2 border-t ${
-          matrixActive ? 'border-emerald-900/60' : 'border-slate-800/80'
-        } mt-2`}
+        className={`relative z-20 shrink-0 flex items-center gap-1.5 px-3.5 sm:px-4 py-2.5 sm:py-3 border-t ${
+          matrixActive ? 'border-emerald-900/60 bg-black/95' : 'border-slate-800/80 bg-slate-950/95'
+        } backdrop-blur-md`}
+        onClick={() => inputRef.current?.focus()}
       >
         <Prompt username={promptUser} isMatrix={matrixActive} />
         <input
@@ -1361,6 +1382,12 @@ ${subbuData.now.lastDetected}`}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
+          onFocus={() => {
+            setTimeout(() => {
+              inputRef.current?.scrollIntoView({ block: 'nearest' });
+              bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, 300);
+          }}
           disabled={isExecutingAsync}
           className={`flex-1 bg-transparent border-none outline-none font-mono text-xs focus:ring-0 p-0 ml-1 ${
             matrixActive
@@ -1369,9 +1396,7 @@ ${subbuData.now.lastDetected}`}
               ? 'text-slate-300'
               : 'text-slate-100 placeholder-slate-600'
           } ${isExecutingAsync ? 'opacity-40' : ''}`}
-          placeholder={
-            'type a command...'
-          }
+          placeholder="type a command..."
           autoFocus
           autoComplete="off"
           spellCheck={false}

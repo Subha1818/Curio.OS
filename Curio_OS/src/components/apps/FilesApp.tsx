@@ -5,6 +5,7 @@ import {
   Lock,
   Search,
   ChevronRight,
+  ChevronLeft,
   Heart,
   Unlock,
   Mail,
@@ -114,9 +115,13 @@ const PortfolioCard: React.FC<{
       : 'caption' in item && item.caption ? item.caption
         : `Item ${index + 1}`;
 
+  const isProject = folderId === 'projects' && 'techStack' in item;
+  const project = isProject ? (item as PortfolioProject) : null;
+  const isPhotoOrDrawing = folderId === 'photography' || folderId === 'drawings';
+
   const subtitle =
-    folderId === 'projects' && 'techStack' in item
-      ? (item as PortfolioProject).techStack.slice(0, 3).join(' · ')
+    isProject && project
+      ? project.techStack.slice(0, 3).join(' · ')
       : folderId === 'achievements' && 'description' in item
         ? (item as PortfolioAchievement).description
         : '';
@@ -124,11 +129,11 @@ const PortfolioCard: React.FC<{
   return (
     <div
       onClick={onClick}
-      style={{ contentVisibility: 'auto', containIntrinsicSize: '240px 180px' }}
-      className="group cursor-pointer rounded-2xl bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800/80 hover:border-pink-500/40 transition-all overflow-hidden shadow-sm hover:shadow-lg hover:scale-[1.02] will-change-transform"
+      style={{ contentVisibility: 'auto' }}
+      className="group cursor-pointer rounded-2xl bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800/80 hover:border-pink-500/40 transition-all overflow-hidden shadow-sm hover:shadow-lg hover:scale-[1.01] will-change-transform flex flex-col"
     >
       {/* Thumbnail */}
-      <div className="w-full aspect-video bg-slate-950/80 overflow-hidden relative">
+      <div className={`w-full ${isPhotoOrDrawing ? 'aspect-square sm:aspect-video' : 'aspect-video'} bg-slate-950/80 overflow-hidden relative shrink-0`}>
         {imagePath ? (
           <img
             src={imagePath}
@@ -154,15 +159,44 @@ const PortfolioCard: React.FC<{
             gradient={PLACEHOLDER_GRADIENTS[index % PLACEHOLDER_GRADIENTS.length]}
           />
         )}
+        {/* Subtle overlay gradient on projects */}
+        {isProject && (
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent pointer-events-none" />
+        )}
       </div>
 
       {/* Labels */}
-      <div className="p-3">
-        <p className="text-xs font-display font-medium text-slate-200 truncate group-hover:text-purple-300 transition-colors">
-          {title}
-        </p>
-        {subtitle && (
-          <p className="text-[10px] text-slate-400 font-sans truncate mt-0.5">{subtitle}</p>
+      <div className="p-3 sm:p-3.5 flex-1 flex flex-col justify-between">
+        <div>
+          <div className="flex items-center justify-between gap-1.5">
+            <p className="text-xs sm:text-sm font-display font-semibold text-slate-200 truncate group-hover:text-purple-300 transition-colors">
+              {title}
+            </p>
+            {isProject && project?.liveUrl && (
+              <span className="shrink-0 flex items-center gap-1 text-[9px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live
+              </span>
+            )}
+          </div>
+          {subtitle && (
+            <p className="text-[10px] sm:text-xs text-slate-400 font-sans line-clamp-1 mt-0.5">{subtitle}</p>
+          )}
+        </div>
+
+        {isProject && project && (
+          <div className="flex flex-wrap items-center gap-1 mt-2.5 pt-2 border-t border-slate-800/60">
+            {project.techStack.slice(0, 3).map((tech) => (
+              <span key={tech} className="px-1.5 py-0.5 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20 text-[9px] font-mono">
+                {tech}
+              </span>
+            ))}
+            {project.techStack.length > 3 && (
+              <span className="text-[9px] text-slate-500 font-mono">+{project.techStack.length - 3}</span>
+            )}
+            <span className="ml-auto text-[10px] text-purple-400 font-sans font-medium group-hover:translate-x-0.5 transition-transform flex items-center">
+              View →
+            </span>
+          </div>
         )}
       </div>
     </div>
@@ -530,6 +564,7 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
   });
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
+  const [mobileShowFolders, setMobileShowFolders] = useState(false);
 
   const [unlocked, setUnlocked] = useState(false);
 
@@ -551,6 +586,7 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
       const customEvent = e as CustomEvent<FolderId>;
       if (customEvent.detail) {
         setCurrentFolder(customEvent.detail);
+        setMobileShowFolders(false);
         setSearchQuery('');
         setPreviewFile(null);
         setDetailItem(null);
@@ -649,14 +685,28 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
   return (
     <div className="flex h-full w-full bg-slate-950/95 text-slate-200 select-none overflow-hidden text-sm font-sans relative">
 
-      {/* ── Left Sidebar ────────────────────────────────────────────────────── */}
-      <div className="w-64 shrink-0 border-r border-slate-800/80 bg-slate-900/60 p-3.5 flex flex-col gap-2 backdrop-blur-md">
-        <div className="flex items-center gap-2 px-2.5 py-1 text-slate-400 text-xs font-medium mb-1 font-sans">
-          <Home className="w-3.5 h-3.5 text-purple-400" />
-          <span>Home</span>
+      {/* ── Left Sidebar (Desktop fixed + Mobile full-screen folder hub) ──────── */}
+      <div
+        className={`${
+          mobileShowFolders ? 'flex w-full absolute inset-0 z-30' : 'hidden md:flex'
+        } md:relative md:w-60 lg:w-64 shrink-0 border-r border-slate-800/80 bg-slate-900/95 md:bg-slate-900/60 p-3.5 sm:p-4 flex-col gap-2 backdrop-blur-xl overflow-y-auto`}
+      >
+        <div className="flex items-center justify-between px-2.5 py-1 text-slate-400 text-xs font-medium mb-1 font-sans">
+          <div className="flex items-center gap-2">
+            <Home className="w-3.5 h-3.5 text-purple-400" />
+            <span className="font-semibold text-slate-200">File Explorer</span>
+          </div>
+          {mobileShowFolders && (
+            <button
+              onClick={() => { sound.playClick(); setMobileShowFolders(false); }}
+              className="md:hidden text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium active:scale-95"
+            >
+              Done
+            </button>
+          )}
         </div>
 
-        <div className="space-y-1 pl-1.5 border-l-2 border-slate-800/80 ml-3">
+        <div className="space-y-1.5 pl-1 md:pl-1.5 md:border-l-2 md:border-slate-800/80 md:ml-3">
           {FOLDER_DEFINITIONS.map((folder) => {
             const isActive = currentFolder === folder.id;
             const count = getFolderCount(folder.id);
@@ -664,78 +714,98 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
             return (
               <button
                 key={folder.id}
-                onClick={() => { sound.playClick(); setCurrentFolder(folder.id); setSearchQuery(''); setPreviewFile(null); setDetailItem(null); }}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all group font-sans ${isActive
-                  ? 'bg-purple-500/20 text-purple-200 border border-purple-500/35 shadow-sm font-semibold'
-                  : 'text-slate-300 hover:bg-slate-800/70 hover:text-white'
-                  }`}
+                onClick={() => {
+                  sound.playClick();
+                  setCurrentFolder(folder.id);
+                  setMobileShowFolders(false);
+                  setSearchQuery('');
+                  setPreviewFile(null);
+                  setDetailItem(null);
+                }}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all group font-sans ${
+                  isActive
+                    ? 'bg-purple-500/20 text-purple-200 border border-purple-500/35 shadow-sm font-semibold'
+                    : 'text-slate-300 hover:bg-slate-800/70 hover:text-white'
+                }`}
               >
-                <div className="flex items-center gap-2.5 truncate">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <FolderIcon
                     iconName={folder.iconName}
                     isUnlocked={folder.id === 'secret' && unlocked}
-                    className="w-4 h-4"
+                    className="w-4 h-4 shrink-0"
                   />
-                  <span className="truncate">{folder.name}</span>
+                  <div className="text-left truncate">
+                    <p className="truncate font-medium">{folder.name}</p>
+                    <p className="md:hidden text-[10px] text-slate-500 truncate">{folder.description}</p>
+                  </div>
                 </div>
-                {folder.badge ? (
-                  <span className="text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/30 px-1.5 py-0.5 rounded font-mono font-bold tracking-tight">
-                    {folder.badge}
-                  </span>
-                ) : (
-                  <span className="text-[10px] text-slate-500 group-hover:text-slate-400 font-mono">
-                    {count}
-                  </span>
-                )}
+                <div className="flex items-center gap-1 shrink-0 ml-2">
+                  {folder.badge ? (
+                    <span className="text-[9px] bg-rose-500/20 text-rose-300 border border-rose-500/30 px-1.5 py-0.5 rounded font-mono font-bold tracking-tight">
+                      {folder.badge}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-slate-500 group-hover:text-slate-400 font-mono">
+                      {count}
+                    </span>
+                  )}
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-slate-400 md:hidden ml-1" />
+                </div>
               </button>
             );
           })}
         </div>
 
         {/* Sidebar footer */}
-        <div className="mt-auto p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] text-slate-400 font-sans">
-          <div className="space-y-1">
-
-            <p className="text-[10px] text-slate-400 leading-tight">
-              Portfolio folders are public. Explore Subbu's personal notes &amp; manifesto!
-            </p>
-          </div>
+        <div className="mt-auto p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] text-slate-400 font-sans">
+          <p className="text-[10px] text-slate-400 leading-tight">
+            Portfolio folders are public. Explore Subbu's projects, art &amp; achievements!
+          </p>
         </div>
       </div>
 
       {/* ── Main Content Area ────────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-slate-900/30 font-sans">
+      <div className={`flex-1 flex flex-col overflow-hidden bg-slate-900/30 font-sans w-full ${mobileShowFolders ? 'hidden md:flex' : 'flex'}`}>
 
         {/* Toolbar */}
-        <div className="h-11 border-b border-slate-800/80 px-4 flex items-center justify-between bg-slate-950/40 text-xs">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-1.5 text-slate-400 font-sans">
-            <span
-              onClick={() => setCurrentFolder('documents')}
-              className="hover:text-slate-200 cursor-pointer flex items-center gap-1"
+        <div className="h-12 border-b border-slate-800/80 px-3 sm:px-4 flex items-center justify-between bg-slate-950/60 text-xs shrink-0 gap-2">
+          {/* Breadcrumb + Mobile Folders Button */}
+          <div className="flex items-center gap-2 text-slate-400 font-sans min-w-0">
+            <button
+              onClick={() => { sound.playClick(); setMobileShowFolders(true); }}
+              className="md:hidden flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/30 text-xs font-semibold shrink-0 active:scale-95 transition-all shadow-sm"
+              title="Browse all folders"
             >
-              <Home className="w-3.5 h-3.5 text-purple-400" /> Home
-            </span>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
-            <span className="text-slate-100 font-medium font-display">{folderDef.name}</span>
-            {isPortfolioFolder && (
-              <span className="ml-1 text-[10px] bg-purple-500/15 text-purple-300 border border-purple-500/30 px-1.5 py-0.5 rounded-full font-sans">
-                Portfolio
+              <ChevronLeft className="w-4 h-4" />
+              <span>Folders</span>
+            </button>
+
+            <div className="flex items-center gap-1.5 min-w-0 truncate">
+              <span
+                onClick={() => { setCurrentFolder('documents'); setMobileShowFolders(false); }}
+                className="hidden sm:flex hover:text-slate-200 cursor-pointer items-center gap-1 truncate"
+              >
+                <Home className="w-3.5 h-3.5 text-purple-400 shrink-0" /> Home
               </span>
-            )}
+              <ChevronRight className="hidden sm:inline w-3.5 h-3.5 text-slate-600 shrink-0" />
+              <span className="text-slate-100 font-semibold font-display truncate text-xs sm:text-sm">{folderDef.name}</span>
+              <span className="text-[10px] text-purple-300 bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.2 rounded-full font-mono shrink-0">
+                {getFolderCount(folderDef.id)}
+              </span>
+            </div>
           </div>
 
           {/* Right toolbar */}
           {currentFolder !== 'education' ? (
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg text-slate-300 text-xs focus-within:border-purple-500/50">
-                <Search className="w-3.5 h-3.5 text-slate-500" />
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-2 py-1 rounded-lg text-slate-300 text-xs focus-within:border-purple-500/50">
+                <Search className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={`Search ${folderDef.name.toLowerCase()}...`}
-                  className="bg-transparent border-none outline-none text-xs text-slate-200 placeholder-slate-500 w-28 sm:w-40 font-sans"
+                  placeholder="Search..."
+                  className="bg-transparent border-none outline-none text-xs text-slate-200 placeholder-slate-500 w-20 sm:w-36 font-sans"
                 />
                 {searchQuery && (
                   <button onClick={() => setSearchQuery('')} className="text-slate-500 hover:text-slate-300">
@@ -744,7 +814,7 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
                 )}
               </div>
 
-              <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5">
+              <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 shrink-0">
                 <button
                   onClick={() => { sound.playClick(); setViewMode('grid'); }}
                   title="Grid view"
@@ -764,13 +834,41 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
           ) : (
             <div className="flex items-center gap-1.5 text-xs font-sans text-slate-400">
               <GraduationCap className="w-3.5 h-3.5 text-slate-500" />
-              <span>3 milestones recorded</span>
+              <span className="hidden sm:inline">3 milestones</span>
             </div>
           )}
         </div>
 
+        {/* Mobile Horizontal Quick-Switch Folder Tabs */}
+        <div className="flex md:hidden items-center gap-1.5 px-3 py-2 border-b border-slate-800/80 bg-slate-950/80 overflow-x-auto scrollbar-none shrink-0 z-10">
+          {FOLDER_DEFINITIONS.map((folder) => {
+            const isActive = currentFolder === folder.id;
+            return (
+              <button
+                key={folder.id}
+                onClick={() => {
+                  sound.playClick();
+                  setCurrentFolder(folder.id);
+                  setSearchQuery('');
+                  setPreviewFile(null);
+                  setDetailItem(null);
+                }}
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                  isActive
+                    ? 'bg-gradient-to-r from-purple-600/30 to-pink-600/30 text-purple-200 border border-purple-500/50 shadow-sm font-semibold'
+                    : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 border border-slate-800/80'
+                }`}
+              >
+                <FolderIcon iconName={folder.iconName} className="w-3.5 h-3.5" isUnlocked={folder.id === 'secret' && unlocked} />
+                <span>{folder.name}</span>
+                <span className="text-[10px] opacity-70 font-mono">({getFolderCount(folder.id)})</span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* ── Body ──────────────────────────────────────────────────────────── */}
-        <div className={`flex-1 overflow-y-auto relative overscroll-contain [transform:translateZ(0)] ${currentFolder === 'resume' ? 'p-3 flex flex-col' : 'p-5'
+        <div className={`flex-1 overflow-y-auto relative overscroll-contain [transform:translateZ(0)] ${currentFolder === 'resume' ? 'p-3 flex flex-col' : 'p-3.5 sm:p-5'
           }`}>
 
           {/* ── Secret Folder Lock Protocol ───────────────────────────────────── */}
@@ -806,7 +904,11 @@ export const FilesApp: React.FC<{ windowId: string }> = () => {
                 {searchQuery && <p className="text-slate-500 text-xs mt-1">Try a different search term.</p>}
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3.5">
+              <div className={`grid gap-3 sm:gap-3.5 ${
+                currentFolder === 'photography' || currentFolder === 'drawings'
+                  ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'
+                  : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+              }`}>
                 {filteredPortfolioItems.map((item, idx) => (
                   <PortfolioCard
                     key={item.id}

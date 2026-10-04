@@ -15,6 +15,7 @@ import { GmailApp } from './apps/GmailApp';
 import { MiniMusicPlayer } from './MiniMusicPlayer';
 import { CursorTrail } from './CursorTrail';
 import { MusicRainEffect } from './MusicRainEffect';
+import { DesktopCompanion } from './DesktopCompanion';
 import type { AppId, WallpaperId } from '../types/os';
 import { useWindowManager } from '../context/WindowManagerContext';
 import { sound } from '../utils/sound';
@@ -472,7 +473,7 @@ export const Desktop: React.FC<DesktopProps> = ({
       onPointerMove={handleGlobalPointerMove}
       onPointerUp={handleGlobalPointerUp}
       onPointerCancel={handleGlobalPointerUp}
-      className="relative w-full h-[calc(100vh-52px)] overflow-hidden select-none"
+      className="relative w-full h-full md:h-[calc(100vh-52px)] overflow-hidden select-none"
     >
       {/* Dynamic Animated Wallpaper */}
       <Wallpaper id={currentWallpaper} />
@@ -552,6 +553,9 @@ export const Desktop: React.FC<DesktopProps> = ({
           className="fixed pointer-events-none border border-pink-400/60 bg-pink-500/15 rounded z-40"
         />
       )}
+
+      {/* Wandering Interactive Desktop Companion (Mochi / Spooky / Byte) */}
+      <DesktopCompanion />
 
       {/* Windows Manager Layer */}
       <div

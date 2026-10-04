@@ -92,7 +92,7 @@ export const MiniMusicPlayer: React.FC = () => {
   if (isMobile) {
     return (
       <div
-        style={{ position: 'fixed', bottom: '60px', left: '50%', transform: 'translateX(-50%)', zIndex: 9000, width: 'calc(100vw - 32px)', maxWidth: '340px' }}
+        style={{ position: 'fixed', bottom: '16px', left: '50%', transform: 'translateX(-50%)', zIndex: 9000, width: 'calc(100vw - 32px)', maxWidth: '340px' }}
         className="rounded-2xl bg-slate-900/90 border border-pink-500/40 shadow-[0_20px_50px_rgba(0,0,0,0.6),0_0_30px_rgba(236,72,153,0.3)] backdrop-blur-2xl select-none overflow-hidden animate-in fade-in zoom-in-95 duration-200"
       >
         <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-pink-500/20 blur-2xl pointer-events-none" />

@@ -35,7 +35,7 @@ const APP_CONFIGS: Record<
 export const WindowManagerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [windows, setWindows] = useState<WindowState[]>([]);
   const [activeWindowId, setActiveWindowId] = useState<string | null>(null);
-  const [maxZIndex, setMaxZIndex] = useState(10);
+  const [maxZIndex, setMaxZIndex] = useState(30);
 
   const focusWindow = useCallback((id: string) => {
     setActiveWindowId(id);

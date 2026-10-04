@@ -222,7 +222,7 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
       </div>
 
       {/* Main Mail Content View */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-5 relative z-10">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-5 pb-12 sm:pb-8 relative z-10">
         {isSent ? (
           /* Success Screen in DREAM.OS / Curio.OS voice */
           <div className="h-full min-h-[340px] flex flex-col items-center justify-center text-center p-6 space-y-4 animate-fadeIn">
@@ -389,9 +389,9 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
                       setValidationTip(null);
                     }
                   }}
-                  rows={7}
+                  rows={4}
                   placeholder="Hey Subbu! Loved exploring your Curio.OS portfolio. Wanted to discuss..."
-                  className="w-full p-4 bg-transparent text-slate-100 placeholder:text-slate-500/60 placeholder:font-normal placeholder:italic text-xs leading-relaxed focus:outline-none resize-none custom-scrollbar"
+                  className="w-full p-3 sm:p-4 bg-transparent text-slate-100 placeholder:text-slate-500/60 placeholder:font-normal placeholder:italic text-xs leading-relaxed focus:outline-none resize-none custom-scrollbar"
                   disabled={isSending}
                 />
               </div>
@@ -429,14 +429,13 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
               </div>
 
               {/* Mochi Speech Bubble */}
-              <div className="relative px-3 py-1.5 rounded-xl bg-slate-900/80 border border-purple-500/20 text-[11px] text-purple-200/90 shadow-sm flex items-center gap-1.5 animate-fadeIn">
-
-                <span>{MOCHI_TIPS[mochiTipIdx]}</span>
+              <div className="relative px-3 py-1.5 rounded-xl bg-slate-900/80 border border-purple-500/20 text-[11px] text-purple-200/90 shadow-sm flex items-center gap-1.5 animate-fadeIn min-w-0">
+                <span className="truncate sm:whitespace-normal">{MOCHI_TIPS[mochiTipIdx]}</span>
               </div>
             </div>
 
             {/* ── 6. Bottom Action Bar (Inline Validation & Rate-Limited Send Area) ── */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
               {/* Inline Validation Feedback */}
               <div className="min-h-[20px] flex items-center">
                 {validationTip && (
@@ -448,19 +447,19 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
               </div>
 
               {/* Send Area (Button or In-Voice Rate Limit) */}
-              <div className="w-full sm:w-auto flex justify-end">
+              <div className="w-full sm:w-auto flex justify-end shrink-0">
                 {cooldown > 0 ? (
                   /* Rate limit folded cleanly into send position */
-                  <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900/90 border border-amber-500/30 text-xs font-mono text-amber-300 shadow-inner select-none animate-fadeIn">
+                  <div className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900/90 border border-amber-500/30 text-xs font-mono text-amber-300 shadow-inner select-none animate-fadeIn">
                     <Clock className="w-3.5 h-3.5 text-amber-400 animate-spin shrink-0" />
-                    <span>Give it a moment — one message at a time. ({cooldown}s)</span>
+                    <span>Give it a moment ({cooldown}s)</span>
                   </div>
                 ) : (
                   /* Active Send Button with airplane micro-interaction */
                   <button
                     type="submit"
                     disabled={isSending}
-                    className="group relative inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-medium text-xs text-white bg-[#EA4335] hover:bg-[#d6382a] active:scale-95 border border-red-400/50 shadow-[0_0_18px_rgba(234,67,53,0.45)] hover:shadow-[0_0_24px_rgba(234,67,53,0.6)] transition-all cursor-pointer"
+                    className="w-full sm:w-auto justify-center group relative inline-flex items-center gap-2 px-7 py-3 sm:py-2.5 rounded-xl font-semibold text-xs text-white bg-[#EA4335] hover:bg-[#d6382a] active:scale-95 border border-red-400/50 shadow-[0_0_18px_rgba(234,67,53,0.45)] hover:shadow-[0_0_24px_rgba(234,67,53,0.6)] transition-all cursor-pointer"
                   >
                     {isSending ? (
                       <>
@@ -469,7 +468,7 @@ export const GmailApp: React.FC<GmailAppProps> = () => {
                       </>
                     ) : (
                       <>
-                        <span>Send</span>
+                        <span>Send Message</span>
                         <Send
                           className={`w-3.5 h-3.5 text-white transition-transform ${isPlaneFlying ? 'animate-plane-fly' : 'group-hover:translate-x-0.5 group-hover:-translate-y-0.5'
                             }`}
