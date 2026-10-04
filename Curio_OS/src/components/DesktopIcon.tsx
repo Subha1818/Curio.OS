@@ -259,10 +259,35 @@ export const DesktopIcon: React.FC<DesktopIconProps> = ({
     onOpen();
   };
 
+  // On touch devices: single tap = open (no double-tap needed)
+  const lastTapRef = React.useRef<number>(0);
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    if (isDisabled) return;
+    const now = Date.now();
+    const timeSinceLastTap = now - lastTapRef.current;
+    lastTapRef.current = now;
+    // If tapped twice quickly, also open (double-tap)
+    if (timeSinceLastTap < 400) {
+      onOpen();
+    } else {
+      // First tap: select; second tap will open
+      sound.playClick();
+      onSelect();
+      // Auto-open after short delay if no second tap — nice UX for mobile
+      setTimeout(() => {
+        if (Date.now() - lastTapRef.current >= 380) {
+          onOpen();
+        }
+      }, 420);
+    }
+  };
+
   return (
     <div
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
+      onTouchEnd={handleTouchEnd}
       className={`group w-24 p-2 rounded-2xl flex flex-col items-center text-center select-none transition-all relative ${
         isDragging
           ? 'bg-white/20 backdrop-blur-md ring-2 ring-pink-400/60 shadow-2xl scale-105 cursor-grabbing z-50'

@@ -102,7 +102,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
   };
 
   return (
-    <div className="h-[52px] w-full fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between px-3 bg-slate-950/85 backdrop-blur-2xl border-t border-white/10 select-none shadow-[0_-5px_25px_rgba(0,0,0,0.5)]">
+    <div className="h-[52px] w-full fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between px-3 bg-slate-950/85 backdrop-blur-2xl border-t border-white/10 select-none shadow-[0_-5px_25px_rgba(0,0,0,0.5)] taskbar-safe">
       {/* Left: Start / Curio Menu Button */}
       <div className="flex items-center gap-2">
         <button
@@ -127,7 +127,7 @@ export const Taskbar: React.FC<TaskbarProps> = ({
       </div>
 
       {/* Center: Dock of Pinned & Running Apps */}
-      <div className="flex items-center gap-1.5 px-3 py-1 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-md shadow-lg">
+      <div className="flex items-center gap-1.5 px-2 py-1 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-md shadow-lg max-w-[60vw] sm:max-w-none overflow-x-auto scrollbar-none">
         {pinnedApps.map((app) => {
           const win = windows.find((w) => w.appId === app.id);
           const isOpen = Boolean(win);
@@ -206,12 +206,12 @@ export const Taskbar: React.FC<TaskbarProps> = ({
         )}
 
         {/* Wi-Fi Indicator */}
-        <div title="Curio-Mesh • 5G Quantum Link" className="cursor-default text-emerald-400 hidden xs:block">
+        <div title="Curio-Mesh • 5G Quantum Link" className="cursor-default text-emerald-400 hidden sm:block">
           <Wifi className="w-4 h-4" />
         </div>
 
         {/* Battery Indicator */}
-        <div title="Battery: 98% (Perpetual Whimsy)" className="flex items-center gap-1 text-slate-300 text-xs hidden sm:flex cursor-default">
+        <div title="Battery: 98% (Perpetual Whimsy)" className="items-center gap-1 text-slate-300 text-xs hidden md:flex cursor-default">
           <BatteryCharging className="w-4 h-4 text-amber-400" />
           <span className="text-[11px] font-mono">98%</span>
         </div>

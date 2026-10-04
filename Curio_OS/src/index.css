@@ -570,3 +570,58 @@ textarea {
   animation: consoleBorderPulseMagenta 3.5s ease-in-out infinite;
 }
 
+
+/* ── Mobile & Touch Improvements ─────────────────────────── */
+
+/* Hide scrollbar while keeping scroll functionality */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Enable smooth touch momentum scrolling in app windows */
+.overflow-y-auto,
+.overflow-y-scroll,
+.overflow-auto,
+.overflow-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent accidental pinch-zoom on interactive elements */
+button,
+[role="button"],
+input,
+textarea,
+select {
+  touch-action: manipulation;
+}
+
+/* Ensure desktop area doesn't show rubber-band overscroll on iOS */
+html, body {
+  overscroll-behavior: none;
+}
+
+/* Improved tap highlight for touchscreens */
+button,
+[role="button"],
+a {
+  -webkit-tap-highlight-color: rgba(192, 132, 252, 0.15);
+}
+
+/* On very small screens: ensure boot sequence text is readable */
+@media (max-width: 480px) {
+  .font-pixel {
+    letter-spacing: 0.02em;
+  }
+}
+
+/* Safe area insets for devices with notches/home bars */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .taskbar-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+

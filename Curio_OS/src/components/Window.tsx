@@ -53,7 +53,7 @@ export const Window: React.FC<WindowProps> = ({ windowState, children }) => {
     };
   }, [windowState.position.x, windowState.position.y, windowState.size.width, windowState.size.height]);
 
-  // Handle Dragging
+  // Handle Dragging (mouse)
   const handleHeaderMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     // Don't drag if clicked on window action buttons
     if ((e.target as HTMLElement).closest('button')) return;
@@ -69,6 +69,22 @@ export const Window: React.FC<WindowProps> = ({ windowState, children }) => {
     };
     currentPosRef.current = { x: windowState.position.x, y: windowState.position.y };
     e.preventDefault();
+  };
+
+  // Handle Dragging (touch)
+  const handleHeaderTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    if (windowState.isMaximized) return;
+    const touch = e.touches[0];
+    focusWindow(windowState.id);
+    setIsDragging(true);
+    dragStartPos.current = {
+      mouseX: touch.clientX,
+      mouseY: touch.clientY,
+      winX: windowState.position.x,
+      winY: windowState.position.y,
+    };
+    currentPosRef.current = { x: windowState.position.x, y: windowState.position.y };
   };
 
   useEffect(() => {
@@ -94,17 +110,45 @@ export const Window: React.FC<WindowProps> = ({ windowState, children }) => {
       }
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      const dx = touch.clientX - dragStartPos.current.mouseX;
+      const dy = touch.clientY - dragStartPos.current.mouseY;
+
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+
+      const newX = Math.max(-windowState.size.width + 100, Math.min(screenWidth - 100, dragStartPos.current.winX + dx));
+      const newY = Math.max(0, Math.min(screenHeight - 80, dragStartPos.current.winY + dy));
+
+      currentPosRef.current = { x: newX, y: newY };
+
+      if (windowRef.current) {
+        windowRef.current.style.left = `${newX}px`;
+        windowRef.current.style.top = `${newY}px`;
+      }
+    };
+
     const handleMouseUp = () => {
       setIsDragging(false);
       // Commit final position to React context
       updatePosition(windowState.id, currentPosRef.current);
     };
 
+    const handleTouchEnd = () => {
+      setIsDragging(false);
+      updatePosition(windowState.id, currentPosRef.current);
+    };
+
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd);
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
     };
   }, [isDragging, windowState.id, windowState.size.width, updatePosition]);
 
@@ -204,7 +248,7 @@ export const Window: React.FC<WindowProps> = ({ windowState, children }) => {
         top: 0,
         left: 0,
         width: '100vw',
-        height: 'calc(100vh - 48px)', // leave taskbar visible
+        height: 'calc(100vh - 52px)', // leave taskbar visible
         zIndex: windowState.zIndex,
         borderRadius: 0,
         display: windowState.isMinimized ? 'none' : 'flex',
@@ -243,6 +287,7 @@ export const Window: React.FC<WindowProps> = ({ windowState, children }) => {
         {/* Window Header Bar — Drag Handle */}
         <div
           onMouseDown={handleHeaderMouseDown}
+          onTouchStart={handleHeaderTouchStart}
           onDoubleClick={() => toggleMaximize(windowState.id)}
           className={`h-10 px-3.5 flex items-center justify-between border-b backdrop-blur-xl transition-colors cursor-grab active:cursor-grabbing ${
             isFocused

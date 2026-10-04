@@ -194,7 +194,9 @@ export const CursorTrail: React.FC<{ enabled?: boolean }> = ({ enabled = true })
     };
   }, [enabled]);
 
-  if (!enabled) return null;
+  // Don't render on touch-primary devices (no cursor to trail)
+  const isTouchDevice = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+  if (!enabled || isTouchDevice) return null;
 
   return (
     <canvas

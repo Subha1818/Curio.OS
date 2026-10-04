@@ -73,6 +73,9 @@ export const WindowManagerProvider: React.FC<{ children: React.ReactNode }> = ({
       const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
       const screenHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
 
+      // On mobile/small screens, auto-maximize windows
+      const isMobile = screenWidth < 768;
+
       const initialX = Math.max(20, Math.min(screenWidth - config.defaultWidth - 20, 80 + offset));
       const initialY = Math.max(30, Math.min(screenHeight - config.defaultHeight - 80, 50 + offset));
 
@@ -87,7 +90,7 @@ export const WindowManagerProvider: React.FC<{ children: React.ReactNode }> = ({
         position: { x: initialX, y: initialY },
         size: { width: config.defaultWidth, height: config.defaultHeight },
         isMinimized: false,
-        isMaximized: false,
+        isMaximized: isMobile,
         zIndex: newZ,
       };
 

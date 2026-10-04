@@ -126,7 +126,7 @@ export const StartMenu: React.FC<StartMenuProps> = ({ isOpen, onClose, onReboot 
   return (
     <div
       onClick={(e) => e.stopPropagation()}
-      className="fixed bottom-[60px] left-3 w-80 sm:w-96 rounded-2xl bg-slate-950/90 border border-white/15 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-50 overflow-hidden flex flex-col select-none text-slate-200 animate-in fade-in slide-in-from-bottom-2 duration-200"
+      className="fixed bottom-[60px] left-0 right-0 mx-3 sm:left-3 sm:right-auto sm:mx-0 w-auto sm:w-80 md:w-96 rounded-2xl bg-slate-950/90 border border-white/15 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-50 overflow-hidden flex flex-col select-none text-slate-200 animate-in fade-in slide-in-from-bottom-2 duration-200"
     >
       {/* User profile card */}
       <div className="p-4 bg-gradient-to-r from-pink-500/15 via-indigo-500/15 to-purple-500/15 border-b border-white/10 flex items-center justify-between">
