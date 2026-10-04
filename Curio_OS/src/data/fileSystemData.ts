@@ -118,6 +118,7 @@ Role: Full-Stack Engineer & Creative Technologist
 Location: Kolkata, India • B.Tech CSE (2024–2028)
 GitHub: https://github.com/Subha1818
 LinkedIn: https://www.linkedin.com/in/subha1818/
+X: https://x.com/Subha1818
 
 File: Subha_Resume_September_2026.pdf
 Status: Verified Official Resume

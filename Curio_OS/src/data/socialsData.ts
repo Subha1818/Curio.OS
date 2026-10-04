@@ -17,6 +17,14 @@ export const socialsData: SocialProfile[] = [
     accent: "#0A66C2"
   },
   {
+    id: "x",
+    name: "X",
+    handle: "@Subha1818",
+    url: "https://x.com/Subha1818",
+    logo: "/assets/socials/x.svg",
+    accent: "#F3F4F6"
+  },
+  {
     id: "github",
     name: "GitHub",
     handle: "@Subha1818",
