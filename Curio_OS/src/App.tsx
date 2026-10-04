@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { WindowManagerProvider } from './context/WindowManagerContext';
 import { MusicProvider } from './context/MusicContext';
 import { VoidProvider, useVoid } from './context/VoidContext';
@@ -315,6 +316,7 @@ export function App() {
       <WindowManagerProvider>
         <MusicProvider>
           <CurioShell />
+          <Analytics />
         </MusicProvider>
       </WindowManagerProvider>
     </VoidProvider>
