@@ -14,6 +14,7 @@ import {
   Share2,
   Cpu,
   Heart,
+  Briefcase,
 } from 'lucide-react';
 import { LetterBoxIcon } from './icons/LetterBoxIcon';
 import { sound } from '../utils/sound';
@@ -118,6 +119,21 @@ const ICON_ACCENTS: Record<string, IconAccent> = {
     glow: 'rgba(74, 222, 128, 0.45)',
     hoverBorder: 'group-hover:border-emerald-400/60',
   },
+  Briefcase: {
+    color: '#fb7185',
+    glow: 'rgba(251, 113, 133, 0.45)',
+    hoverBorder: 'group-hover:border-rose-400/60',
+  },
+  Resume: {
+    color: '#fb7185',
+    glow: 'rgba(251, 113, 133, 0.45)',
+    hoverBorder: 'group-hover:border-rose-400/60',
+  },
+  FileText: {
+    color: '#818cf8',
+    glow: 'rgba(129, 140, 248, 0.45)',
+    hoverBorder: 'group-hover:border-indigo-400/60',
+  },
 };
 
 export const DesktopIcon: React.FC<DesktopIconProps> = ({
@@ -206,6 +222,10 @@ export const DesktopIcon: React.FC<DesktopIconProps> = ({
 
       case 'FileText':
         return <FileText className="w-8 h-8 text-indigo-400 group-hover:scale-110 transition-transform" />;
+
+      case 'Briefcase':
+      case 'Resume':
+        return <Briefcase className="w-8 h-8 text-rose-400 group-hover:scale-110 transition-transform" />;
 
       case 'Settings':
         return <Settings className="w-8 h-8 text-sky-400 group-hover:rotate-45 transition-transform" />;

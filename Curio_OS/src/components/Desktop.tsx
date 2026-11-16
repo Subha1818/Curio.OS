@@ -57,6 +57,13 @@ const DESKTOP_APPS: DesktopItem[] = [
   { id: 'files', appId: 'files', title: 'File Explorer', iconName: 'Folder' },
   { id: 'skills', appId: 'skills', title: 'Skills', iconName: 'Cpu' },
   {
+    id: 'resume-shortcut',
+    title: 'Resume',
+    iconName: 'Briefcase',
+    targetFolder: 'resume',
+    isShortcut: true,
+  },
+  {
     id: 'projects-shortcut',
     title: 'Projects',
     iconName: 'FolderCode',
@@ -68,7 +75,7 @@ const DESKTOP_APPS: DesktopItem[] = [
 // Default desktop layout matching 2nd screenshot:
 // Col 0: Terminal, Socials, LetterBox, Music Player, Settings, VOID.EXE
 // Col 1: [GAP - 1 empty column]
-// Col 2: Let's Connect, File Explorer, Skills, Projects
+// Col 2: Let's Connect, File Explorer, Skills, Resume, Projects
 export const DEFAULT_ICON_GRID: Record<string, { col: number; row: number }> = {
   terminal: { col: 0, row: 0 },
   socials: { col: 0, row: 1 },
@@ -79,10 +86,11 @@ export const DEFAULT_ICON_GRID: Record<string, { col: number; row: number }> = {
   gmail: { col: 2, row: 0 },
   files: { col: 2, row: 1 },
   skills: { col: 2, row: 2 },
-  'projects-shortcut': { col: 2, row: 3 },
+  'resume-shortcut': { col: 2, row: 3 },
+  'projects-shortcut': { col: 2, row: 4 },
 };
 
-const STORAGE_KEY = 'curio_desktop_icon_positions_v5';
+const STORAGE_KEY = 'curio_desktop_icon_positions_v6';
 
 // Helper to compute default icon positions matching screenshot 1 layout
 const computeDefaultPositions = (
@@ -194,6 +202,7 @@ export const Desktop: React.FC<DesktopProps> = ({
     try {
       localStorage.removeItem('curio_desktop_icon_positions');
       localStorage.removeItem('curio_desktop_icon_positions_v4');
+      localStorage.removeItem('curio_desktop_icon_positions_v5');
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);

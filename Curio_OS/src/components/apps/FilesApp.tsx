@@ -193,7 +193,7 @@ const PortfolioCard: React.FC<{
             {project.techStack.length > 3 && (
               <span className="text-[9px] text-slate-500 font-mono">+{project.techStack.length - 3}</span>
             )}
-            <span className="ml-auto text-[10px] text-purple-400 font-sans font-medium group-hover:translate-x-0.5 transition-transform flex items-center">
+            <span className="ml-auto text-[10px] text-cyan-300 font-sans font-medium px-2 py-0.5 rounded-md bg-cyan-500/15 border border-cyan-500/30 group-hover:bg-cyan-500/25 group-hover:border-cyan-400/60 group-hover:text-cyan-200 transition-all flex items-center gap-0.5 shadow-xs">
               View →
             </span>
           </div>

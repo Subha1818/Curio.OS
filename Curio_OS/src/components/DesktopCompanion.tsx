@@ -81,7 +81,7 @@ export const DesktopCompanion: React.FC = () => {
   });
   const [facingLeft, setFacingLeft] = useState<boolean>(false);
   const [message, setMessage] = useState<string | null>(
-    "Hi cutie! I'm Mochi. Click me to pet or double-click for a flip! 🌸"
+    "Hello! I'm Mochi. Click me to pet or double-click for a flip! 🐾"
   );
   const [hearts, setHearts] = useState<HeartParticle[]>([]);
   const [isDragging, setIsDragging] = useState<boolean>(false);

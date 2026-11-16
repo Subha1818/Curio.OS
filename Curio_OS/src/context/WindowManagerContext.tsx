@@ -21,15 +21,15 @@ const APP_CONFIGS: Record<
   AppId,
   { title: string; iconName: string; defaultWidth: number; defaultHeight: number }
 > = {
-  terminal: { title: 'Curio Terminal', iconName: 'Terminal', defaultWidth: 640, defaultHeight: 440 },
-  files: { title: 'File Explorer', iconName: 'Folder', defaultWidth: 780, defaultHeight: 500 },
-  music: { title: 'Curio Music Player', iconName: 'Music', defaultWidth: 540, defaultHeight: 520 },
-  letterbox: { title: 'LetterBox', iconName: 'LetterBox', defaultWidth: 680, defaultHeight: 520 },
-  settings: { title: 'System Settings', iconName: 'Settings', defaultWidth: 580, defaultHeight: 520 },
-  void: { title: 'VOID.EXE', iconName: 'Skull', defaultWidth: 460, defaultHeight: 380 },
-  socials: { title: "Subbu's Socials", iconName: 'Share2', defaultWidth: 640, defaultHeight: 480 },
-  skills: { title: "Subbu's Tech Stack", iconName: 'Cpu', defaultWidth: 680, defaultHeight: 520 },
-  gmail: { title: "Let's Connect", iconName: 'MessagesSquare', defaultWidth: 580, defaultHeight: 520 },
+  terminal: { title: 'Curio Terminal', iconName: 'Terminal', defaultWidth: 720, defaultHeight: 480 },
+  files: { title: 'File Explorer', iconName: 'Folder', defaultWidth: 960, defaultHeight: 580 },
+  music: { title: 'Curio Music Player', iconName: 'Music', defaultWidth: 600, defaultHeight: 540 },
+  letterbox: { title: 'LetterBox', iconName: 'LetterBox', defaultWidth: 740, defaultHeight: 540 },
+  settings: { title: 'System Settings', iconName: 'Settings', defaultWidth: 660, defaultHeight: 540 },
+  void: { title: 'VOID.EXE', iconName: 'Skull', defaultWidth: 480, defaultHeight: 400 },
+  socials: { title: "Subbu's Socials", iconName: 'Share2', defaultWidth: 740, defaultHeight: 520 },
+  skills: { title: "Subbu's Tech Stack", iconName: 'Cpu', defaultWidth: 780, defaultHeight: 560 },
+  gmail: { title: "Let's Connect", iconName: 'MessagesSquare', defaultWidth: 660, defaultHeight: 540 },
 };
 
 export const WindowManagerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -76,8 +76,11 @@ export const WindowManagerProvider: React.FC<{ children: React.ReactNode }> = ({
       // On mobile/small screens, auto-maximize windows
       const isMobile = screenWidth < 768;
 
-      const initialX = Math.max(20, Math.min(screenWidth - config.defaultWidth - 20, 80 + offset));
-      const initialY = Math.max(30, Math.min(screenHeight - config.defaultHeight - 80, 50 + offset));
+      // On wide desktop screens, position comfortably so desktop icons remain visible
+      const initialX = screenWidth > config.defaultWidth + 260
+        ? Math.max(250, Math.min(screenWidth - config.defaultWidth - 20, Math.round((screenWidth - config.defaultWidth) / 2) + (offset % 64)))
+        : Math.max(20, Math.min(screenWidth - config.defaultWidth - 20, 80 + offset));
+      const initialY = Math.max(30, Math.min(screenHeight - config.defaultHeight - 80, Math.max(45, Math.round((screenHeight - config.defaultHeight - 60) / 2)) + (offset % 48)));
 
       const newZ = maxZIndex + 1;
       setMaxZIndex(newZ);

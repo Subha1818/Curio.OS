@@ -47,6 +47,17 @@ export interface PortfolioContent {
 export const portfolioContent: PortfolioContent = {
   projects: [
     {
+      id: 'mylinks',
+      title: 'MyLinks',
+      banner: '/assets/projects/mylinks.jpg',
+      thumbnail: '/assets/projects/thumbs/mylinks.jpg',
+      description:
+        'A bold, playful link-in-bio SaaS built with Next.js App Router, Tailwind CSS, TypeScript, Better Auth, and PostgreSQL on Neon.',
+      githubUrl: 'https://github.com/Subha1818/MyLinks',
+      liveUrl: 'https://mylinkz.vercel.app/',
+      techStack: ['Next.js', 'Tailwind CSS', 'TypeScript', 'Better Auth', 'Neon Postgres'],
+    },
+    {
       id: 'kisaansetu',
       title: 'KisaanSetu',
       banner: '/assets/projects/kisaansetu.png',

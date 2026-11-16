@@ -104,26 +104,31 @@ export const subbuData: SubbuData = {
   projects: [
     {
       id: '01',
+      name: 'MYLINKS',
+      description: 'Bold, playful link-in-bio SaaS built with Next.js & Neon',
+    },
+    {
+      id: '02',
       name: 'KISAANSETU',
       description: 'Smart procurement queue management system for farmers',
     },
     {
-      id: '02',
+      id: '03',
       name: 'LOGIFLOW',
       description: 'Route optimization & logistics visualization',
     },
     {
-      id: '03',
+      id: '04',
       name: 'STUDENT SPHERE',
       description: 'Student resource platform',
     },
     {
-      id: '04',
+      id: '05',
       name: 'AYURTRACK',
       description: 'Panchakarma patient management system',
     },
     {
-      id: '05',
+      id: '06',
       name: 'DREAM.OS',
       description: 'You are currently inside it.',
     },

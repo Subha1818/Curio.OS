@@ -13,7 +13,7 @@ export const getTimeBasedGreeting = () => {
 
   if (hour >= 5 && hour < 12) {
     return {
-      greeting: "Good morning cutie 🌸",
+      greeting: "Good morning! 🌸",
       subtitle: "Hope you have a magical and productive day ahead!",
       tag: "MORNING",
       timeFormatted,

@@ -169,7 +169,7 @@ like discovering a secret computer in an abandoned cyberpunk arcade."
 AWARDS & DISTINCTIONS:
 - Runner-up: Hack-Ur-Way — ENVISAGE 25
 - SIH 2026 Internal Round Top 45/300 teams
-- Creator of Curio.OS, KisaanSetu, LogiFlow, Student Sphere, AyurTrack
+- Creator of Curio.OS, MyLinks, KisaanSetu, LogiFlow, Student Sphere, AyurTrack
 
 MESSAGE FOR YOU:
 Thank you for complimenting me so sincerely! It took real dedication
