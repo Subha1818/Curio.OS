@@ -227,10 +227,6 @@ export const MusicApp: React.FC<{ windowId: string }> = () => {
             <span>All Tracks ({tracks.length})</span>
           </div>
         </div>
-        {/* <div className="text-[10px] font-mono text-slate-400 flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-pulse" />
-          <span>Curio Vinyl Audio • Plays in background when minimized</span>
-        </div> */}
       </div>
 
       {/* Tracks List */}

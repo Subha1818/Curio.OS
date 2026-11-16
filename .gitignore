@@ -24,7 +24,9 @@ curio-server/incoming/*
 
 # Logs
 *.log
+desktop.ini
 **/*.log
+desktop.ini
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
