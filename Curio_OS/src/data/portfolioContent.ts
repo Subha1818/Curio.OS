@@ -144,6 +144,20 @@ export const portfolioContent: PortfolioContent = {
 
   achievements: [
     {
+      id: 'nptel-java',
+      title: 'NPTEL — Programming In Java (Elite)',
+      image: '/assets/achievements/NPTEL_JAVA.png',
+      thumbnail: '/assets/achievements/thumbs/nptel-java.png',
+      description: 'Elite Certificate (78%) by IIT Kharagpur & Swayam, Ministry of Education.',
+    },
+    {
+      id: 'nptel-swe',
+      title: 'NPTEL — Software Engineering',
+      image: '/assets/achievements/NPTEL_SWE.png',
+      thumbnail: '/assets/achievements/thumbs/nptel-swe.png',
+      description: 'National Certification (57%) by IIT Kharagpur & Swayam, Ministry of Education.',
+    },
+    {
       id: 'sih2025',
       title: 'Smart India Hackathon 2025',
       image: '/assets/achievements/sih2026.png',

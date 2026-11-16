@@ -158,6 +158,16 @@ export const subbuData: SubbuData = {
     },
     {
       icon: '📜',
+      title: 'NPTEL Java (Elite)',
+      detail: 'IIT Kharagpur — 78% (Elite)',
+    },
+    {
+      icon: '📜',
+      title: 'NPTEL Software Engineering',
+      detail: 'IIT Kharagpur Certified',
+    },
+    {
+      icon: '📜',
       title: 'IBM Python',
       detail: 'Certified',
     },
